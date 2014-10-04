@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>image_Flame_Red</key>
+	<string>Flame_Red.png</string>
+	<key>image_Flame_Green</key>
+	<string>Flame_Green.png</string>
+	<key>image_Flame_Blue</key>
+	<string>Flame_Blue.png</string>
+	<key>image_Flame_White</key>
+	<string>Flame_White.png</string>
+	<key>image_Flame_Orange</key>
+	<string>Flame_Orange.png</string>
+	<key>image_Rock_Red</key>
+	<string>Rock_Red.png</string>
+	<key>image_Rock_Green</key>
+	<string>Rock_Green.png</string>
+	<key>image_Rock_Blue</key>
+	<string>Rock_Blue.png</string>
+	<key>image_Rock_Yellow</key>
+	<string>Rock_Yellow.png</string>
+	<key>image_Rock_Gray</key>
+	<string>Rock_Gray.png</string>
+	<key>image_Fire</key>
+	<string>Fire.png</string>
+	<key>image_Eye</key>
+	<string>Eye.png</string>
+	<key>image_Portal</key>
+	<string>Portal.png</string>
+	<key>image_addItem_normal</key>
+	<string>addItem_normal.png</string>
+	<key>image_addItem_selected</key>
+	<string>addItem_selected.png</string>
+	<key>image_save_normal</key>
+	<string>save_normal.png</string>
+	<key>image_save_selected</key>
+	<string>save_selected.png</string>
+	<key>image_play_normal</key>
+	<string>play_normal.png</string>
+	<key>image_play_selected</key>
+	<string>play_selected.png</string>
+	<key>image_reset_normal</key>
+	<string>reset_normal.png</string>
+	<key>image_reset_selected</key>
+	<string>reset_selected.png</string>
+	<key>material_dirt</key>
+	<string>dirt512_2.png</string>
+</dict>
+</plist>
