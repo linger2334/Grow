@@ -17,9 +17,6 @@ class Polygon : public ItemModel
 public:
     static Polygon* create(Item& item);
     virtual bool init(Item& item);
-
-protected:
-    b2Body* createBody() { return nullptr; };
     
 };
 

@@ -21,10 +21,9 @@ struct Item{
     float scale;
     int localZorder;
     bool iscreated;
-    float speed;
     void* features;
     
-    Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _iscreated = false,float _speed = 0.0,void* _features = nullptr)
+    Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _iscreated = false,void* _features = nullptr)
     {
         type = _type;
         id = _id;
@@ -34,7 +33,6 @@ struct Item{
         scale = _scale;
         localZorder = _localZorder;
         iscreated = _iscreated;
-        speed = _speed;
         features = _features;
     }
     
@@ -51,9 +49,27 @@ struct Item{
 };
 
 struct Features_Cicada{
+    float w;
     float includedAngle;
     float interval;
     float bellTransparency;
+    Features_Cicada()
+    {
+        w = kDefaultCicadaW;
+        includedAngle = kDefaultCicadaIncludedAngle;
+        interval = kDefaultCicadaInterval;
+        bellTransparency = kDefaultCicadaBellTransparency;
+    }
+};
+
+struct Features_Dragon{
+    float w;
+    float backTransparency;
+    Features_Dragon()
+    {
+        w = kDefaultDragonW;
+        backTransparency = kDefaultDragonBackTransparency;
+    }
 };
 
 struct Features_Polygon{

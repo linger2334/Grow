@@ -11,6 +11,7 @@
 
 #include "cocos2d.h"
 #include "cocos-ext.h"
+#include "GameConstants.h"
 //#include "editor-support/cocostudio/CCSGUIReader.h"
 //#include "cocostudio/CocoStudio.h"
 //#include "ui/CocosGUI.h"
@@ -29,6 +30,8 @@ USING_NS_CC_EXT;
 #define DEFAULT_ANGLE 0.0
 #define DEFAULT_SCALE 1.000
 
+#define cc_to_b2Vec(x,y) (b2Vec2((x)/PTM_RATIO,(y)/PTM_RATIO))
+
 enum Item_Type{
     Flame_Red,
     Flame_Green,
@@ -44,6 +47,7 @@ enum Item_Type{
     Eye,
     Polygon
 };
+
 
 #define IMAGE_FLAME_RED "Flame_Red.png"
 #define IMAGE_FLAME_GREEN "Flame_Green.png"

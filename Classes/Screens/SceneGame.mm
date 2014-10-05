@@ -55,8 +55,7 @@ bool SceneGame::init()
 
 void SceneGame::initInfo()
 {
-//add physics world
-    initPhysics();
+
 /////////////////////////////////////////////
     _gameManager  = GameManager::getInstance();
     
@@ -134,6 +133,8 @@ void SceneGame::initInfo()
         _lightListHelper.addLight(testLight());
     }
 //add Items
+    //add physics world
+    initPhysics();
     _layerItem = LayerItem::create();
     _layerItem->setAnchorPoint(Vec2(0.5,0));
     _layerItem->setPosition(Vec2(VisibleSize.width/2,0));
@@ -169,7 +170,6 @@ void SceneGame::initPhysics()
     world->SetAllowSleeping(true);
     world->SetContinuousPhysics(true);
     world->SetContactListener(this);
-    world->ShiftOrigin(b2Vec2((Director::getInstance()->getWinSize().width/2 - WinSize.width/2)/PTM_RATIO, 0));
     //调试绘图
     _debugDraw = new GLESDebugDraw(PTM_RATIO);
     world->SetDebugDraw(_debugDraw);

@@ -24,10 +24,10 @@ public:
     virtual bool init(Item& item);
     
     Item_Type type;
+    
 protected:
     friend class LayerItem;
-    virtual b2Body* createBody() = 0;
-    
+    virtual void createBody(std::vector<b2Body*>& bodies){};
 };
 
 

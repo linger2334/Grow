@@ -22,7 +22,7 @@ public:
     
 protected:
     friend class LayerItem;
-    b2Body* createBody();
+    void createBody(std::vector<b2Body*>& bodies);
     
     
     

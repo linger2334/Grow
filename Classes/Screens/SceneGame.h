@@ -42,8 +42,6 @@ enum SceneGameChildZorder
 
 using namespace ui;
 
-#define cc_to_b2Vec(x,y) (b2Vec2((x)/PTM_RATIO,(y)/PTM_RATIO))
-
 class SceneGame: public Layer,public b2ContactListener
 {
 //

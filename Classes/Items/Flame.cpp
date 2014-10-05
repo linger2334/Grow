@@ -55,11 +55,11 @@ bool Flame::init(Item& item)
     return result;
 }
 
-b2Body* Flame::createBody()
+void Flame::createBody(std::vector<b2Body*>& bodies)
 {
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
-    bodyDef.position = b2Vec2(getPositionX()/PTM_RATIO,getPositionY()/PTM_RATIO);
+    bodyDef.position = b2Vec2(getParent()->convertToWorldSpace(getPosition()).x/PTM_RATIO,getParent()->convertToWorldSpace(getPosition()).y/PTM_RATIO);
     bodyDef.angle = -CC_DEGREES_TO_RADIANS(getRotation());
     bodyDef.linearDamping = 0.3;
     bodyDef.userData = this;
@@ -69,19 +69,19 @@ b2Body* Flame::createBody()
     shapeCache->addShapesWithFile("Item_fixtures.plist");
     switch (type) {
         case Flame_Red:
-            shapeCache->addFixturesToBody(body, "Flame_Blue");
+            shapeCache->addFixturesToBody(body, "Flame_Red");
             break;
         case Flame_Green:
-            shapeCache->addFixturesToBody(body, "Flame_Blue");
+            shapeCache->addFixturesToBody(body, "Flame_Green");
             break;
         case Flame_Blue:
             shapeCache->addFixturesToBody(body, "Flame_Blue");
             break;
         case Flame_White:
-            shapeCache->addFixturesToBody(body, "Flame_Blue");
+            shapeCache->addFixturesToBody(body, "Flame_White");
             break;
         case Flame_Orange:
-            shapeCache->addFixturesToBody(body, "Flame_Blue");
+            shapeCache->addFixturesToBody(body, "Flame_Orange");
             break;
         default:
             break;
@@ -107,7 +107,7 @@ b2Body* Flame::createBody()
     bodymassData.I *= getScale();
     body->SetMassData(&bodymassData);
     
-    return body;
+    bodies.push_back(body);
 }
 
 

@@ -37,11 +37,11 @@ bool Eye::init(Item& item)
     return result;
 }
 
-b2Body* Eye::createBody()
+void Eye::createBody(std::vector<b2Body*>& bodies)
 {
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
-    bodyDef.position = b2Vec2(getPositionX()/PTM_RATIO,getPositionY()/PTM_RATIO);
+    bodyDef.position = b2Vec2(getParent()->convertToWorldSpace(getPosition()).x/PTM_RATIO,getParent()->convertToWorldSpace(getPosition()).y/PTM_RATIO);
     bodyDef.angle = -CC_DEGREES_TO_RADIANS(getRotation());
     bodyDef.linearDamping = 0.3;
     bodyDef.userData = this;
@@ -50,23 +50,7 @@ b2Body* Eye::createBody()
     GB2ShapeCache* shapeCache = GB2ShapeCache::getInstance();
     shapeCache->addShapesWithFile("Item_fixtures.plist");
     
-    b2FixtureDef fixtureDefL;
-    b2CircleShape circle_left;
-    circle_left.m_radius = this->getContentSize().height*0.5/PTM_RATIO;
-    circle_left.m_p.Set(-0.7*this->getContentSize().height*0.5/PTM_RATIO, 0);
-    fixtureDefL.shape = &circle_left;
-    fixtureDefL.filter.categoryBits = 0x01;
-    fixtureDefL.filter.maskBits = 0x00;
-    body->CreateFixture(&fixtureDefL);
-    
-    b2FixtureDef fixtureDefR;
-    b2CircleShape circle_right;
-    circle_right.m_radius = this->getContentSize().height*0.5/PTM_RATIO;
-    circle_right.m_p.Set(0.7*this->getContentSize().height*0.5/PTM_RATIO, 0);
-    fixtureDefR.shape = &circle_right;
-    fixtureDefR.filter.categoryBits = 0x01;
-    fixtureDefR.filter.maskBits = 0x00;
-    body->CreateFixture(&fixtureDefR);
+    shapeCache->addFixturesToBody(body, "Eye");
     
     for (b2Fixture* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
         b2Shape* shape = fixture->GetShape();
@@ -88,5 +72,5 @@ b2Body* Eye::createBody()
     bodymassData.I *= getScale();
     body->SetMassData(&bodymassData);
     
-    return body;
+    bodies.push_back(body);
 }

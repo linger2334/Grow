@@ -75,11 +75,11 @@ bool Dragon::init(Item& item)
     return result;
 }
 
-b2Body* Dragon::createBody()
+void Dragon::createBody(std::vector<b2Body*>& bodies)
 {
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
-    bodyDef.position = b2Vec2(getPositionX()/PTM_RATIO,getPositionY()/PTM_RATIO);
+    bodyDef.position = b2Vec2(getParent()->convertToWorldSpace(getPosition()).x/PTM_RATIO,getParent()->convertToWorldSpace(getPosition()).y/PTM_RATIO);
     bodyDef.angle = -CC_DEGREES_TO_RADIANS(getRotation());
     bodyDef.linearDamping = 0.3;
     bodyDef.userData = this;
@@ -89,10 +89,10 @@ b2Body* Dragon::createBody()
     shapeCache->addShapesWithFile("Item_fixtures.plist");
     switch (type) {
         case Dragon_Anti:
-            shapeCache->addFixturesToBody(body, "Flame_Blue");
+            shapeCache->addFixturesToBody(body, "Dragon_Anti");
             break;
         case Dragon_Clockwise:
-            shapeCache->addFixturesToBody(body, "Flame_Blue");
+            shapeCache->addFixturesToBody(body, "Dragon_Clockwise");
             break;
         default:
             break;
@@ -118,5 +118,5 @@ b2Body* Dragon::createBody()
     bodymassData.I *= getScale();
     body->SetMassData(&bodymassData);
     
-    return body;
+    bodies.push_back(body);
 }

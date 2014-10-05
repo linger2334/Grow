@@ -69,7 +69,7 @@ void LevelFileHandler::loadFile()
             objElement->QueryFloatAttribute("scale", &scale);
             localZorder = objElement->IntAttribute("localZorder");
             
-            Item item = {Flame_Red,id,x,y,angle,scale,localZorder};
+            Item item(Flame_Red,id,x,y,angle,scale,localZorder);
             if (!strcmp(type,"Flame_Red")) {
                 item.type = Flame_Red;
             }
@@ -96,15 +96,50 @@ void LevelFileHandler::loadFile()
             }
             else if(!strcmp(type, "Cicada")){
                 item.type = Cicada;
+                Features_Cicada* features = new Features_Cicada();
+                
+                if(XMLElement* wElement = objElement->FirstChildElement("w")){
+                    wElement->QueryFloatText(&features->w);
+                }
+                if (XMLElement* includedAngeleElement = objElement->FirstChildElement("includedAngle")) {
+                    includedAngeleElement->QueryFloatText(&features->includedAngle);
+                }
+                if (XMLElement* intervalElement = objElement->FirstChildElement("interval")) {
+                    intervalElement->QueryFloatText(&features->interval);
+                }
+                if(XMLElement* bellTransparencyElement = objElement->FirstChildElement("bellTransparency")){
+                    bellTransparencyElement->QueryFloatText(&features->bellTransparency);
+                }
+                
+                item.features = features;
             }
             else if(!strcmp(type, "Dragon_Anti")){
                 item.type = Dragon_Anti;
+                Features_Dragon* features = new Features_Dragon();
+                if(XMLElement* wElement = objElement->FirstChildElement("w")){
+                    wElement->QueryFloatText(&features->w);
+                }
+                if (XMLElement* backTransparencyElement = objElement->FirstChildElement("backTransparency")) {
+                    backTransparencyElement->QueryFloatText(&features->backTransparency);
+                }
+                item.features = features;
             }
             else if (!strcmp(type, "Dragon_Clockwise")){
                 item.type = Dragon_Clockwise;
+                Features_Dragon* features = new Features_Dragon();
+                if(XMLElement* wElement = objElement->FirstChildElement("w")){
+                    wElement->QueryFloatText(&features->w);
+                }
+                if (XMLElement* backTransparencyElement = objElement->FirstChildElement("backTransparency")) {
+                    backTransparencyElement->QueryFloatText(&features->backTransparency);
+                }
+                item.features = features;
             }
             else if(!strcmp(type, "Eye")){
                 item.type = Eye;
+            }
+            else if(!strcmp(type,"Polygon")){
+                item.type = Polygon;
             }
             _items.push_back(item);
             objElement = objElement->NextSiblingElement();
@@ -195,16 +230,88 @@ int LevelFileHandler::saveFile()
                 itemElement->SetName("Rock_Gray");
                 break;
             case Cicada:
+            {
                 itemElement->SetName("Cicada");
+                Features_Cicada* features = (Features_Cicada*)item.features;
+                char buf[50];
+                
+                if (features->w!=kDefaultCicadaW) {
+                    XMLElement* w = doc->NewElement("w");
+                    itemElement->LinkEndChild(w);
+                    
+                    XMLText* wContent = doc->NewText(gcvt(features->w, 8, buf));
+                    w->LinkEndChild(wContent);
+                }
+                
+                if (features->includedAngle!=kDefaultCicadaIncludedAngle) {
+                    XMLElement* includedAngle = doc->NewElement("includedAngle");
+                    itemElement->LinkEndChild(includedAngle);
+                    XMLText* includedAngleContent = doc->NewText(gcvt(features->includedAngle, 7, buf));
+                    includedAngle->LinkEndChild(includedAngleContent);
+                }
+                
+                if (features->interval!=kDefaultCicadaInterval) {
+                    XMLElement* interval = doc->NewElement("interval");
+                    itemElement->LinkEndChild(interval);
+                    XMLText* intervalContent = doc->NewText(gcvt(((Features_Cicada*)item.features)->interval, 7, buf));
+                    interval->LinkEndChild(intervalContent);
+                }
+                
+                if (features->bellTransparency!=kDefaultCicadaBellTransparency) {
+                    XMLElement* bellTransparency = doc->NewElement("bellTransparency");
+                    itemElement->LinkEndChild(bellTransparency);
+                    XMLText* bellTransparencyContent = doc->NewText(gcvt(((Features_Cicada*)item.features)->bellTransparency, 6, buf));
+                    bellTransparency->LinkEndChild(bellTransparencyContent);
+                }
+            }
                 break;
             case Dragon_Anti:
+            {
                 itemElement->SetName("Dragon_Anti");
+                Features_Dragon* features = (Features_Dragon*)item.features;
+                char buf[50];
+                
+                if (features->w!=kDefaultDragonW) {
+                    XMLElement* w = doc->NewElement("w");
+                    itemElement->LinkEndChild(w);
+                    XMLText* wContent = doc->NewText(gcvt(((Features_Dragon*)item.features)->w, 8, buf));
+                    w->LinkEndChild(wContent);
+                }
+                
+                if (features->backTransparency!=kDefaultDragonBackTransparency) {
+                    XMLElement* backTransparency = doc->NewElement("backTransparency");
+                    itemElement->LinkEndChild(backTransparency);
+                    XMLText* backTransparencyContent = doc->NewText(gcvt(((Features_Dragon*)item.features)->backTransparency,6, buf));
+                    backTransparency->LinkEndChild(backTransparencyContent);
+                }
+            }
                 break;
             case Dragon_Clockwise:
+            {
                 itemElement->SetName("Dragon_Clockwise");
+                Features_Dragon* features = (Features_Dragon*)item.features;
+                char buf[50];
+                
+                if (features->w!=kDefaultDragonW) {
+                    XMLElement* w = doc->NewElement("w");
+                    itemElement->LinkEndChild(w);
+                    XMLText* wContent = doc->NewText(gcvt(((Features_Dragon*)item.features)->w, 8, buf));
+                    w->LinkEndChild(wContent);
+                }
+                
+                if (features->backTransparency!=kDefaultDragonBackTransparency) {
+                    XMLElement* backTransparency = doc->NewElement("backTransparency");
+                    itemElement->LinkEndChild(backTransparency);
+                    XMLText* backTransparencyContent = doc->NewText(gcvt(((Features_Dragon*)item.features)->backTransparency,6, buf));
+                    backTransparency->LinkEndChild(backTransparencyContent);
+                }
+            }
                 break;
             case Eye:
                 itemElement->SetName("Eye");
+                break;
+            case Polygon:
+                itemElement->SetName("Polygon");
                 break;
             default:
                 break;

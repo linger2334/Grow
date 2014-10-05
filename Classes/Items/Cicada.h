@@ -21,8 +21,12 @@ public:
     bool init(Item& item);
 
 protected:
+    Sprite* _head;
+    Sprite* _belly;
+    Sprite* _leftwing;
+    Sprite* _rightwing;
     friend class LayerItem;
-    b2Body* createBody();
+    void createBody(std::vector<b2Body*>& bodies);
 };
 
 

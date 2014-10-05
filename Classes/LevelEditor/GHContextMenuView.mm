@@ -492,8 +492,6 @@ CGFloat const   GHAnimationDelay = GHAnimationDuration/5;
 
 -(void)dealloc
 {
-    NSLog(@"menuitems refcount is %d",_menuItems.retainCount);
-    NSLog(@"itemlocations refcount is %d",_itemLocations.retainCount);
     _menuItems = nil;
     _itemLocations = nil;
     

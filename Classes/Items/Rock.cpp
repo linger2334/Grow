@@ -49,11 +49,11 @@ bool Rock::init(Item& item)
     return result;
 }
 
-b2Body* Rock::createBody()
+void Rock::createBody(std::vector<b2Body*>& bodies)
 {
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
-    bodyDef.position = b2Vec2(getPositionX()/PTM_RATIO,getPositionY()/PTM_RATIO);
+    bodyDef.position = b2Vec2(getParent()->convertToWorldSpace(getPosition()).x/PTM_RATIO,getParent()->convertToWorldSpace(getPosition()).y/PTM_RATIO);
     bodyDef.angle = - CC_DEGREES_TO_RADIANS(getRotation());
     bodyDef.linearDamping = 0.3;
     bodyDef.userData = this;
@@ -63,10 +63,10 @@ b2Body* Rock::createBody()
     shapeCache->addShapesWithFile("Item_fixtures.plist");
     switch (type) {
         case Rock_Circle:
-            shapeCache->addFixturesToBody(body, "Rock_Gray");
+            shapeCache->addFixturesToBody(body, "Rock_Circle");
             break;
         case Rock_Ellipse:
-            shapeCache->addFixturesToBody(body, "Rock_Gray");
+            shapeCache->addFixturesToBody(body, "Rock_Ellipse");
             break;
         case Rock_Gray:
             shapeCache->addFixturesToBody(body, "Rock_Gray");
@@ -95,7 +95,7 @@ b2Body* Rock::createBody()
     bodymassData.I *= getScale();
     body->SetMassData(&bodymassData);
     
-    return body;
+    bodies.push_back(body);
 }
 
 

@@ -534,7 +534,7 @@ void LevelEditor::drawLoadedLevel()
         newItem.center = CGPointMake(0.1*width + imageview.center.x,0.1*height + imageview.center.y);
         [newItem setTag:[self firstUnusedId]];
         
-        Item itemStruct = {type,static_cast<int>(newItem.tag),static_cast<float>(newItem.center.x/width),static_cast<float>(PAGE_COUNTS - newItem.center.y/height),DEFAULT_ANGLE,DEFAULT_SCALE,static_cast<int>(_fileHandler->_items.size())};
+        Item itemStruct(type,static_cast<int>(newItem.tag),static_cast<float>(newItem.center.x/width),static_cast<float>(PAGE_COUNTS - newItem.center.y/height),DEFAULT_ANGLE,DEFAULT_SCALE,static_cast<int>(_fileHandler->_items.size()));
 
         switch (type) {
             case Flame_Red:
@@ -715,7 +715,7 @@ void LevelEditor::drawLoadedLevel()
     newItem.center = CGPointMake(0.5*width,_scrollView.contentOffset.y + 0.5*height);
     [newItem setTag:[self firstUnusedId]];
     
-    Item itemStruct = {Flame_Red,static_cast<int>(newItem.tag),static_cast<float>(newItem.center.x/width),static_cast<float>(PAGE_COUNTS - newItem.center.y/height),DEFAULT_ANGLE,DEFAULT_SCALE,static_cast<int>(_fileHandler->_items.size())};
+    Item itemStruct(Flame_Red,static_cast<int>(newItem.tag),static_cast<float>(newItem.center.x/width),static_cast<float>(PAGE_COUNTS - newItem.center.y/height),DEFAULT_ANGLE,DEFAULT_SCALE,static_cast<int>(_fileHandler->_items.size()));
     switch (btn.tag) {
         case 1:
             newItem.bounds =CGRectMake(0, 0, FLAME_RED_WIDTH*contentscale, FLAME_RED_HEIGHT*contentscale);

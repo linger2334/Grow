@@ -20,10 +20,9 @@ public:
     static Flame* create(Item& item);
     bool init(Item& item);
     
-    Item_Type type;
 protected:
     friend class LayerItem;
-    b2Body* createBody();
+    void createBody(std::vector<b2Body*>& bodies);
     
 };
 
