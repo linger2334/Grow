@@ -6,6 +6,7 @@
 //
 //
 #include <QuartzCore/QuartzCore.h>
+#import <objc/runtime.h>
 
 #include "LevelEditor.h"
 #include "SceneGame.h"
@@ -211,52 +212,65 @@ void LevelEditor::drawLoadedLevel()
         UIImageView* imageview = [[UIImageView alloc] init];
         imageview.center = CGPointMake(x, y);
         [imageview setTag:id];
+        [imageview setHeightLightState:NO];
         switch (type) {
             case Flame_Red:
+                [imageview setTypeName:@"Flame_Red"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_FLAME_RED]];
                 imageview.bounds = CGRectMake(0, 0, FLAME_RED_WIDTH*contentscale, FLAME_RED_HEIGHT*contentscale);
                 break;
             case Flame_Green:
+                [imageview setTypeName:@"Flame_Green"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_FLAME_GREEN]];
                 imageview.bounds = CGRectMake(0, 0, FLAME_GREEN_WIDTH*contentscale, FLAME_GREEN_HEIGHT*contentscale);
                 break;
             case Flame_Blue:
+                [imageview setTypeName:@"Flame_Blue"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_FLAME_BLUE]];
                 imageview.bounds = CGRectMake(0, 0, FLAME_BLUE_WIDTH*contentscale, FLAME_BLUE_HEIGHT*contentscale);
                 break;
             case Flame_White:
+                [imageview setTypeName:@"Flame_White"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_FLAME_WHITE]];
                 imageview.bounds = CGRectMake(0, 0, FLAME_WHITE_WIDTH*contentscale, FLAME_WHITE_HEIGHT*contentscale);
                 break;
             case Flame_Orange:
+                [imageview setTypeName:@"Flame_Orange"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_FLAME_ORANGE]];
                 imageview.bounds = CGRectMake(0, 0, FLAME_ORANGE_WIDTH*contentscale, FLAME_ORANGE_HEIGHT*contentscale);
                 break;
             case Rock_Circle:
+                [imageview setTypeName:@"Rock_Circle"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_ROCK_CIRCLE]];
                 imageview.bounds = CGRectMake(0, 0, ROCK_CIRCLE_WIDTH*contentscale, ROCK_CIRCLE_HEIGHT*contentscale);
                 break;
             case Rock_Ellipse:
+                [imageview setTypeName:@"Rock_Ellipse"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_ROCK_ELLIPSE]];
                 imageview.bounds = CGRectMake(0, 0, ROCK_ELLIPSE_WIDTH*contentscale, ROCK_ELLIPSE_HEIGHT*contentscale);
                 break;
             case Rock_Gray:
+                [imageview setTypeName:@"Rock_Gray"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_ROCK_GRAY]];
                 imageview.bounds = CGRectMake(0, 0, ROCK_GRAY_WIDTH*contentscale, ROCK_GRAY_HEIGHT*contentscale);
                 break;
             case Cicada:
+                [imageview setTypeName:@"Cicada"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_CICADA]];
                 imageview.bounds = CGRectMake(0, 0, CICADA_WIDTH*contentscale, CICADA_HEIGHT*contentscale);
                 break;
             case Dragon_Anti:
+                [imageview setTypeName:@"Dragon_Anti"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_DRAGON_ANTI]];
                 imageview.bounds = CGRectMake(0, 0, DRAGON_ANTI_WIDTH*contentscale, DRAGON_ANTI_HEIGHT*contentscale);
                 break;
             case Dragon_Clockwise:
+                [imageview setTypeName:@"Dragon_Clockwise"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_DRAGON_CLOCKWISE]];
                 imageview.bounds = CGRectMake(0, 0, DRAGON_CLOCKWISE_WIDTH*contentscale, DRAGON_CLOCKWISE_HEIGHT*contentscale);
                 break;
             case Eye:
+                [imageview setTypeName:@"Eye"];
                 [imageview setImage:[UIImage imageNamed:@IMAGE_EYE]];
                 imageview.bounds = CGRectMake(0, 0, EYE_WIDTH*contentscale, EYE_HEIGHT*contentscale);
                 break;
@@ -332,9 +346,18 @@ void LevelEditor::drawLoadedLevel()
 {
     if(recognizer.state == UIGestureRecognizerStateEnded)
     {
-        if (!recognizer.view.layer.sublayers.count) {
+        BOOL isBoderCreated = NO;
+        for (CALayer* layer in recognizer.view.layer.sublayers) {
+            if ([layer.name isEqualToString:@"boder"]) {
+                isBoderCreated = YES;
+                break;
+            }
+        }
+        
+        if (![recognizer.view getHeightLightState]&&!isBoderCreated) {
            
             CAShapeLayer* border1 = [CAShapeLayer layer];//便利构造器，autorelease
+            [border1 setName:@"boder"];
             border1.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
             border1.fillColor = nil;
             border1.lineDashPattern = nil;
@@ -343,6 +366,7 @@ void LevelEditor::drawLoadedLevel()
             border1.frame = recognizer.view.bounds;
             
             CAShapeLayer* border2 = [CAShapeLayer layer];
+            [border2 setName:@"boder"];
             border2.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
             border2.fillColor = nil;
             border2.lineDashPattern = nil;
@@ -351,6 +375,7 @@ void LevelEditor::drawLoadedLevel()
             border2.frame = recognizer.view.bounds;
             
             CAShapeLayer* border3 = [CAShapeLayer layer];
+            [border3 setName:@"boder"];
             border3.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
             border3.fillColor = nil;
             border3.lineDashPattern = nil;
@@ -359,19 +384,38 @@ void LevelEditor::drawLoadedLevel()
             border3.frame = recognizer.view.bounds;
             
             CAShapeLayer* border4 = [CAShapeLayer layer];
+            [border4 setName:@"boder"];
             border4.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
             border4.fillColor = nil;
             border4.lineDashPattern = nil;
             [recognizer.view.layer addSublayer:border4];
             border4.path = [UIBezierPath bezierPathWithRect:recognizer.view.bounds].CGPath;
             border4.frame = recognizer.view.bounds;
+            
+            [recognizer.view setHeightLightState:YES];
+            _toDealWith.insert(static_cast<UIImageView*>(recognizer.view));
+        }else if(![recognizer.view getHeightLightState]&&isBoderCreated){
+
+            for(CAShapeLayer* shapeLayer in recognizer.view.layer.sublayers)
+            {
+                if ([shapeLayer.name isEqualToString:@"boder"]){
+                    [shapeLayer setHidden:NO];
+                }
+            }
+            [recognizer.view setHeightLightState:YES];
+            _toDealWith.insert(static_cast<UIImageView*>(recognizer.view));
+        }else{
+            
+            for(CAShapeLayer* shapeLayer in recognizer.view.layer.sublayers)
+            {
+                if ([shapeLayer.name isEqualToString:@"boder"]){
+                    [shapeLayer setHidden:YES];
+                }
+            }
+            [recognizer.view setHeightLightState:NO];
+            _toDealWith.erase(find(_toDealWith.begin(),_toDealWith.end(),recognizer.view));
         }
         
-        for (CAShapeLayer* shapeLayer in recognizer.view.layer.sublayers) {
-            [shapeLayer setHidden:NO];
-        }
-        
-        _toDealWith.insert(static_cast<UIImageView*>(recognizer.view));
     }
     
 }
@@ -533,6 +577,7 @@ void LevelEditor::drawLoadedLevel()
         UIImageView* newItem = [[UIImageView alloc] init];
         newItem.center = CGPointMake(0.1*width + imageview.center.x,0.1*height + imageview.center.y);
         [newItem setTag:[self firstUnusedId]];
+        [newItem setHeightLightState:NO];
         
         Item itemStruct(type,static_cast<int>(newItem.tag),static_cast<float>(newItem.center.x/width),static_cast<float>(PAGE_COUNTS - newItem.center.y/height),DEFAULT_ANGLE,DEFAULT_SCALE,static_cast<int>(_fileHandler->_items.size()));
 
@@ -714,6 +759,7 @@ void LevelEditor::drawLoadedLevel()
     UIImageView* newItem = [[UIImageView alloc] init];
     newItem.center = CGPointMake(0.5*width,_scrollView.contentOffset.y + 0.5*height);
     [newItem setTag:[self firstUnusedId]];
+    [newItem setHeightLightState:NO];
     
     Item itemStruct(Flame_Red,static_cast<int>(newItem.tag),static_cast<float>(newItem.center.x/width),static_cast<float>(PAGE_COUNTS - newItem.center.y/height),DEFAULT_ANGLE,DEFAULT_SCALE,static_cast<int>(_fileHandler->_items.size()));
     switch (btn.tag) {
@@ -852,7 +898,7 @@ void LevelEditor::drawLoadedLevel()
         }
         scale = fabsf(a/cosf(angle));
     }
-    _fileHandler->saveItemInformation(id, x, y, angle, scale,localZorder);
+    _fileHandler->saveItemInfoInMemory(id, x, y, angle, scale,localZorder);
 }
 
 #pragma mark GHContextMenu
@@ -932,10 +978,13 @@ void LevelEditor::drawLoadedLevel()
     for(it = _toDealWith.begin();it!=_toDealWith.end();it++)
     {
         UIImageView* imageview = *it;
-        if (imageview.layer.sublayers.count!=0) {
+        if ([imageview getHeightLightState]) {
             for (CAShapeLayer* shapeLayer in imageview.layer.sublayers) {
+                if([shapeLayer.name isEqualToString:@"boder"]){
                 [shapeLayer setHidden:YES];
+                }
             }
+            [imageview setHeightLightState:NO];
         }
     }
     
@@ -1003,5 +1052,26 @@ void LevelEditor::drawLoadedLevel()
 
 @end
 
+@implementation UIView (LevelEditor)
 
+-(void)setTypeName:(NSString*)typeName
+{
+    objc_setAssociatedObject(self, "name", typeName, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
 
+-(NSString*)getTypeName
+{
+    return objc_getAssociatedObject(self, "name");
+}
+
+-(void)setHeightLightState:(BOOL)isHeightLight
+{
+    objc_setAssociatedObject(self, "isHeightLight", [NSNumber numberWithBool:isHeightLight], OBJC_ASSOCIATION_ASSIGN);
+}
+
+-(BOOL)getHeightLightState
+{
+    return [objc_getAssociatedObject(self, "isHeightLight") boolValue];
+}
+
+@end

@@ -31,7 +31,8 @@ bool Dragon::init(Item& item)
         std::string bodyFilename;
         std::string backFilename;
         int rotateDirection;
-        float w;
+        float w = kDefaultDragonW;
+        float backTransparency = kDefaultDragonBackTransparency;
         
         switch (type) {
             case Dragon_Anti:
@@ -39,7 +40,6 @@ bool Dragon::init(Item& item)
                 bodyFilename = "DragonBody_Anti.png";
                 backFilename = "DragonBack_Anti.png";
                 rotateDirection = -1;
-                w = 360/4.0;
             }
                 break;
             case Dragon_Clockwise:
@@ -47,11 +47,16 @@ bool Dragon::init(Item& item)
                 bodyFilename = "DragonBody_Clockwise.png";
                 backFilename = "DragonBack_Clockwise.png";
                 rotateDirection = 1;
-                w = 360/4.0;
             }
                 break;
             default:
                 return false;
+        }
+        
+        if(item.features){
+            Features_Dragon* features = (Features_Dragon*)item.features;
+            w = features->w;
+            backTransparency = features->backTransparency;
         }
         
         setTexture(bodyFilename);
@@ -59,10 +64,10 @@ bool Dragon::init(Item& item)
         dragonBack->setPosition(getBoundingBox().size.width/2,getBoundingBox().size.height/2);
         addChild(dragonBack);
         
-        ActionInterval* rotation = RotateBy::create(360/w,rotateDirection*360);
+        ActionInterval* rotation = RotateBy::create(2*M_PI/w,rotateDirection*360);
         runAction(RepeatForever::create(rotation));
         
-        ActionInterval* flickering = FadeTo::create(0.4,50);
+        ActionInterval* flickering = FadeTo::create(0.4,255*backTransparency);
         ActionInterval* flickering_reverse = FadeTo::create(0.4, 255);
         ActionInterval* sequence = Sequence::createWithTwoActions(flickering, flickering_reverse);
         dragonBack->runAction(RepeatForever::create(sequence));

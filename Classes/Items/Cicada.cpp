@@ -49,21 +49,53 @@ bool Cicada::init(Item& item)
         addChild(_leftwing);
         addChild(_rightwing);
         
-        ActionInterval* shine = FadeTo::create(1, 50);
+        w = kDefaultCicadaW;
+        includedAngle = kDefaultCicadaIncludedAngle;
+        fanningDuration = kDefaultCicadaFanningDuration;
+        interval = kDefaultCicadaInterval;
+        bellyTransparency = kDefaultCicadaBellyTransparency;
+        if(item.features){
+            Features_Cicada* features = (Features_Cicada*)item.features;
+            w = features->w;
+            includedAngle = features->includedAngle;
+            fanningDuration = features->fanningDuration;
+            interval = features->interval;
+            bellyTransparency = features->bellyTransparency;
+        }
+        
+        ActionInterval* shine = FadeTo::create(1,bellyTransparency*255);
         ActionInterval* shine_reverse = FadeTo::create(1, 255);
         _belly->runAction(RepeatForever::create(Sequence::createWithTwoActions(shine, shine_reverse)));
         
-        ActionInterval* fan_left = RotateBy::create(0.01, 25);
-        _leftwing->runAction(RepeatForever::create(Sequence::create(fan_left,fan_left->reverse(), NULL)));
-        ActionInterval* fan_right = RotateBy::create(0.01, -25);
-        _rightwing->runAction(RepeatForever::create(Sequence::create(fan_right,fan_right->reverse(), NULL)));
-        
+        wingFanning();
         result = true;
     }else{
         result = false;
     }
     
     return result;
+}
+
+void Cicada::wingFanning()
+{
+    ActionInterval* fan_left = RotateBy::create(includedAngle/w,CC_RADIANS_TO_DEGREES(includedAngle));
+    _leftwing->runAction(RepeatForever::create(Sequence::create(fan_left,fan_left->reverse(), NULL)));
+    
+    ActionInterval* fan_right = RotateBy::create(includedAngle/w, -CC_RADIANS_TO_DEGREES( includedAngle));
+    _rightwing->runAction(RepeatForever::create(Sequence::create(fan_right,fan_right->reverse(),NULL)));
+    
+    scheduleOnce(schedule_selector(Cicada::canCelFanning), fanningDuration);
+}
+
+void Cicada::canCelFanning(float)
+{
+    _leftwing->stopAllActions();
+    _rightwing->stopAllActions();
+    _leftwing->setRotation(0);
+    _rightwing->setRotation(0);
+    
+    CallFunc* restore = CallFunc::create(CC_CALLBACK_0(Cicada::wingFanning, this));
+    this->runAction(Sequence::create(DelayTime::create(interval),restore, NULL));
 }
 
 void Cicada::createBody(std::vector<b2Body*>& bodies)

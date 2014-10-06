@@ -72,4 +72,16 @@ public:
 -(void)swapDepthsWithView:(UIView*)swapView;
 
 @end
+
+@interface UIView(LevelEditor)
+
+-(void)setTypeName:(NSString*) typeName;
+
+-(NSString*)getTypeName;
+
+-(void)setHeightLightState:(BOOL)isHeightLight;
+
+-(BOOL)getHeightLightState;
+
+@end
 #endif /* defined(__GrowUp__LevelEditor__) */

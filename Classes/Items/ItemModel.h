@@ -23,11 +23,12 @@ public:
     static ItemModel* create(Item& item);
     virtual bool init(Item& item);
     
-    Item_Type type;
+    virtual void createBody(std::vector<b2Body*>& bodies){};
     
 protected:
     friend class LayerItem;
-    virtual void createBody(std::vector<b2Body*>& bodies){};
+    Item_Type type;
+    
 };
 
 

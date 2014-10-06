@@ -23,7 +23,7 @@ public:
     bool init(const char* filename);
     
     void removeItemWithID(int id);
-    void saveItemInformation(int id,float x,float y,float angle,float scale,int localZorder);
+    void saveItemInfoInMemory(int id,float x,float y,float angle,float scale,int localZorder);
     int saveFile();
     void reload();
     

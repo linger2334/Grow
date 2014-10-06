@@ -12,6 +12,25 @@
 #include <iostream>
 #include "Macro.h"
 
+struct Features_Cicada{
+    float w;
+    float includedAngle;
+    float fanningDuration;
+    float interval;
+    float bellyTransparency;
+    Features_Cicada(float W=kDefaultCicadaW,float IncludedAngle=kDefaultCicadaIncludedAngle,float FanningDuration=kDefaultCicadaFanningDuration,float Interval=kDefaultCicadaInterval,float BellyTransparency=kDefaultCicadaBellyTransparency);
+};
+
+struct Features_Dragon{
+    float w;
+    float backTransparency;
+    Features_Dragon(float W = kDefaultDragonW,float BackTransparency = kDefaultDragonBackTransparency);
+};
+
+struct Features_Polygon{
+    std::set<std::pair<float,float>> vertexBuffer;
+};
+
 struct Item{
     Item_Type type;
     int id;
@@ -23,18 +42,10 @@ struct Item{
     bool iscreated;
     void* features;
     
-    Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _iscreated = false,void* _features = nullptr)
-    {
-        type = _type;
-        id = _id;
-        x = _x;
-        y = _y;
-        angle = _angle;
-        scale = _scale;
-        localZorder = _localZorder;
-        iscreated = _iscreated;
-        features = _features;
-    }
+    Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _iscreated = false,void* _features = nullptr);
+    
+    Item(const Item& );
+    ~Item();
     
     bool operator<(const Item& value)const
     {
@@ -48,33 +59,7 @@ struct Item{
     
 };
 
-struct Features_Cicada{
-    float w;
-    float includedAngle;
-    float interval;
-    float bellTransparency;
-    Features_Cicada()
-    {
-        w = kDefaultCicadaW;
-        includedAngle = kDefaultCicadaIncludedAngle;
-        interval = kDefaultCicadaInterval;
-        bellTransparency = kDefaultCicadaBellTransparency;
-    }
-};
 
-struct Features_Dragon{
-    float w;
-    float backTransparency;
-    Features_Dragon()
-    {
-        w = kDefaultDragonW;
-        backTransparency = kDefaultDragonBackTransparency;
-    }
-};
-
-struct Features_Polygon{
-    std::set<std::pair<float,float>> vertexBuffer;
-};
 
 #ifdef __cplusplus
 extern "C"{

@@ -19,14 +19,24 @@ class Cicada : public ItemModel
 public:
     static Cicada* create(Item& item);
     bool init(Item& item);
-
+    
+    
+    void wingFanning();
+    void canCelFanning(float);
+    void createBody(std::vector<b2Body*>& bodies);
+    
 protected:
     Sprite* _head;
     Sprite* _belly;
     Sprite* _leftwing;
     Sprite* _rightwing;
-    friend class LayerItem;
-    void createBody(std::vector<b2Body*>& bodies);
+
+    float w;
+    float includedAngle;
+    float fanningDuration;
+    float interval;
+    float bellyTransparency;
+    
 };
 
 
