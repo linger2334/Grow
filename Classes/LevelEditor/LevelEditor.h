@@ -14,14 +14,17 @@
 #include "LevelFileHandler.h"
 #include "OCScrollView.h"
 
+@class ItemView;
+
 @interface MyViewController:UIViewController<UIScrollViewDelegate,UIGestureRecognizerDelegate,UIActionSheetDelegate>
 {
 @public    LevelFileHandler* _fileHandler;
     float retinascale;
     float contentscale;
     OCScrollView* _scrollView;
-    std::vector<UIImageView*> _imageViews;
     std::vector<UIButton*> needHidenButtons;
+    std::vector<ItemView*> itemViews;
+    std::list<int>ids;
     BOOL isButtonHiden;
 }
 
@@ -53,35 +56,5 @@ public:
 
 };
 
-@interface UIView(Hierarchy)
 
--(int)getSubviewIndex;
-
--(void)bringToFront;
-
--(void)sendToBack;
-
--(void)bringOneLevelUp;
-
--(void)sendOneLevelDown;
-
--(BOOL)isInFront;
-
--(BOOL)isAtBack;
-
--(void)swapDepthsWithView:(UIView*)swapView;
-
-@end
-
-@interface UIView(LevelEditor)
-
--(void)setTypeName:(NSString*) typeName;
-
--(NSString*)getTypeName;
-
--(void)setHeightLightState:(BOOL)isHeightLight;
-
--(BOOL)getHeightLightState;
-
-@end
 #endif /* defined(__GrowUp__LevelEditor__) */

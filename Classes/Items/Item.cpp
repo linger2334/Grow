@@ -17,10 +17,25 @@ Features_Cicada::Features_Cicada(float W,float IncludedAngle,float FanningDurati
     bellyTransparency = BellyTransparency;
 }
 
+Features_Cicada::Features_Cicada(const Features_Cicada& other)
+{
+    w = other.w;
+    includedAngle = other.includedAngle;
+    fanningDuration = other.fanningDuration;
+    interval = other.interval;
+    bellyTransparency = other.bellyTransparency;
+}
+
 Features_Dragon::Features_Dragon(float W,float BackTransparency)
 {
     w = W;
     backTransparency = BackTransparency;
+}
+
+Features_Dragon::Features_Dragon(const Features_Dragon& other)
+{
+    w = other.w;
+    backTransparency = other.backTransparency;
 }
 
 Item::Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _iscreated,void* _features)

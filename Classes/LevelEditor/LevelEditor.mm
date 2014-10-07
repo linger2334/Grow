@@ -1,3 +1,4 @@
+
 //
 //  LevelEditor.cpp
 //  GrowUp
@@ -6,7 +7,6 @@
 //
 //
 #include <QuartzCore/QuartzCore.h>
-#import <objc/runtime.h>
 
 #include "LevelEditor.h"
 #include "SceneGame.h"
@@ -17,6 +17,7 @@
 #import "PopupViewController.h"
 #import "GHContextMenuView.h"
 #import "FeaturesController.h"
+#import "UIViewExtension.h"
 
 LevelEditor::LevelEditor():_myViewController(nil)
 {
@@ -70,7 +71,8 @@ void LevelEditor::drawLoadedLevel()
 }
 
 @interface MyViewController()<GHContextOverlayViewDataSource,GHContextOverlayViewDelegate>{
-    std::set<UIImageView*> _toDealWith;
+    GameManager* _gameManager;
+    std::set<ItemView*> _toDealWith;
     
 }
 
@@ -95,9 +97,9 @@ void LevelEditor::drawLoadedLevel()
 -(id)init
 {
     self = [super init];
-    GameManager* gameManager = GameManager::getInstance();
+    _gameManager = GameManager::getInstance();
     if(self){
-        _fileHandler = gameManager->_fileHandler;
+        _fileHandler = _gameManager->_fileHandler;
     }
     
     CCEAGLView* glview = (CCEAGLView*)Director::getInstance()->getOpenGLView()->getEAGLView();
@@ -106,9 +108,9 @@ void LevelEditor::drawLoadedLevel()
     self.width = 768.0/1024.0*self.height;
     contentscale = self.height/1024;
 
-    gameManager->editor_width = width;
-    gameManager->editor_height = height;
-    gameManager->editor_contentscale = contentscale;
+    _gameManager->editor_width = width;
+    _gameManager->editor_height = height;
+    _gameManager->editor_contentscale = contentscale;
     
     return self;
 }
@@ -201,117 +203,19 @@ void LevelEditor::drawLoadedLevel()
 -(void)createItemFromFileHandler
 {
     sort(_fileHandler->_items.begin(),_fileHandler->_items.end(),Itemlesser);
-    for (Item item : _fileHandler->_items) {
+    
+    for (Item& item : _fileHandler->_items) {
+        ItemView* itemView = [[ItemView alloc] init:item];
+        [itemView itemAddGestureRecognizerWithTarget:self];
         
-        Item_Type type = item.type;
-        int id = item.id;
-        float x = item.x*width;
-        float y = (PAGE_COUNTS - item.y)*height;
-        int localZorder = item.localZorder;
-        
-        UIImageView* imageview = [[UIImageView alloc] init];
-        imageview.center = CGPointMake(x, y);
-        [imageview setTag:id];
-        [imageview setHeightLightState:NO];
-        switch (type) {
-            case Flame_Red:
-                [imageview setTypeName:@"Flame_Red"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_FLAME_RED]];
-                imageview.bounds = CGRectMake(0, 0, FLAME_RED_WIDTH*contentscale, FLAME_RED_HEIGHT*contentscale);
-                break;
-            case Flame_Green:
-                [imageview setTypeName:@"Flame_Green"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_FLAME_GREEN]];
-                imageview.bounds = CGRectMake(0, 0, FLAME_GREEN_WIDTH*contentscale, FLAME_GREEN_HEIGHT*contentscale);
-                break;
-            case Flame_Blue:
-                [imageview setTypeName:@"Flame_Blue"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_FLAME_BLUE]];
-                imageview.bounds = CGRectMake(0, 0, FLAME_BLUE_WIDTH*contentscale, FLAME_BLUE_HEIGHT*contentscale);
-                break;
-            case Flame_White:
-                [imageview setTypeName:@"Flame_White"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_FLAME_WHITE]];
-                imageview.bounds = CGRectMake(0, 0, FLAME_WHITE_WIDTH*contentscale, FLAME_WHITE_HEIGHT*contentscale);
-                break;
-            case Flame_Orange:
-                [imageview setTypeName:@"Flame_Orange"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_FLAME_ORANGE]];
-                imageview.bounds = CGRectMake(0, 0, FLAME_ORANGE_WIDTH*contentscale, FLAME_ORANGE_HEIGHT*contentscale);
-                break;
-            case Rock_Circle:
-                [imageview setTypeName:@"Rock_Circle"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_ROCK_CIRCLE]];
-                imageview.bounds = CGRectMake(0, 0, ROCK_CIRCLE_WIDTH*contentscale, ROCK_CIRCLE_HEIGHT*contentscale);
-                break;
-            case Rock_Ellipse:
-                [imageview setTypeName:@"Rock_Ellipse"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_ROCK_ELLIPSE]];
-                imageview.bounds = CGRectMake(0, 0, ROCK_ELLIPSE_WIDTH*contentscale, ROCK_ELLIPSE_HEIGHT*contentscale);
-                break;
-            case Rock_Gray:
-                [imageview setTypeName:@"Rock_Gray"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_ROCK_GRAY]];
-                imageview.bounds = CGRectMake(0, 0, ROCK_GRAY_WIDTH*contentscale, ROCK_GRAY_HEIGHT*contentscale);
-                break;
-            case Cicada:
-                [imageview setTypeName:@"Cicada"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_CICADA]];
-                imageview.bounds = CGRectMake(0, 0, CICADA_WIDTH*contentscale, CICADA_HEIGHT*contentscale);
-                break;
-            case Dragon_Anti:
-                [imageview setTypeName:@"Dragon_Anti"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_DRAGON_ANTI]];
-                imageview.bounds = CGRectMake(0, 0, DRAGON_ANTI_WIDTH*contentscale, DRAGON_ANTI_HEIGHT*contentscale);
-                break;
-            case Dragon_Clockwise:
-                [imageview setTypeName:@"Dragon_Clockwise"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_DRAGON_CLOCKWISE]];
-                imageview.bounds = CGRectMake(0, 0, DRAGON_CLOCKWISE_WIDTH*contentscale, DRAGON_CLOCKWISE_HEIGHT*contentscale);
-                break;
-            case Eye:
-                [imageview setTypeName:@"Eye"];
-                [imageview setImage:[UIImage imageNamed:@IMAGE_EYE]];
-                imageview.bounds = CGRectMake(0, 0, EYE_WIDTH*contentscale, EYE_HEIGHT*contentscale);
-                break;
-            default:
-                break;
-        }
-        imageview.transform = CGAffineTransformRotate(imageview.transform,item.angle);
-        imageview.transform = CGAffineTransformScale(imageview.transform,item.scale,item.scale);
-        
-        [_scrollView insertSubview:imageview atIndex:localZorder];
-        [imageview release];
+        [_scrollView insertSubview:itemView atIndex:itemViews.size()];
+        [itemView release];
         //加入编辑器数组
-        _imageViews.push_back(imageview);
-        
-        UIPanGestureRecognizer* panGestureRecognizer =[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-        UIRotationGestureRecognizer* rotateRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotate:)];
-        UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-        tapRecognizer.numberOfTapsRequired = 1;
-        UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
-        longPressRecognizer.minimumPressDuration =0.5;
-        //询问代理
-        panGestureRecognizer.delegate =self;
-        longPressRecognizer.delegate = self;
-        
-        [imageview addGestureRecognizer:panGestureRecognizer];
-        [imageview addGestureRecognizer:rotateRecognizer];
-        [imageview addGestureRecognizer:tapRecognizer];
-        [imageview addGestureRecognizer:longPressRecognizer];
-        
-        [panGestureRecognizer release];
-        [rotateRecognizer release];
-        [tapRecognizer release];
-        [longPressRecognizer release];
-        
-        //互斥
-        [tapRecognizer requireGestureRecognizerToFail:panGestureRecognizer];
-        
-        [imageview setUserInteractionEnabled:YES];
-        
+        itemViews.push_back(itemView);
+        ids.push_back(itemView.tag);
     }
     
+    _fileHandler->_items.clear();
 }
 
 -(void)handlePan:(UIPanGestureRecognizer*)recognizer
@@ -393,7 +297,7 @@ void LevelEditor::drawLoadedLevel()
             border4.frame = recognizer.view.bounds;
             
             [recognizer.view setHeightLightState:YES];
-            _toDealWith.insert(static_cast<UIImageView*>(recognizer.view));
+            _toDealWith.insert(static_cast<ItemView*>(recognizer.view));
         }else if(![recognizer.view getHeightLightState]&&isBoderCreated){
 
             for(CAShapeLayer* shapeLayer in recognizer.view.layer.sublayers)
@@ -403,7 +307,7 @@ void LevelEditor::drawLoadedLevel()
                 }
             }
             [recognizer.view setHeightLightState:YES];
-            _toDealWith.insert(static_cast<UIImageView*>(recognizer.view));
+            _toDealWith.insert(static_cast<ItemView*>(recognizer.view));
         }else{
             
             for(CAShapeLayer* shapeLayer in recognizer.view.layer.sublayers)
@@ -424,7 +328,7 @@ void LevelEditor::drawLoadedLevel()
 {
     if(recognizer.state == UIGestureRecognizerStateBegan)
     {
-        featuresController = [[FeaturesController alloc] init:[recognizer.view getSubviewIndex]];
+        featuresController = [[FeaturesController alloc] init:static_cast<ItemView*>(recognizer.view)];
         featuresController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
         featuresController.modalPresentationStyle = UIModalPresentationFormSheet;
         
@@ -528,9 +432,11 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)save:(id)sender
 {
-    for(UIImageView* imageview: _imageViews)
+    _fileHandler->_items.clear();
+    
+    for(ItemView* itemView: itemViews)
     {
-        [self updateItemInformation:imageview];
+        [self saveItemInformationInMemory:itemView];
     }
     int errNo = _fileHandler->saveFile();
     
@@ -563,123 +469,89 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)copyItem:(id)sender
 {
-    for(std::set<UIImageView*>::iterator it = _toDealWith.begin();it!=_toDealWith.end();it++)
+    for(std::set<ItemView*>::iterator it = _toDealWith.begin();it!=_toDealWith.end();it++)
     {
-        UIImageView* imageview = *it;
-        Item_Type type;
-        for (Item item : _fileHandler->_items) {
-            if (item.id == imageview.tag) {
-                type = item.type;
-                break;
-            }
-        }
+        ItemView* itemView = *it;
         
-        UIImageView* newItem = [[UIImageView alloc] init];
-        newItem.center = CGPointMake(0.1*width + imageview.center.x,0.1*height + imageview.center.y);
-        [newItem setTag:[self firstUnusedId]];
-        [newItem setHeightLightState:NO];
+        Item_Type type = itemView->itemtype;
+        int id = [self firstUnusedId];
+        float x = (itemView.center.x + 0.4*itemView.bounds.size.width)/width;
+        float y = PAGE_COUNTS - (itemView.center.y + 0.4*itemView.bounds.size.height)/height;
+        float angle = DEFAULT_ANGLE;
+        float scale = DEFAULT_SCALE;
+        int localZorder = itemViews.size();
+        bool iscreated = false;
+        void* features = nullptr;
         
-        Item itemStruct(type,static_cast<int>(newItem.tag),static_cast<float>(newItem.center.x/width),static_cast<float>(PAGE_COUNTS - newItem.center.y/height),DEFAULT_ANGLE,DEFAULT_SCALE,static_cast<int>(_fileHandler->_items.size()));
-
-        switch (type) {
-            case Flame_Red:
-                newItem.bounds =CGRectMake(0, 0, FLAME_RED_WIDTH*contentscale, FLAME_RED_HEIGHT*contentscale);
-                newItem.image =[UIImage imageNamed:@IMAGE_FLAME_RED];
-                break;
-            case Flame_Green:
-                newItem.bounds = CGRectMake(0,0,FLAME_GREEN_WIDTH*contentscale,FLAME_GREEN_HEIGHT*contentscale);
-                newItem.image = [UIImage imageNamed:@IMAGE_FLAME_GREEN];
-                break;
-            case Flame_Blue:
-                newItem.bounds =CGRectMake(0, 0, FLAME_BLUE_WIDTH*contentscale, FLAME_BLUE_HEIGHT*contentscale);
-                newItem.image =[UIImage imageNamed:@IMAGE_FLAME_BLUE];
-                break;
-            case Flame_White:
-                newItem.bounds = CGRectMake(0,0,FLAME_WHITE_WIDTH*contentscale,FLAME_WHITE_HEIGHT*contentscale);
-                newItem.image = [UIImage imageNamed:@IMAGE_FLAME_WHITE];
-                break;
-            case Flame_Orange:
-                newItem.bounds = CGRectMake(0,0,FLAME_ORANGE_WIDTH*contentscale,FLAME_ORANGE_HEIGHT*contentscale);
-                newItem.image = [UIImage imageNamed:@IMAGE_FLAME_ORANGE];
-                break;
-            case Rock_Circle:
-                newItem.bounds =CGRectMake(0, 0, ROCK_CIRCLE_WIDTH*contentscale, ROCK_CIRCLE_HEIGHT*contentscale);
-                newItem.image =[UIImage imageNamed:@IMAGE_ROCK_CIRCLE];
-                break;
-            case Rock_Ellipse:
-                newItem.bounds = CGRectMake(0,0,ROCK_ELLIPSE_WIDTH*contentscale,ROCK_ELLIPSE_HEIGHT*contentscale);
-                newItem.image = [UIImage imageNamed:@IMAGE_ROCK_ELLIPSE];
-                break;
-            case Rock_Gray:
-                newItem.bounds = CGRectMake(0,0,ROCK_GRAY_WIDTH*contentscale,ROCK_GRAY_HEIGHT*contentscale);
-                newItem.image = [UIImage imageNamed:@IMAGE_ROCK_GRAY];
-                break;
+        switch(itemView->itemtype){
             case Cicada:
-                newItem.bounds = CGRectMake(0, 0, CICADA_WIDTH*contentscale, CICADA_HEIGHT*contentscale);
-                newItem.image = [UIImage imageNamed:@IMAGE_CICADA];
+            {
+                Features_Cicada* oldfeatures = (Features_Cicada*)itemView->features;
+                if(oldfeatures){
+                    Features_Cicada feat(*oldfeatures);
+                    features = &feat;
+                }else{
+                    Features_Cicada feat;
+                    features = &feat;
+                }
+            }
                 break;
             case Dragon_Anti:
-                newItem.bounds = CGRectMake(0, 0, DRAGON_ANTI_WIDTH*contentscale, DRAGON_ANTI_HEIGHT*contentscale);
-                newItem.image = [UIImage imageNamed:@IMAGE_DRAGON_ANTI];
+            {
+                Features_Dragon* oldfeatures = (Features_Dragon*)itemView->features;
+                if(oldfeatures){
+                    Features_Dragon feat(*oldfeatures);
+                    features = &feat;
+                }else{
+                    Features_Dragon feat;
+                    features = &feat;
+                }
+            }
                 break;
             case Dragon_Clockwise:
-                newItem.bounds = CGRectMake(0, 0, DRAGON_CLOCKWISE_WIDTH*contentscale, DRAGON_CLOCKWISE_HEIGHT*contentscale);
-                newItem.image = [UIImage imageNamed:@IMAGE_DRAGON_CLOCKWISE];
+            {
+                Features_Dragon* oldfeatures = (Features_Dragon*)itemView->features;
+                if(oldfeatures){
+                    Features_Dragon feat(*oldfeatures);
+                    features = &feat;
+                }else{
+                    Features_Dragon feat;
+                    features = &feat;
+                }
+            }
                 break;
-            case Eye:
-                newItem.bounds = CGRectMake(0, 0, EYE_WIDTH*contentscale, EYE_HEIGHT*contentscale);
-                newItem.image = [UIImage imageNamed:@IMAGE_EYE];
-                break;
-
             default:
                 break;
         }
-        newItem.transform = imageview.transform;
+        
+        Item item(type,id,x,y,angle,scale,localZorder,iscreated,features);
+        
+        ItemView* newItem = [[ItemView alloc] init:item];
+        //copy
+        newItem.transform = itemView.transform;
         //
-        UIPanGestureRecognizer* panGestureRecognizer =[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-        //    UIPinchGestureRecognizer* pinchGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
-        UIRotationGestureRecognizer* rotateRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotate:)];
-        UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-        tapRecognizer.numberOfTapsRequired = 1;
-        UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
-        longPressRecognizer.minimumPressDuration = 0.5;
+        [newItem itemAddGestureRecognizerWithTarget:self];
         
-        [newItem addGestureRecognizer:panGestureRecognizer];
-        [newItem addGestureRecognizer:rotateRecognizer];
-        [newItem addGestureRecognizer:tapRecognizer];
-        [newItem addGestureRecognizer:longPressRecognizer];
-        
-        [panGestureRecognizer release];
-        [rotateRecognizer release];
-        [tapRecognizer release];
-        [longPressRecognizer release];
-        
-        //互斥
-        [tapRecognizer requireGestureRecognizerToFail:panGestureRecognizer];
-        
-        [newItem setUserInteractionEnabled:YES];
-        
-        [_scrollView insertSubview:newItem atIndex:_fileHandler->_items.size()];
+        [_scrollView insertSubview:newItem atIndex:itemViews.size()];
         [newItem release];
-        _imageViews.push_back(newItem);
         //添加到数组
-        _fileHandler->_items.push_back(itemStruct);
-        
+        itemViews.push_back(newItem);
+        ids.push_back(newItem.tag);
     }
     
 }
 
 -(void)deleteItem:(id)sender
 {
-    for(std::set<UIImageView*>::iterator it = _toDealWith.begin();it!=_toDealWith.end();it++)
+    for(std::set<ItemView*>::iterator it = _toDealWith.begin();it!=_toDealWith.end();it++)
     {
-        UIImageView* selectedImageview = *it;
+        ItemView* selectedItemview = *it;
         //从编辑器中删
-        _imageViews.erase(find(_imageViews.begin(),_imageViews.end(),selectedImageview));
-        //从文件句柄中删
-        _fileHandler->removeItemWithID(static_cast<int>(selectedImageview.tag));
+        itemViews.erase(find(itemViews.begin(),itemViews.end(),selectedItemview));
+        ids.erase(find(ids.begin(),ids.end(),selectedItemview.tag));
+        
         //从视图中移除
-        [selectedImageview removeFromSuperview];
+        [selectedItemview removeFromSuperview];
     }
     
     _toDealWith.clear();
@@ -687,12 +559,14 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)play:(id)sender
 {
-    for(UIImageView* imageview : _imageViews)
+    _fileHandler->_items.clear();
+    
+    for(ItemView* itemView : itemViews)
     {
-        [self updateItemInformation:imageview];
+        [self saveItemInformationInMemory:itemView];
     }
-    GameManager::getInstance()->scrollViewOffset = (PAGE_COUNTS - 1)*height - _scrollView.contentOffset.y;
-    GameManager::getInstance()->_levelEditor->playLevel();
+    _gameManager->scrollViewOffset = (PAGE_COUNTS - 1)*height - _scrollView.contentOffset.y;
+    _gameManager->_levelEditor->playLevel();
 }
 
 -(void)hide:(id)sender
@@ -721,11 +595,12 @@ void LevelEditor::drawLoadedLevel()
 //        [alert show];
 //        [alert release];
         //先把自己的清空
-        for(UIImageView* imageview : _imageViews)
+        for(ItemView* itemview : itemViews)
         {
-            [imageview removeFromSuperview];
+            [itemview removeFromSuperview];
         }
-        _imageViews.clear();
+        itemViews.clear();
+        ids.clear();
         _toDealWith.clear();
         //在让文件管理器清空
         _fileHandler->reload();
@@ -738,9 +613,9 @@ void LevelEditor::drawLoadedLevel()
 {
     int firstUnusedID = 0;
     int lastID = 0;
-    sort(_fileHandler->_items.begin(),_fileHandler->_items.end());
-    for (Item item : _fileHandler->_items) {
-        if(item.id - lastID >1){
+    ids.sort();
+    for (int i : ids) {
+        if(i - lastID >1){
             firstUnusedID = lastID + 1;
             break;
         }
@@ -755,126 +630,72 @@ void LevelEditor::drawLoadedLevel()
 -(IBAction)createItemAtCenter:(id)sender
 {
     UIButton* btn = (UIButton*)sender;
-
-    UIImageView* newItem = [[UIImageView alloc] init];
-    newItem.center = CGPointMake(0.5*width,_scrollView.contentOffset.y + 0.5*height);
-    [newItem setTag:[self firstUnusedId]];
-    [newItem setHeightLightState:NO];
     
-    Item itemStruct(Flame_Red,static_cast<int>(newItem.tag),static_cast<float>(newItem.center.x/width),static_cast<float>(PAGE_COUNTS - newItem.center.y/height),DEFAULT_ANGLE,DEFAULT_SCALE,static_cast<int>(_fileHandler->_items.size()));
-    switch (btn.tag) {
-        case 1:
-            newItem.bounds =CGRectMake(0, 0, FLAME_RED_WIDTH*contentscale, FLAME_RED_HEIGHT*contentscale);
-            newItem.image =[UIImage imageNamed:@IMAGE_FLAME_RED];
-            itemStruct.type = Flame_Red;
+    Item_Type type = static_cast<Item_Type>(btn.tag);
+    int id = [self firstUnusedId];
+    float x = 0.5 ;
+    float y = PAGE_COUNTS - (_scrollView.contentOffset.y + 0.5*height)/height;
+    float angle = DEFAULT_ANGLE;
+    float scale = DEFAULT_SCALE;
+    int localZorder = itemViews.size();
+    bool iscreated = false;
+    void* features = nullptr;
+    
+    switch(type){
+        case Cicada:
+        {
+            Features_Cicada feat;
+            features = &feat;
+        }
             break;
-        case 2:
-            newItem.bounds = CGRectMake(0,0,FLAME_GREEN_WIDTH*contentscale,FLAME_GREEN_HEIGHT*contentscale);
-            newItem.image = [UIImage imageNamed:@IMAGE_FLAME_GREEN];
-            itemStruct.type = Flame_Green;
+        case Dragon_Anti:
+        {
+            Features_Dragon feat;
+            features = &feat;
+        }
             break;
-        case 3:
-            newItem.bounds =CGRectMake(0, 0, FLAME_BLUE_WIDTH*contentscale, FLAME_BLUE_HEIGHT*contentscale);
-            newItem.image =[UIImage imageNamed:@IMAGE_FLAME_BLUE];
-        itemStruct.type = Flame_Blue;
+        case Dragon_Clockwise:
+        {
+            Features_Dragon feat;
+            features = &feat;
+        }
             break;
-        case 4:
-            newItem.bounds = CGRectMake(0,0,FLAME_WHITE_WIDTH*contentscale,FLAME_WHITE_HEIGHT*contentscale);
-            newItem.image = [UIImage imageNamed:@IMAGE_FLAME_WHITE];
-            itemStruct.type = Flame_White;
-            break;
-        case 5:
-            newItem.bounds = CGRectMake(0,0,FLAME_ORANGE_WIDTH*contentscale,FLAME_ORANGE_HEIGHT*contentscale);
-            newItem.image = [UIImage imageNamed:@IMAGE_FLAME_ORANGE];
-            itemStruct.type = Flame_Orange;
-            break;
-        case 6:
-            newItem.bounds =CGRectMake(0, 0, ROCK_CIRCLE_WIDTH*contentscale, ROCK_CIRCLE_HEIGHT*contentscale);
-            newItem.image =[UIImage imageNamed:@IMAGE_ROCK_CIRCLE];
-            itemStruct.type = Rock_Circle;
-            break;
-        case 7:
-            newItem.bounds = CGRectMake(0,0,ROCK_ELLIPSE_WIDTH*contentscale,ROCK_ELLIPSE_HEIGHT*contentscale);
-            newItem.image = [UIImage imageNamed:@IMAGE_ROCK_ELLIPSE];
-            itemStruct.type = Rock_Ellipse;
-            break;
-        case 8:
-            newItem.bounds =CGRectMake(0, 0, ROCK_GRAY_WIDTH*contentscale, ROCK_GRAY_HEIGHT*contentscale);
-            newItem.image =[UIImage imageNamed:@IMAGE_ROCK_GRAY];
-            itemStruct.type = Rock_Gray;
-            break;
-        case 9:
-            newItem.bounds = CGRectMake(0,0,CICADA_WIDTH*contentscale,CICADA_HEIGHT*contentscale);
-            newItem.image = [UIImage imageNamed:@IMAGE_CICADA];
-            itemStruct.type = Cicada;
-            break;
-        case 10:
-            newItem.bounds = CGRectMake(0,0,DRAGON_ANTI_WIDTH*contentscale,DRAGON_ANTI_HEIGHT*contentscale);
-            newItem.image = [UIImage imageNamed:@IMAGE_DRAGON_ANTI];
-            itemStruct.type = Dragon_Anti;
-            break;
-        case 11:
-            newItem.bounds = CGRectMake(0,0,DRAGON_CLOCKWISE_WIDTH*contentscale,DRAGON_CLOCKWISE_HEIGHT*contentscale);
-            newItem.image = [UIImage imageNamed:@IMAGE_DRAGON_CLOCKWISE];
-            itemStruct.type = Dragon_Clockwise;
-            break;
-        case 12:
-            newItem.bounds = CGRectMake(0, 0, EYE_WIDTH*contentscale, EYE_HEIGHT*contentscale);
-            newItem.image = [UIImage imageNamed:@IMAGE_EYE];
-            itemStruct.type = Eye;
-            break;
-
         default:
             break;
     }
-    newItem.transform = CGAffineTransformScale(newItem.transform,DEFAULT_SCALE,DEFAULT_SCALE);
-    //
-    UIPanGestureRecognizer* panGestureRecognizer =[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-//    UIPinchGestureRecognizer* pinchGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
-    UIRotationGestureRecognizer* rotateRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotate:)];
-    UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-    tapRecognizer.numberOfTapsRequired = 1;
-    UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
-    longPressRecognizer.minimumPressDuration = 0.5;
     
-    [newItem addGestureRecognizer:panGestureRecognizer];
-    [newItem addGestureRecognizer:rotateRecognizer];
-    [newItem addGestureRecognizer:tapRecognizer];
-    [newItem addGestureRecognizer:longPressRecognizer];
+    Item item(type,id,x,y,angle,scale,localZorder,iscreated,features);
     
-    [panGestureRecognizer release];
-    [rotateRecognizer release];
-    [tapRecognizer release];
-    [longPressRecognizer release];
+    ItemView* newItem = [[ItemView alloc] init:item];
     
-    //互斥
-    [tapRecognizer requireGestureRecognizerToFail:panGestureRecognizer];
+    [newItem itemAddGestureRecognizerWithTarget:self];
     
-    [newItem setUserInteractionEnabled:YES];
-    
-    [_scrollView insertSubview:newItem atIndex:_fileHandler->_items.size()];
+    [_scrollView insertSubview:newItem atIndex:itemViews.size()];
     [newItem release];
-    _imageViews.push_back(newItem);
     //添加到数组
-    _fileHandler->_items.push_back(itemStruct);
+    itemViews.push_back(newItem);
+    ids.push_back(newItem.tag);
     
     //返回
     [popupViewController backEditor:newItem];
 }
 
--(void)updateItemInformation:(UIImageView*)imageview
+-(void)saveItemInformationInMemory:(ItemView*)itemView
 {
-    int id = static_cast<int>(imageview.tag);
-    float x = imageview.center.x/width;
-    float y = PAGE_COUNTS - imageview.center.y/height;
-    float a = imageview.transform.a;
-    float b = imageview.transform.b;
-    float c = imageview.transform.c;
-    float d = imageview.transform.d;
+    Item_Type type = itemView->itemtype;
+    int id = static_cast<int>(itemView.tag);
+    float x = itemView.center.x/width;
+    float y = PAGE_COUNTS - itemView.center.y/height;
+    float a = itemView.transform.a;
+    float b = itemView.transform.b;
+    float c = itemView.transform.c;
+    float d = itemView.transform.d;
     
     float angle;
     float scale;
-    int localZorder = [imageview getSubviewIndex];
+    int localZorder = [itemView getSubviewIndex];
+    bool iscreated = false;
+    void* features = nullptr;
     if(a ==0.0&&b>0.0&&c<0.0&&d==0.0)
     {
         angle = M_PI_2;
@@ -898,7 +719,42 @@ void LevelEditor::drawLoadedLevel()
         }
         scale = fabsf(a/cosf(angle));
     }
-    _fileHandler->saveItemInfoInMemory(id, x, y, angle, scale,localZorder);
+    
+    switch (type) {
+        case Cicada:
+        {
+            Features_Cicada* oldfeatures = (Features_Cicada*)itemView->features;
+            if(oldfeatures){
+                Features_Cicada feat(*oldfeatures);
+                features = &feat;
+            }
+            NSLog(@"i am Cicada");
+        }
+            break;
+        case Dragon_Anti:
+        {
+            Features_Dragon* oldfeatures = (Features_Dragon*)itemView->features;
+            if(oldfeatures){
+                Features_Dragon feat(*oldfeatures);
+                features = &feat;
+            }
+        }
+            break;
+        case Dragon_Clockwise:
+        {
+            Features_Dragon* oldfeatures = (Features_Dragon*)itemView->features;
+            if(oldfeatures){
+                Features_Dragon feat(*oldfeatures);
+                features = &feat;
+            }
+        }
+            break;
+        default:
+            break;
+    }
+    
+    Item item(type,id,x,y,angle,scale,localZorder,iscreated,features);
+    _fileHandler->_items.push_back(item);
 }
 
 #pragma mark GHContextMenu
@@ -937,7 +793,7 @@ void LevelEditor::drawLoadedLevel()
 -(void)didSelectItemAtIndex:(NSInteger)selectedIndex forMenuAtPoint:(CGPoint)point
 {
     UIImageView* selectedImageview = nil;
-    for (UIImageView* imageview : _imageViews) {
+    for (UIImageView* imageview : itemViews) {
         if (CGRectContainsPoint(imageview.bounds,[imageview convertPoint:contextMenu.longPressLocation fromView:contextMenu])) {
             selectedImageview = imageview;
             break;
@@ -974,7 +830,7 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)cancelHeightLight
 {
-    std::set<UIImageView*>::iterator it;
+    std::set<ItemView*>::iterator it;
     for(it = _toDealWith.begin();it!=_toDealWith.end();it++)
     {
         UIImageView* imageview = *it;
@@ -1006,72 +862,3 @@ void LevelEditor::drawLoadedLevel()
 @end
 
 
-@implementation UIView(Hierarchy)
-
--(int)getSubviewIndex
-{
-    return [self.superview.subviews indexOfObject:self];
-}
-
--(void)bringToFront
-{
-    [self.superview bringSubviewToFront:self];
-}
-
--(void)sendToBack
-{
-    [self.superview sendSubviewToBack:self];
-}
-
--(void)bringOneLevelUp
-{
-    int currentIndex = [self getSubviewIndex];
-    [self.superview exchangeSubviewAtIndex:currentIndex withSubviewAtIndex:currentIndex+1];
-}
-
--(void)sendOneLevelDown
-{
-    int currentIndex = [self getSubviewIndex];
-    [self.superview exchangeSubviewAtIndex:currentIndex withSubviewAtIndex:currentIndex - 1];
-}
-
--(BOOL)isInFront
-{
-    return ([self.superview.subviews lastObject]==self);
-}
-
--(BOOL)isAtBack
-{
-    return ([self.superview.subviews objectAtIndex:0]==self);
-}
-
--(void)swapDepthsWithView:(UIView*)swapView
-{
-    [self.superview exchangeSubviewAtIndex:[self getSubviewIndex] withSubviewAtIndex:[swapView getSubviewIndex]];
-}
-
-@end
-
-@implementation UIView (LevelEditor)
-
--(void)setTypeName:(NSString*)typeName
-{
-    objc_setAssociatedObject(self, "name", typeName, OBJC_ASSOCIATION_COPY_NONATOMIC);
-}
-
--(NSString*)getTypeName
-{
-    return objc_getAssociatedObject(self, "name");
-}
-
--(void)setHeightLightState:(BOOL)isHeightLight
-{
-    objc_setAssociatedObject(self, "isHeightLight", [NSNumber numberWithBool:isHeightLight], OBJC_ASSOCIATION_ASSIGN);
-}
-
--(BOOL)getHeightLightState
-{
-    return [objc_getAssociatedObject(self, "isHeightLight") boolValue];
-}
-
-@end

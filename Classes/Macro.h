@@ -33,7 +33,7 @@ USING_NS_CC_EXT;
 #define cc_to_b2Vec(x,y) (b2Vec2((x)/PTM_RATIO,(y)/PTM_RATIO))
 
 enum Item_Type{
-    Flame_Red,
+    Flame_Red = 1,
     Flame_Green,
     Flame_Blue,
     Flame_White,

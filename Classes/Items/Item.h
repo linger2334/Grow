@@ -19,12 +19,14 @@ struct Features_Cicada{
     float interval;
     float bellyTransparency;
     Features_Cicada(float W=kDefaultCicadaW,float IncludedAngle=kDefaultCicadaIncludedAngle,float FanningDuration=kDefaultCicadaFanningDuration,float Interval=kDefaultCicadaInterval,float BellyTransparency=kDefaultCicadaBellyTransparency);
+    Features_Cicada(const Features_Cicada& );
 };
 
 struct Features_Dragon{
     float w;
     float backTransparency;
     Features_Dragon(float W = kDefaultDragonW,float BackTransparency = kDefaultDragonBackTransparency);
+    Features_Dragon(const Features_Dragon& );
 };
 
 struct Features_Polygon{

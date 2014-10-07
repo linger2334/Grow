@@ -176,21 +176,6 @@ void LevelFileHandler::removeItemWithID(int id)
     }
 }
 
-void LevelFileHandler::saveItemInfoInMemory(int id, float x, float y, float angle, float scale,int localZorder)
-{
-    for (Item& item : _items) {
-        if (item.id == id) {
-            item.x = x;
-            item.y = y;
-            item.angle = angle;
-            item.scale = scale;
-            item.localZorder = localZorder;
-            break;
-        }
-    }
-    
-}
-
 int LevelFileHandler::saveFile()
 {
     XMLError result;

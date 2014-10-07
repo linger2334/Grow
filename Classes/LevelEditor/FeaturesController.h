@@ -7,20 +7,21 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "UIViewExtension.h"
 
 class GameManager;
 
 @interface FeaturesController : UIViewController<UIPickerViewDelegate,UIPickerViewDataSource>
 {
-    int localZorder;
-    float editor_width;
-    float editor_height;
-    float editor_contentscale;
+    float width;
+    float height;
+    float contentscale;
     GameManager* gameManager;
 }
 
--(id)init:(int)localzorder;
+-(id)init:(ItemView*)itemview;
 
-@property(nonatomic,readonly) UIPickerView* _pickerView;
+@property(nonatomic,readonly)ItemView* _itemView;
+@property(nonatomic,readonly) UIPickerView* _hierarchyPickerView;
 
 @end
