@@ -52,7 +52,7 @@ bool Rock::init(Item& item)
 void Rock::createBody(std::vector<b2Body*>& bodies)
 {
     b2BodyDef bodyDef;
-    bodyDef.type = b2_dynamicBody;
+    bodyDef.type = b2_staticBody;
     bodyDef.position = b2Vec2(getParent()->convertToWorldSpace(getPosition()).x/PTM_RATIO,getParent()->convertToWorldSpace(getPosition()).y/PTM_RATIO);
     bodyDef.angle = - CC_DEGREES_TO_RADIANS(getRotation());
     bodyDef.linearDamping = 0.3;
