@@ -7,7 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#include "iostream"
 #include "Item.h"
+#import "PolygonView.h"
 
 @interface UIView(Hierarchy)
 
@@ -56,3 +58,6 @@
 -(void)dealloc;
 
 @end
+
+
+

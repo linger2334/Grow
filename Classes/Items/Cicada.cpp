@@ -72,12 +72,13 @@ bool Cicada::init(Item& item)
         result = false;
     }
     
+    _collisionCallBack = std::bind(&Cicada::collisionWithPlant, this);
     return result;
 }
 
 void Cicada::createBody(std::vector<b2Body*>& bodies)
 {
-    b2World* world = GameManager::getInstance()->_sceneGame->world;
+    b2World* world = GameManager::getInstance()->getBox2dWorld();
     
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
@@ -85,13 +86,13 @@ void Cicada::createBody(std::vector<b2Body*>& bodies)
     bodyDef.angle = -CC_DEGREES_TO_RADIANS(getRotation());
     bodyDef.linearDamping = 0.3;
     bodyDef.userData = this;
-    b2Body* body= world->CreateBody(&bodyDef);
+    _body= world->CreateBody(&bodyDef);
     
     GB2ShapeCache* shapeCache = GB2ShapeCache::getInstance();
     shapeCache->addShapesWithFile("Item_fixtures.plist");
-    shapeCache->addFixturesToBody(body, "Cicada");
+    shapeCache->addFixturesToBody(_body, "Cicada");
     
-    for (b2Fixture* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
+    for (b2Fixture* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
         b2Shape* shape = fixture->GetShape();
         if (shape->GetType() == b2Shape::Type::e_circle) {
             b2CircleShape* circleShape = (b2CircleShape*)shape;
@@ -106,11 +107,24 @@ void Cicada::createBody(std::vector<b2Body*>& bodies)
     }
     
     b2MassData bodymassData;
-    body->GetMassData(&bodymassData);
+    _body->GetMassData(&bodymassData);
     bodymassData.mass *= getScale();
     bodymassData.I *= getScale();
-    body->SetMassData(&bodymassData);
+    _body->SetMassData(&bodymassData);
     
-    bodies.push_back(body);
+    bodies.push_back(_body);
+}
+
+void Cicada::collisionWithPlant()
+{
+    PhysicsHandler* handler = GameManager::getInstance()->getPhysicsHandler();
+    handler->getItemBodies().erase(find(handler->getItemBodies().begin(),handler->getItemBodies().end(),_body));
+    handler->getWorld()->DestroyBody(_body);
+    this->removeFromParent();
+    /////other effect
+    
+    
+    
+    
 }
 

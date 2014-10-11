@@ -20,11 +20,12 @@ public:
     static Rock* create(Item& item);
     bool init(Item& item);
     
-protected:
-    friend class LayerItem;
     void createBody(std::vector<b2Body*>& bodies);
     
+protected:
+    friend class LayerItem;
     
+    b2Body* _body;
     
 };
 

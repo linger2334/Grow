@@ -38,14 +38,19 @@ enum Item_Type{
     Flame_Blue,
     Flame_White,
     Flame_Orange,
-    Rock_Circle,
-    Rock_Ellipse,
-    Rock_Gray,
     Cicada,
     Dragon_Anti,
     Dragon_Clockwise,
     Eye,
-    Polygon
+    Polygon,
+    Rock_Circle = 101,
+    Rock_Ellipse,
+    Rock_Gray
+};
+
+enum
+{
+    TypeDirtLine = 111,
 };
 
 

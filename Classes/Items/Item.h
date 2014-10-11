@@ -30,7 +30,11 @@ struct Features_Dragon{
 };
 
 struct Features_Polygon{
-    std::set<std::pair<float,float>> vertexBuffer;
+    bool isConvex;
+    std::vector<std::pair<float,float>> vertexs;
+    
+    Features_Polygon(bool isConvex,std::vector<std::pair<float,float>>& vertexs);
+    Features_Polygon(const Features_Polygon& );
 };
 
 struct Item{

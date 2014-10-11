@@ -21,7 +21,7 @@
 @public    LevelFileHandler* _fileHandler;
     float retinascale;
     float contentscale;
-    OCScrollView* _scrollView;
+@public    OCScrollView* _scrollView;
     std::vector<UIButton*> needHidenButtons;
     std::vector<ItemView*> itemViews;
     std::list<int>ids;

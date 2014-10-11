@@ -12,7 +12,6 @@
 #include <iostream>
 #include "Box2d/Box2d.h"
 #include "Macro.h"
-#include "GLES-Render.h"
 
 class PhysicsHandler : public Ref,public b2ContactListener
 {
@@ -20,11 +19,15 @@ public:
     PhysicsHandler();
     ~PhysicsHandler();
     
-    CREATE_FUNC(PhysicsHandler);
-    bool init();
+    static PhysicsHandler* create(b2World* world);
+    bool init(b2World* world);
     
-    b2World* getWorld();
+    inline b2World* getWorld() { return _world;}
+    inline std::vector<b2Body*>& getItemBodies() { return _itembodies;}
+    
     bool isPointContact(cocos2d::Point ptInGl);
+    
+    void dealCollisions();
     virtual void BeginContact(b2Contact* contact);
     virtual void EndContact(b2Contact* contact);
     virtual void PreSolve(b2Contact* contact,const b2Manifold* oldManifold);
@@ -33,9 +36,7 @@ public:
     void update(float dt);
 
 protected:
-    b2World* world;
-    GLESDebugDraw* _debugDraw;
-    
+    b2World* _world;
     std::vector<b2Body*> _itembodies;
     typedef std::pair<b2Fixture*,b2Fixture*> MyContact;
     std::set<MyContact> _contacts;

@@ -13,8 +13,9 @@
 #include "Box2d/Box2d.h"
 #include "Item.h"
 #include "Macro.h"
+#include "TypeBase.h"
 
-class ItemModel : public Sprite
+class ItemModel : public Sprite,public TypeBase
 {
 public:
     ItemModel();
@@ -25,9 +26,10 @@ public:
     
     virtual void createBody(std::vector<b2Body*>& bodies){};
     
+    std::function<void()> _collisionCallBack;
+    virtual void collisionWithPlant() { };
 protected:
     friend class LayerItem;
-    Item_Type type;
     
 };
 

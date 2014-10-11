@@ -28,7 +28,7 @@ bool Rock::init(Item& item)
     bool result;
     if (ItemModel::init(item)) {
         
-        switch (type) {
+        switch (_type) {
             case Rock_Circle:
                 setTexture(IMAGE_ROCK_CIRCLE);
                 break;
@@ -51,31 +51,32 @@ bool Rock::init(Item& item)
 
 void Rock::createBody(std::vector<b2Body*>& bodies)
 {
+    b2World* world = GameManager::getInstance()->getBox2dWorld();
     b2BodyDef bodyDef;
     bodyDef.type = b2_staticBody;
     bodyDef.position = b2Vec2(getParent()->convertToWorldSpace(getPosition()).x/PTM_RATIO,getParent()->convertToWorldSpace(getPosition()).y/PTM_RATIO);
     bodyDef.angle = - CC_DEGREES_TO_RADIANS(getRotation());
     bodyDef.linearDamping = 0.3;
     bodyDef.userData = this;
-    b2Body* body = GameManager::getInstance()->_sceneGame->world->CreateBody(&bodyDef);
+    _body = world->CreateBody(&bodyDef);
     
     GB2ShapeCache* shapeCache = GB2ShapeCache::getInstance();
     shapeCache->addShapesWithFile("Item_fixtures.plist");
-    switch (type) {
+    switch (_type) {
         case Rock_Circle:
-            shapeCache->addFixturesToBody(body, "Rock_Circle");
+            shapeCache->addFixturesToBody(_body, "Rock_Circle");
             break;
         case Rock_Ellipse:
-            shapeCache->addFixturesToBody(body, "Rock_Ellipse");
+            shapeCache->addFixturesToBody(_body, "Rock_Ellipse");
             break;
         case Rock_Gray:
-            shapeCache->addFixturesToBody(body, "Rock_Gray");
+            shapeCache->addFixturesToBody(_body, "Rock_Gray");
             break;
         default:
             break;
     }
     
-    for (b2Fixture* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
+    for (b2Fixture* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
         b2Shape* shape = fixture->GetShape();
         if (shape->GetType() == b2Shape::Type::e_circle) {
             b2CircleShape* circleShape = (b2CircleShape*)shape;
@@ -90,12 +91,12 @@ void Rock::createBody(std::vector<b2Body*>& bodies)
     }
     
     b2MassData bodymassData;
-    body->GetMassData(&bodymassData);
+    _body->GetMassData(&bodymassData);
     bodymassData.mass *= getScale();
     bodymassData.I *= getScale();
-    body->SetMassData(&bodymassData);
+    _body->SetMassData(&bodymassData);
     
-    bodies.push_back(body);
+    bodies.push_back(_body);
 }
 
 

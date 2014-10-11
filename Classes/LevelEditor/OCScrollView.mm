@@ -14,6 +14,21 @@
 @synthesize isButtonHiden;
 @synthesize levelName;
 
+-(id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if(self){
+        self.pointColor = [UIColor blueColor];
+        self.lineColor = [UIColor whiteColor];
+        self.centerViews = [NSMutableArray arrayWithCapacity:10];
+        self.centerviewKeys = [NSMutableArray arrayWithCapacity:10];
+        self.polygons = [NSMutableDictionary dictionaryWithCapacity:10];
+        
+    }
+    
+    return self;
+}
+
 -(void)drawRect:(CGRect)rect
 {
     CGContextRef context = UIGraphicsGetCurrentContext();
@@ -42,6 +57,8 @@
         NSString* currentPageNumber = [[NSString stringWithUTF8String:levelName.c_str()] stringByAppendingFormat:@" - %d",i];
         [currentPageNumber drawAtPoint:CGPointMake(40, 20 +(PAGE_COUNTS - i)*WinSize.height) withFont:font];
     }
+    
+    
     
 }
 

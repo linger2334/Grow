@@ -28,7 +28,7 @@ bool Flame::init(Item& item)
     bool result;
     if (ItemModel::init(item)) {
         
-        switch (type) {
+        switch (_type) {
             case Flame_Red:
                 setTexture(IMAGE_FLAME_RED);
                 break;
@@ -52,42 +52,44 @@ bool Flame::init(Item& item)
         result = false;
     }
     
+    _collisionCallBack = std::bind(&Flame::collisionWithPlant, this);
     return result;
 }
 
 void Flame::createBody(std::vector<b2Body*>& bodies)
 {
+    b2World* world = GameManager::getInstance()->getBox2dWorld();
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
     bodyDef.position = b2Vec2(getParent()->convertToWorldSpace(getPosition()).x/PTM_RATIO,getParent()->convertToWorldSpace(getPosition()).y/PTM_RATIO);
     bodyDef.angle = -CC_DEGREES_TO_RADIANS(getRotation());
     bodyDef.linearDamping = 0.3;
     bodyDef.userData = this;
-    b2Body* body = GameManager::getInstance()->_sceneGame->world->CreateBody(&bodyDef);
+    _body = world->CreateBody(&bodyDef);
     
     GB2ShapeCache* shapeCache = GB2ShapeCache::getInstance();
     shapeCache->addShapesWithFile("Item_fixtures.plist");
-    switch (type) {
+    switch (_type) {
         case Flame_Red:
-            shapeCache->addFixturesToBody(body, "Flame_Red");
+            shapeCache->addFixturesToBody(_body, "Flame_Red");
             break;
         case Flame_Green:
-            shapeCache->addFixturesToBody(body, "Flame_Green");
+            shapeCache->addFixturesToBody(_body, "Flame_Green");
             break;
         case Flame_Blue:
-            shapeCache->addFixturesToBody(body, "Flame_Blue");
+            shapeCache->addFixturesToBody(_body, "Flame_Blue");
             break;
         case Flame_White:
-            shapeCache->addFixturesToBody(body, "Flame_White");
+            shapeCache->addFixturesToBody(_body, "Flame_White");
             break;
         case Flame_Orange:
-            shapeCache->addFixturesToBody(body, "Flame_Orange");
+            shapeCache->addFixturesToBody(_body, "Flame_Orange");
             break;
         default:
             break;
     }
     
-    for (b2Fixture* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
+    for (b2Fixture* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
         b2Shape* shape = fixture->GetShape();
         if (shape->GetType() == b2Shape::Type::e_circle) {
             b2CircleShape* circleShape = (b2CircleShape*)shape;
@@ -102,14 +104,25 @@ void Flame::createBody(std::vector<b2Body*>& bodies)
     }
     
     b2MassData bodymassData;
-    body->GetMassData(&bodymassData);
+    _body->GetMassData(&bodymassData);
     bodymassData.mass *= getScale();
     bodymassData.I *= getScale();
-    body->SetMassData(&bodymassData);
+    _body->SetMassData(&bodymassData);
     
-    bodies.push_back(body);
+    bodies.push_back(_body);
 }
 
+void Flame::collisionWithPlant()
+{
+    PhysicsHandler* handler = GameManager::getInstance()->getPhysicsHandler();
+    handler->getItemBodies().erase(find(handler->getItemBodies().begin(),handler->getItemBodies().end(),_body));
+    handler->getWorld()->DestroyBody(_body);
+    
+    this->removeFromParent();
+    /////other effect
+    
+    
+}
 
 
 

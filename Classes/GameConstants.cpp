@@ -18,3 +18,6 @@ const float kDefaultCicadaBellyTransparency = 50/255.0;
 
 const float kDefaultDragonW = 1.570796;
 const float kDefaultDragonBackTransparency = 50/255.0;
+
+const int kDefaultPolygonVexNum = 4;
+const float kDefaultPolygonPointRadius = 10;

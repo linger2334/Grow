@@ -78,7 +78,7 @@ bool ItemModel::init(Item &item)
 {
     bool result;
     if (Sprite::init()) {
-        type = item.type;
+        _type = item.type;
         setTag(item.id);
         setPosition(item.x*WinSize.width, item.y*WinSize.height);
         setRotation(CC_RADIANS_TO_DEGREES(item.angle));

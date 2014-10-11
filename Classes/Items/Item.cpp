@@ -38,6 +38,18 @@ Features_Dragon::Features_Dragon(const Features_Dragon& other)
     backTransparency = other.backTransparency;
 }
 
+Features_Polygon::Features_Polygon(bool _isConvex,std::vector<std::pair<float,float>>& _vertexs)
+{
+    isConvex = _isConvex;
+    vertexs = _vertexs;
+}
+
+Features_Polygon::Features_Polygon(const Features_Polygon& other)
+{
+    isConvex = other.isConvex;
+    vertexs = other.vertexs;
+}
+
 Item::Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _iscreated,void* _features)
 {
     type = _type;

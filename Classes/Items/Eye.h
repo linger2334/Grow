@@ -20,10 +20,13 @@ public:
     static Eye* create(Item& item);
     bool init(Item& item);
     
-protected:
-    friend class LayerItem;
+    void collisionWithPlant();
     void createBody(std::vector<b2Body*>& bodies);
     
+protected:
+    friend class LayerItem;
+    
+    b2Body* _body;
 };
 
 #endif /* defined(__Grow__Eye__) */

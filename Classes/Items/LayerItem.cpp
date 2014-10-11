@@ -9,7 +9,7 @@
 #include "LayerItem.h"
 #include "GameManager.h"
 #include "SceneGame.h"
-#include "ItemModel.h"
+
 
 
 LayerItem::LayerItem()
@@ -47,6 +47,6 @@ void LayerItem::loadItemsAndBodys()
     {
         ItemModel* itemModel = ItemModel::create(item);
         addChild(itemModel);
-        itemModel->createBody(gameManager->_sceneGame->_itembodies);
+        itemModel->createBody(gameManager->_sceneGame->getPhysicsHandler()->getItemBodies());
     }
 }

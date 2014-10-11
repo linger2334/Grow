@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include "Macro.h"
+#include "ItemModel.h"
 #include "PlantBase.h"
 
 class LayerItem : public GameLayerRollY

@@ -214,7 +214,7 @@ void LevelEditor::drawLoadedLevel()
         itemViews.push_back(itemView);
         ids.push_back(itemView.tag);
     }
-    
+
     _fileHandler->_items.clear();
 }
 
@@ -225,7 +225,12 @@ void LevelEditor::drawLoadedLevel()
     }
     
     CGPoint translation = [recognizer translationInView:_scrollView];
-    recognizer.view.center = CGPointMake(recognizer.view.center.x + translation.x,recognizer.view.center.y + translation.y);
+    if (find(_toDealWith.begin(),_toDealWith.end(),recognizer.view)!=_toDealWith.end()) {
+        for(std::set<ItemView*>::iterator it = _toDealWith.begin();it != _toDealWith.end();it++){
+            ItemView* itemview = *it;
+            itemview.center = CGPointMake(itemview.center.x + translation.x, itemview.center.y + translation.y);
+        }
+    }
     [recognizer setTranslation:CGPointZero inView:_scrollView];
 
     if(recognizer.state == UIGestureRecognizerStateEnded){
@@ -242,7 +247,16 @@ void LevelEditor::drawLoadedLevel()
 
 -(void) handleRotate:(UIRotationGestureRecognizer*) recognizer
 {
-    recognizer.view.transform = CGAffineTransformRotate(recognizer.view.transform, recognizer.rotation);
+//    if (recognizer.view != self.view) {
+//        recognizer.view.transform = CGAffineTransformRotate(recognizer.view.transform, recognizer.rotation);
+//    }else{
+//        for (ItemView* itemView : _toDealWith) {
+//            itemView.transform = CGAffineTransformRotate(itemView.transform, recognizer.rotation);
+//        }
+//    }
+    for (ItemView* itemView : _toDealWith) {
+            itemView.transform = CGAffineTransformRotate(itemView.transform, recognizer.rotation);
+        }
     recognizer.rotation = 0;
 }
 
@@ -728,7 +742,6 @@ void LevelEditor::drawLoadedLevel()
                 Features_Cicada feat(*oldfeatures);
                 features = &feat;
             }
-            NSLog(@"i am Cicada");
         }
             break;
         case Dragon_Anti:
@@ -826,6 +839,10 @@ void LevelEditor::drawLoadedLevel()
     tapRecognizer.numberOfTapsRequired = 1;
     [self.view addGestureRecognizer:tapRecognizer];
     [tapRecognizer release];
+    
+    UIRotationGestureRecognizer* rotateRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotate:)];
+    [self.view addGestureRecognizer:rotateRecognizer];
+    [rotateRecognizer release];
 }
 
 -(void)cancelHeightLight
