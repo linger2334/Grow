@@ -26,7 +26,8 @@ public:
     int saveFile();
     void reload();
     
-    std::vector<Item> _items;
+    std::list<Item> _items;
+    __Dictionary* _polygonsDict;
     std::string _filename;
     
 protected:

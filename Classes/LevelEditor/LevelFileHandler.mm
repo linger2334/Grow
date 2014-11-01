@@ -18,7 +18,7 @@ LevelFileHandler::LevelFileHandler()
 
 LevelFileHandler::~LevelFileHandler()
 {
-    
+    CC_SAFE_RELEASE(_polygonsDict);
 }
 
 LevelFileHandler* LevelFileHandler::createWithFileName(const char* filename)
@@ -39,6 +39,7 @@ LevelFileHandler* LevelFileHandler::createWithFileName(const char* filename)
 bool LevelFileHandler::init(const char *filename)
 {
     _filename = filename;
+    _polygonsDict = nullptr;
     this->loadFile();
     return true;
 }
@@ -46,6 +47,7 @@ bool LevelFileHandler::init(const char *filename)
 void LevelFileHandler::loadFile()
 {
     //    std::string fullPath = FileUtils::getInstance()->fullPathForFilename(_filename+".xml");
+    //
     std::string documentPath = FileUtils::getInstance()->getWritablePath() + _filename + ".xml";
     bool fileExists = FileUtils::getInstance()->isFileExist(documentPath);
     if(fileExists){
@@ -60,9 +62,12 @@ void LevelFileHandler::loadFile()
             const char* typestr = objElement->Value();
             Item_Type type;
             int id = 0;
-            float x = 0,y = 0,angle = DEFAULT_ANGLE,scale = DEFAULT_SCALE;
+            float x = 0,y = 0,angle = kDefaultAngle,scale = kDefaultScale;
             int localZorder = 0;
-            bool iscreated = false;
+            bool isAnimated = kDefaultAnimatedOnState;
+            float triggerTime = kDefaultTriggerTime;
+            std::map<std::string,bool> animationControlInstructions;
+            std::vector<std::vector<AnimationInfo>> animationInfos;
             void* features = nullptr;
             
             if (!strcmp(typestr,"Flame_Red")) {
@@ -133,12 +138,43 @@ void LevelFileHandler::loadFile()
                 }
                 features = &feat;
             }
+            else if (!strcmp(typestr, "DoubDragon_Anti")){
+                type = DoubDragon_Anti;
+                Features_DoubleDragon feat;
+                if (XMLElement* wElement = objElement->FirstChildElement("w")) {
+                    wElement->QueryFloatText(&feat.w);
+                }
+                if (XMLElement* bellyTransparencyElement = objElement->FirstChildElement("bellyTransparency")) {
+                    bellyTransparencyElement->QueryFloatText(&feat.bellyTransparency);
+                }
+                features = &feat;
+            }
+            else if(!strcmp(typestr, "DoubDragon_Clockwise")){
+                type = DoubDragon_Clockwise;
+                Features_DoubleDragon feat;
+                if (XMLElement* wElement = objElement->FirstChildElement("w")) {
+                    wElement->QueryFloatText(&feat.w);
+                }
+                if (XMLElement* bellyTransparencyElement = objElement->FirstChildElement("bellyTransparency")) {
+                    bellyTransparencyElement->QueryFloatText(&feat.bellyTransparency);
+                }
+                features = &feat;
+            }
+            else if (!strcmp(typestr, "Serpent")){
+                type = Serpent_;
+                Features_Serpent feat;
+                if (XMLElement* absorptionRateElement = objElement->FirstChildElement("absorptionRate")) {
+                    absorptionRateElement->QueryFloatText(&feat.absorptionRate);
+                }
+                if (XMLElement* holeTransparencyElement = objElement->FirstChildElement("holeTransparency")) {
+                    holeTransparencyElement->QueryFloatText(&feat.holeTransparency);
+                }
+                features = &feat;
+            }
             else if(!strcmp(typestr, "Eye")){
-                type = Eye;
+                type = Eye_;
             }
-            else if(!strcmp(typestr,"Polygon")){
-                type = Polygon;
-            }
+            
             
             id = objElement->IntAttribute("id");
             x = objElement->FloatAttribute("x");
@@ -146,8 +182,46 @@ void LevelFileHandler::loadFile()
             objElement->QueryFloatAttribute("angle", &angle);
             objElement->QueryFloatAttribute("scale", &scale);
             localZorder = objElement->IntAttribute("localZorder");
+            objElement->QueryBoolAttribute("isAnimated", &isAnimated);
+            objElement->QueryFloatAttribute("triggerTime", &triggerTime);
+            //
+            bool animatedLoopState = kDefaultAnimatedLoopState;
+            std::vector<AnimationInfo> animationGroupInfo;
+            XMLElement* animations = objElement->FirstChildElement("animations");
+            if (animations) {
+                XMLElement* animationGroup = animations->FirstChildElement();
+                //
+                while (animationGroup) {
+                    XMLElement* singleAnimation = animationGroup->FirstChildElement();
+                    while (singleAnimation) {
+                        float waitTime = kDefaultAnimationWaitTime;
+                        float rotation = kDefaultAnimationRotation;
+                        float rotationSpeed = kDefaultAnimationRotationSpeed;
+                        float moveSpeed = kDefaultAnimationMoveSpeed;
+                        Vec2 position = kDefaultAnimationPosition;
+                        
+                        singleAnimation->QueryFloatAttribute("waitTime", &waitTime);
+                        singleAnimation->QueryFloatAttribute("rotation", &rotation);
+                        singleAnimation->QueryFloatAttribute("rotationSpeed", &rotationSpeed);
+                        singleAnimation->QueryFloatAttribute("moveSpeed", &moveSpeed);
+                        position = PointFromString(singleAnimation->Attribute("position")) ;
+                        
+                        AnimationInfo animation(waitTime,rotation,rotationSpeed,moveSpeed,position);
+                        animationGroupInfo.push_back(animation);
+                        
+                        singleAnimation = singleAnimation->NextSiblingElement();
+                    }
+                    //
+                    animationGroup->QueryBoolAttribute("loop", &animatedLoopState);
+                    animationControlInstructions.insert(std::make_pair(animationGroup->Name(), animatedLoopState));
+                    animationInfos.push_back(animationGroupInfo);
+                    animationGroupInfo.clear();
+                    animationGroup = animationGroup->NextSiblingElement();
+                }
+
+            }
             
-            Item item(type,id,x,y,angle,scale,localZorder,iscreated,features);
+            Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
             _items.push_back(item);
             
             objElement = objElement->NextSiblingElement();
@@ -157,12 +231,21 @@ void LevelFileHandler::loadFile()
             delete pDoc;
             pDoc = nullptr;
         }
+        
     }else{
         _items.clear();
 #ifdef COCOS2D_DEBUG
         log("file %s not exists!",documentPath.c_str());
 #endif
     }
+    //
+    std::string plistPath = FileUtils::getInstance()->getWritablePath() + _filename + "polygons.plist";
+    if (FileUtils::getInstance()->isFileExist(plistPath)) {
+        _polygonsDict = __Dictionary::createWithContentsOfFile(plistPath.c_str());
+    }else{
+        _polygonsDict = __Dictionary::create();
+    }
+    CC_SAFE_RETAIN(_polygonsDict);
 }
 
 void LevelFileHandler::removeItemWithID(int id)
@@ -313,12 +396,89 @@ int LevelFileHandler::saveFile()
                 }
             }
                 break;
-            case Eye:
+            case DoubDragon_Anti:
+            {
+                itemElement->SetName("DoubDragon_Anti");
+                if (item.features) {
+                    Features_DoubleDragon* feat = (Features_DoubleDragon*)item.features;
+                    char buf[30];
+                    
+                    if (feat->w != kDefaultDragonW) {
+                        XMLElement* w = doc->NewElement("w");
+                        itemElement->LinkEndChild(w);
+                        
+                        sprintf(buf,"%f",feat->w);
+                        XMLText* wContent = doc->NewText(buf);
+                        w->LinkEndChild(wContent);
+                    }
+                    if (feat->bellyTransparency!=kDefaultDragonBellyTransparency) {
+                        XMLElement* bellyTransparency = doc->NewElement("bellTransparency");
+                        itemElement->LinkEndChild(bellyTransparency);
+                        
+                        sprintf(buf,"%f",feat->bellyTransparency);
+                        XMLText* bellyTransparencyContent = doc->NewText("bellyTransparency");
+                        bellyTransparency->LinkEndChild(bellyTransparencyContent);
+                    }
+                }
+            }
+                break;
+            case DoubDragon_Clockwise:
+            {
+                itemElement->SetName("DoubDragon_Clockwise");
+                if (item.features) {
+                    Features_DoubleDragon* feat = (Features_DoubleDragon*)item.features;
+                    char buf[30];
+                    
+                    if (feat->w != kDefaultDragonW) {
+                        XMLElement* w = doc->NewElement("w");
+                        itemElement->LinkEndChild(w);
+                        
+                        sprintf(buf,"%f",feat->w);
+                        XMLText* wContent = doc->NewText(buf);
+                        w->LinkEndChild(wContent);
+                    }
+                    if (feat->bellyTransparency!=kDefaultDragonBellyTransparency) {
+                        XMLElement* bellyTransparency = doc->NewElement("bellTransparency");
+                        itemElement->LinkEndChild(bellyTransparency);
+                        
+                        sprintf(buf,"%f",feat->bellyTransparency);
+                        XMLText* bellyTransparencyContent = doc->NewText("bellyTransparency");
+                        bellyTransparency->LinkEndChild(bellyTransparencyContent);
+                    }
+                }
+            }
+                break;
+            case Serpent_:
+            {
+                itemElement->SetName("Serpent");
+                if (item.features) {
+                    Features_Serpent* feat = (Features_Serpent*)item.features;
+                    char buf[30];
+                    
+                    if (feat->absorptionRate != kDefaultSerpentAbsorptionRate) {
+                        XMLElement* absorptionRate = doc->NewElement("absorptionRate");
+                        itemElement->LinkEndChild(absorptionRate);
+                        
+                        sprintf(buf, "%f",feat->absorptionRate);
+                        XMLText* absorptionRateContent = doc->NewText(buf);
+                        absorptionRate->LinkEndChild(absorptionRateContent);
+                    }
+                    if (feat->holeTransparency!=kDefaultSerpentHoleTransparency) {
+                        XMLElement* holeTransparency = doc->NewElement("holeTransparency");
+                        itemElement->LinkEndChild(holeTransparency);
+                        
+                        sprintf(buf,"%f",feat->holeTransparency);
+                        XMLText* holeTransparencyContent =  doc->NewText(buf);
+                        holeTransparency->LinkEndChild(holeTransparencyContent);
+                        
+                    }
+                }
+            }
+                break;
+            case Eye_:
                 itemElement->SetName("Eye");
                 break;
-            case Polygon:
-                itemElement->SetName("Polygon");
-                break;
+                
             default:
                 break;
         }
@@ -326,21 +486,58 @@ int LevelFileHandler::saveFile()
         itemElement->SetAttribute("x", item.x);
         itemElement->SetAttribute("y", item.y);
         
-        if (item.angle != DEFAULT_ANGLE) {
+        if (item.angle != kDefaultAngle) {
             itemElement->SetAttribute("angle", item.angle);
         }
-        if (item.scale != DEFAULT_SCALE) {
+        if (item.scale != kDefaultScale) {
             itemElement->SetAttribute("scale",item.scale);
         }
-        
         itemElement->SetAttribute("localZorder", item.localZorder);
+        if (item.isAnimated != kDefaultAnimatedOnState) {
+            itemElement->SetAttribute("isAnimated", item.isAnimated);
+        }
+        if (item.triggerTime != kDefaultTriggerTime) {
+            itemElement->SetAttribute("triggerTime", item.triggerTime);
+        }
+
+        XMLElement* animations = doc->NewElement("animations");
+        int groupIndex = 0;
+        for (std::vector<AnimationInfo>& animationGroupInfo : item.animationInfos) {
+            
+            XMLElement* eachAnimationGroup = doc->NewElement((StringUtils::format("group%d",groupIndex)).c_str());
+            eachAnimationGroup->SetAttribute("loop", item.animationControlInstructions.at(eachAnimationGroup->Name()));
+            int subIndex = 1;
+            for (AnimationInfo& singleAnimationInfo : animationGroupInfo) {
+                std::string name = StringUtils::format("animation%d",subIndex);
+                std::string position = StringUtils::format("{%f,%f}",singleAnimationInfo.position.x,singleAnimationInfo.position.y);
+                XMLElement* singleAnimation = doc->NewElement(name.c_str());
+                singleAnimation->SetAttribute("waitTime", singleAnimationInfo.waitTime);
+                singleAnimation->SetAttribute("rotation", singleAnimationInfo.rotation);
+                singleAnimation->SetAttribute("rotationSpeed", singleAnimationInfo.rotationSpeed);
+                singleAnimation->SetAttribute("moveSpeed", singleAnimationInfo.moveSpeed);
+                singleAnimation->SetAttribute("position", position.c_str());
+                
+                eachAnimationGroup->LinkEndChild(singleAnimation);
+                subIndex++;
+            }
+            //
+            animations->LinkEndChild(eachAnimationGroup);
+            groupIndex++;
+        }
+        //
+        itemElement->LinkEndChild(animations);
+        //
         levelElement->LinkEndChild(itemElement);
     }
     
     [FileHelper createFolder:@"levels"];
     std::string savePath = FileUtils::getInstance()->getWritablePath() + _filename + ".xml";
     result = doc->SaveFile(savePath.c_str());
-    if (result==XML_SUCCESS) {
+    
+    std::string plistPath = FileUtils::getInstance()->getWritablePath() + _filename + "polygons.plist";
+    bool plistSuccess = _polygonsDict->writeToFile(plistPath.c_str());
+    
+    if (result==XML_SUCCESS && plistSuccess) {
         log("Save file Success!in:%s",savePath.c_str());
     }else{
         log("Can not save file:%s",savePath.c_str());
@@ -353,6 +550,7 @@ int LevelFileHandler::saveFile()
 void LevelFileHandler::reload()
 {
     this->_items.clear();
+    this->_polygonsDict->removeAllObjects();
     this->loadFile();
 }
 

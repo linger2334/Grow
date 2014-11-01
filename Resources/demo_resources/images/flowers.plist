@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>id</key>
+		<string>1</string>
+		<key>name</key>
+		<string>初见 · 藍花丹</string>
+		<key>img</key>
+		<string>flower1.png</string>
+		<key>description</key>
+		<string>100%的努力不等于100%的成功</string>
+		<key>date</key>
+		<string>meet you in rainday 47hour ealyer</string>
+		<key>condition</key>
+		<array>
+			<dict>
+				<key>SunColor</key>
+				<real>0</real>
+				<key>SunNum</key>
+				<string>3</string>
+			</dict>
+		</array>
+	</dict>
+	<dict>
+		<key>id</key>
+		<string>2</string>
+		<key>name</key>
+		<string>入茶　·　茉莉</string>
+		<key>img</key>
+		<string>flower2.png</string>
+		<key>description</key>
+		<string>可聞春天之氣味</string>
+		<key>date</key>
+		<string>meet you in rainday 88hour early</string>
+		<key>condition</key>
+		<array>
+			<dict>
+				<key>SunColor</key>
+				<real>0</real>
+				<key>SunNum</key>
+				<string>5</string>
+			</dict>
+		</array>
+	</dict>
+	<dict>
+		<key>id</key>
+		<string>3</string>
+		<key>name</key>
+		<string>宣肺　·　桔梗</string>
+		<key>img</key>
+		<string>flower3.png</string>
+		<key>description</key>
+		<string>郁金香也是一种花哦！</string>
+		<key>date</key>
+		<string>meet you in rainday 88hour early</string>
+		<key>condition</key>
+		<array>
+			<dict>
+				<key>SunColor</key>
+				<real>0</real>
+				<key>SunNum</key>
+				<string>7</string>
+			</dict>
+		</array>
+	</dict>
+	<dict>
+		<key>id</key>
+		<string>４</string>
+		<key>name</key>
+		<string>佛焰花序　·　滴水觀音</string>
+		<key>img</key>
+		<string>flower4.png</string>
+		<key>description</key>
+		<string>味辛；性寒；有毒</string>
+		<key>date</key>
+		<string>meet you in rainday 88hour early</string>
+		<key>condition</key>
+		<array>
+			<dict>
+				<key>SunColor</key>
+				<real>0</real>
+				<key>SunNum</key>
+				<string>9</string>
+			</dict>
+		</array>
+	</dict>
+	<dict>
+		<key>id</key>
+		<string>５</string>
+		<key>name</key>
+		<string>东陵·八仙花</string>
+		<key>img</key>
+		<string>flower5.png</string>
+		<key>description</key>
+		<string>有毒的棉花糖</string>
+		<key>date</key>
+		<string>meet you in rainday 88hour early</string>
+		<key>condition</key>
+		<array>
+			<dict>
+				<key>SunColor</key>
+				<real>0</real>
+				<key>SunNum</key>
+				<string>10</string>
+			</dict>
+			<dict>
+				<key>SunColor</key>
+				<real>1</real>
+				<key>SunNum</key>
+				<string>2</string>
+			</dict>
+		</array>
+	</dict>
+	
+</array>
+</plist>

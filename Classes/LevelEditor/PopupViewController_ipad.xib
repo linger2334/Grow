@@ -68,7 +68,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" tag="5" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="tg6-r3-CYT">
-                    <rect key="frame" x="49" y="200" width="120" height="120"/>
+                    <rect key="frame" x="49" y="194" width="120" height="120"/>
                     <autoresizingMask key="autoresizingMask"/>
                     <state key="normal" title="Flame_Orange" image="Flame_Orange.png">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -78,7 +78,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" tag="101" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="G3m-E1-y3j">
-                    <rect key="frame" x="217" y="185" width="128" height="128"/>
+                    <rect key="frame" x="217" y="552" width="128" height="128"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <state key="normal" title="Rock_Circle" image="Rock_Circle.png">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -88,7 +88,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" tag="102" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Fy5-lL-Sq3">
-                    <rect key="frame" x="415" y="173" width="79" height="152"/>
+                    <rect key="frame" x="415" y="551" width="79" height="152"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <state key="normal" image="Rock_Ellipse.png">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -98,7 +98,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" tag="103" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="ola-Jw-8WW">
-                    <rect key="frame" x="562" y="185" width="128" height="128"/>
+                    <rect key="frame" x="562" y="552" width="128" height="128"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <state key="normal" image="Rock_Gray.png">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -108,7 +108,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" tag="6" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Ovq-WZ-E2l">
-                    <rect key="frame" x="68" y="366" width="83" height="132"/>
+                    <rect key="frame" x="240" y="194" width="83" height="132"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <state key="normal" title="Cicada" image="Cicada.png">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -118,7 +118,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" tag="7" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Ucw-vU-Ai5">
-                    <rect key="frame" x="217" y="366" width="128" height="128"/>
+                    <rect key="frame" x="390" y="190" width="128" height="128"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <state key="normal" title="Dragon_Anti" image="Dragon_Anti.png">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -127,8 +127,8 @@
                         <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="0fU-CJ-s1k"/>
                     </connections>
                 </button>
-                <button opaque="NO" tag="9" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="n6r-sK-175">
-                    <rect key="frame" x="597" y="402" width="58" height="34"/>
+                <button opaque="NO" tag="12" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="n6r-sK-175">
+                    <rect key="frame" x="597" y="415" width="58" height="34"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <state key="normal" image="Eye.png">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -138,13 +138,49 @@
                     </connections>
                 </button>
                 <button opaque="NO" tag="8" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="qfB-PS-y5I">
-                    <rect key="frame" x="390" y="366" width="128" height="128"/>
+                    <rect key="frame" x="562" y="190" width="128" height="128"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <state key="normal" title="Dragon_Clockwise" image="Dragon_Clockwise.png">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
                     <connections>
                         <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="rzs-rN-GRV"/>
+                    </connections>
+                </button>
+                <button opaque="NO" tag="13" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="AZE-LQ-L3G">
+                    <rect key="frame" x="41" y="563" width="128" height="128"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <state key="normal" image="Polygon.png"/>
+                    <connections>
+                        <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="yzs-fv-4Kr"/>
+                    </connections>
+                </button>
+                <button opaque="NO" tag="9" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="la9-PG-Z9L">
+                    <rect key="frame" x="41" y="368" width="128" height="128"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <state key="normal" title="DoubDragon_Anti" image="DoubDragon_Anti.png">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="ALi-M0-gIL"/>
+                    </connections>
+                </button>
+                <button opaque="NO" tag="11" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Yqv-SO-mVa">
+                    <rect key="frame" x="390" y="368" width="128" height="128"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <state key="normal" title="Serpent" image="Serpent.png"/>
+                    <connections>
+                        <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="el6-89-qDk"/>
+                    </connections>
+                </button>
+                <button opaque="NO" tag="10" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="4be-Fv-hBS">
+                    <rect key="frame" x="217" y="368" width="128" height="128"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <state key="normal" title="DoubDragon_Clockwise" image="DoubDragon_Clockwise.png">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="Fmc-LA-HtX"/>
                     </connections>
                 </button>
             </subviews>
@@ -154,6 +190,8 @@
     </objects>
     <resources>
         <image name="Cicada.png" width="83" height="132"/>
+        <image name="DoubDragon_Anti.png" width="177" height="176"/>
+        <image name="DoubDragon_Clockwise.png" width="177" height="176"/>
         <image name="Dragon_Anti.png" width="191" height="207"/>
         <image name="Dragon_Clockwise.png" width="191" height="207"/>
         <image name="Eye.png" width="29" height="17"/>
@@ -162,9 +200,11 @@
         <image name="Flame_Orange.png" width="120" height="120"/>
         <image name="Flame_Red.png" width="120" height="120"/>
         <image name="Flame_White.png" width="60" height="73"/>
+        <image name="Polygon.png" width="128" height="128"/>
         <image name="Rock_Circle.png" width="303" height="302"/>
         <image name="Rock_Ellipse.png" width="117" height="266"/>
         <image name="Rock_Gray.png" width="64" height="64"/>
+        <image name="Serpent.png" width="177" height="176"/>
         <image name="back_normal.png" width="456" height="256"/>
     </resources>
 </document>

@@ -17,15 +17,16 @@
 class Rock : public ItemModel
 {
 public:
+    Rock();
+    ~Rock();
+    
     static Rock* create(Item& item);
     bool init(Item& item);
     
-    void createBody(std::vector<b2Body*>& bodies);
+    void createBody();
     
 protected:
     friend class LayerItem;
-    
-    b2Body* _body;
     
 };
 

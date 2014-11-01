@@ -23,7 +23,6 @@ public:
     bool init(b2World* world);
     
     inline b2World* getWorld() { return _world;}
-    inline std::vector<b2Body*>& getItemBodies() { return _itembodies;}
     
     bool isPointContact(cocos2d::Point ptInGl);
     
@@ -37,7 +36,6 @@ public:
 
 protected:
     b2World* _world;
-    std::vector<b2Body*> _itembodies;
     typedef std::pair<b2Fixture*,b2Fixture*> MyContact;
     std::set<MyContact> _contacts;
 };

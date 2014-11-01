@@ -23,13 +23,18 @@
     float contentscale;
 @public    OCScrollView* _scrollView;
     std::vector<UIButton*> needHidenButtons;
-    std::vector<ItemView*> itemViews;
+@public    std::vector<ItemView*> itemViews;
+@public    std::set<ItemView*> _toDealWith;
     std::list<int>ids;
     BOOL isButtonHiden;
 }
 
 @property float width;
 @property float height;
+@property(nonatomic,readonly)UIButton* _zoomInButton;
+@property(nonatomic,readonly)UIButton* _zoomOutButton;
+@property(nonatomic,readonly)UIButton* _hideButton;
+@property(nonatomic,readonly)UILabel* _selectedItemLabel;
 
 -(id)init;
 -(IBAction)createItemAtCenter:(id)sender;

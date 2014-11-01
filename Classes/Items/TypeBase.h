@@ -14,12 +14,12 @@ class TypeBase
 public:
     TypeBase():_type(0){}
     TypeBase(char type):_type(type){}
-    void setType(char type){_type = type;}
-    char getType(){return _type;}
-    bool  isDirtLine(){return _type == TypeDirtLine;}
-    bool  isStone(){return _type >100&&_type<111; }
-    bool  isMustCrashType(){return _type > 100;}
-    bool  isNeedCallBackType(){ return _type < 99;}
+    virtual void setType(char type){_type = type;}
+    virtual char getType(){return _type;}
+    virtual bool  isDirtLine(){return _type == TypeDirtLine;}
+    virtual bool  isStone(){return _type >100&&_type<111; }
+    virtual bool  isMustCrashType(){return _type > 100;}
+   virtual bool  isNeedCallBackType(){ return _type < 90;}
     char _type;
 };
 

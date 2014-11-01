@@ -10,14 +10,14 @@
 
 #include "LevelEditor.h"
 #include "SceneGame.h"
-#include "StaticData.h"
 #include "Item.h"
+#include <Box2D/Common/b2Settings.h>
 #import "CCEAGLView.h"
 #import "AppController.h"
 #import "PopupViewController.h"
 #import "GHContextMenuView.h"
-#import "FeaturesController.h"
 #import "UIViewExtension.h"
+
 
 LevelEditor::LevelEditor():_myViewController(nil)
 {
@@ -29,6 +29,7 @@ LevelEditor::~LevelEditor()
     [_myViewController dismissViewControllerAnimated:NO completion:nil];
     [_myViewController release];
     GameManager::getInstance()->_levelEditor = nullptr;
+    CC_SAFE_RELEASE(GameManager::getInstance()->_fileHandler);
 }
 
 Scene* LevelEditor::createScene()
@@ -43,6 +44,7 @@ bool LevelEditor::init()
 {
     if(!Layer::init()) return false;
     GameManager::getInstance()->_levelEditor = this;
+    GameManager::getInstance()->_fileHandler->retain();
     //添加背景
     _background = Sprite::create("background2.jpg");
     _background->setPosition(Vec2(WinSize.width/2,WinSize.height/2));
@@ -72,15 +74,12 @@ void LevelEditor::drawLoadedLevel()
 
 @interface MyViewController()<GHContextOverlayViewDataSource,GHContextOverlayViewDelegate>{
     GameManager* _gameManager;
-    std::set<ItemView*> _toDealWith;
-    
 }
 
 @property(nonatomic,readonly)PopupViewController* popupViewController;
 @property(nonatomic,readonly)GHContextMenuView* contextMenu;
 @property(nonatomic,readonly)CAShapeLayer* solidLayer;
 @property(nonatomic,readonly)CAShapeLayer* dashLayer;
-@property(nonatomic,readonly)FeaturesController* featuresController;
 
 @end
 
@@ -88,11 +87,14 @@ void LevelEditor::drawLoadedLevel()
 
 @synthesize width;
 @synthesize height;
+@synthesize _zoomInButton;
+@synthesize _zoomOutButton;
+@synthesize _hideButton;
+@synthesize _selectedItemLabel;
 @synthesize popupViewController;
 @synthesize contextMenu;
 @synthesize solidLayer;
 @synthesize dashLayer;
-@synthesize featuresController;
 
 -(id)init
 {
@@ -107,7 +109,7 @@ void LevelEditor::drawLoadedLevel()
     self.height = glview.getHeight*retinascale;
     self.width = 768.0/1024.0*self.height;
     contentscale = self.height/1024;
-
+    
     _gameManager->editor_width = width;
     _gameManager->editor_height = height;
     _gameManager->editor_contentscale = contentscale;
@@ -122,9 +124,11 @@ void LevelEditor::drawLoadedLevel()
     [self addScrollView];
     
     [self addContextMenu];
-
+    
     [self createItemFromFileHandler];
-
+    [self createPolygonsFromFileHandler];
+    [self createPathPointsFromAllItems];
+    
     [self createControlPanel];
     
     [self addLineLayer];
@@ -181,7 +185,10 @@ void LevelEditor::drawLoadedLevel()
     _scrollView.directionalLockEnabled = YES;
     [_scrollView setPagingEnabled:NO];
     //    [_scrollView setDecelerationRate:0.0];
+
     _scrollView.delegate = self;
+    _scrollView.contentMode = UIViewContentModeRedraw;
+    
     _scrollView.levelName = _fileHandler->_filename.substr(_fileHandler->_filename.find("/")+1);
     [self.view addSubview:_scrollView];
     [_scrollView release];
@@ -189,7 +196,10 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    [_scrollView setNeedsDisplay];
+    if (!_scrollView.isPreViewed) {
+        [_scrollView setNeedsDisplay];
+    }
+    
 }
 
 -(void)addContextMenu
@@ -202,40 +212,82 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)createItemFromFileHandler
 {
-    sort(_fileHandler->_items.begin(),_fileHandler->_items.end(),Itemlesser);
+    _fileHandler->_items.sort(Itemlesser);
     
     for (Item& item : _fileHandler->_items) {
         ItemView* itemView = [[ItemView alloc] init:item];
         [itemView itemAddGestureRecognizerWithTarget:self];
         
-        [_scrollView insertSubview:itemView atIndex:itemViews.size()];
-        [itemView release];
         //加入编辑器数组
         itemViews.push_back(itemView);
         ids.push_back(itemView.tag);
+        [_scrollView insertSubview:itemView atIndex:itemViews.size()];
+        [itemView release];
     }
-
     _fileHandler->_items.clear();
+}
+
+-(void)createPolygonsFromFileHandler
+{
+    __Dictionary* polygonsDict = _fileHandler->_polygonsDict;
+    DictElement* singlePolygon;
+    int tag;
+    Vec2 position;
+    bool isConvex;
+    __Array* vertexes;
+    
+    CCDICT_FOREACH(polygonsDict, singlePolygon){
+        const char* mainKey = singlePolygon->getStrKey();
+        char buf[10];
+        strlcpy(buf, mainKey+strlen("polygon"), sizeof(buf));
+        tag = atoi(buf);
+        
+        __Dictionary* propertyDict = (__Dictionary*)singlePolygon->getObject();
+        position = PointFromString(static_cast<__String*>(propertyDict->objectForKey("position"))->getCString());
+        isConvex = (static_cast<__Bool*>(propertyDict->objectForKey("isConvex")))->getValue();
+        vertexes = static_cast<__Array*>(propertyDict->objectForKey("vertexes"));
+        
+        [_scrollView createNewPolygonOfTag:tag+1000 AtCCPercentPosition:position WithCCLocalVertxex:vertexes OfType:isConvex];
+    }
+    
+    polygonsDict->removeAllObjects();
+}
+
+-(void)createPathPointsFromAllItems
+{
+    for(ItemView* itemview : itemViews){
+        if (!itemview->_animationInfos.empty()) {
+            [itemview createAllPathPoints];
+            itemview->_animationInfos.clear();
+        }
+    }
 }
 
 -(void)handlePan:(UIPanGestureRecognizer*)recognizer
 {
-    if(recognizer.state == UIGestureRecognizerStateBegan){
-        _scrollView.scrollEnabled = NO;
-    }
-    
-    CGPoint translation = [recognizer translationInView:_scrollView];
-    if (find(_toDealWith.begin(),_toDealWith.end(),recognizer.view)!=_toDealWith.end()) {
+    CGPoint translation = [recognizer translationInView:self.view];
+    if (!_scrollView.isPreViewed&&!_scrollView.isScrollEnabled) {
+        //移动道具
         for(std::set<ItemView*>::iterator it = _toDealWith.begin();it != _toDealWith.end();it++){
             ItemView* itemview = *it;
             itemview.center = CGPointMake(itemview.center.x + translation.x, itemview.center.y + translation.y);
+            [itemview translateAllPathPoints:translation];
+        }
+        //移动多边形和路径点
+        for (PolygonView* polygon in _scrollView.toDealWithPointView) {
+            if ([polygon.pointType isEqualToString:@"pointview"]) {
+                PolygonView* centerview = (PolygonView*)polygon.superview;
+                if(centerview.isSelected) continue;
+            }else if ([polygon.pointType isEqualToString:@"pathpoint"]){
+                ItemView* parent = polygon->_pathParent;
+                if ([parent getHeightLightState]) continue;
+            }
+            polygon.center = CGPointMake(polygon.center.x + translation.x, polygon.center.y + translation.y);
         }
     }
-    [recognizer setTranslation:CGPointZero inView:_scrollView];
-
-    if(recognizer.state == UIGestureRecognizerStateEnded){
-        _scrollView.scrollEnabled = YES;
-    }
+    
+    [recognizer setTranslation:CGPointZero inView:self.view];
+    [_scrollView setNeedsDisplay];
     
 }
 
@@ -247,107 +299,66 @@ void LevelEditor::drawLoadedLevel()
 
 -(void) handleRotate:(UIRotationGestureRecognizer*) recognizer
 {
-//    if (recognizer.view != self.view) {
-//        recognizer.view.transform = CGAffineTransformRotate(recognizer.view.transform, recognizer.rotation);
-//    }else{
-//        for (ItemView* itemView : _toDealWith) {
-//            itemView.transform = CGAffineTransformRotate(itemView.transform, recognizer.rotation);
-//        }
-//    }
-    for (ItemView* itemView : _toDealWith) {
+    //    if (recognizer.view != self.view) {
+    //        recognizer.view.transform = CGAffineTransformRotate(recognizer.view.transform, recognizer.rotation);
+    //    }else{
+    //        for (ItemView* itemView : _toDealWith) {
+    //            itemView.transform = CGAffineTransformRotate(itemView.transform, recognizer.rotation);
+    //        }
+    //    }
+    if (!_scrollView.isPreViewed) {
+        for (ItemView* itemView : _toDealWith) {
             itemView.transform = CGAffineTransformRotate(itemView.transform, recognizer.rotation);
         }
-    recognizer.rotation = 0;
+        recognizer.rotation = 0;
+    }
+
 }
 
 -(void) handleTap:(UITapGestureRecognizer*) recognizer
 {
     if(recognizer.state == UIGestureRecognizerStateEnded)
     {
-        BOOL isBoderCreated = NO;
-        for (CALayer* layer in recognizer.view.layer.sublayers) {
-            if ([layer.name isEqualToString:@"boder"]) {
-                isBoderCreated = YES;
-                break;
-            }
-        }
+        ItemView* itemview = static_cast<ItemView*>(recognizer.view);
+        
+        BOOL isBoderCreated = [itemview isBorderCreated];
         
         if (![recognizer.view getHeightLightState]&&!isBoderCreated) {
-           
-            CAShapeLayer* border1 = [CAShapeLayer layer];//便利构造器，autorelease
-            [border1 setName:@"boder"];
-            border1.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
-            border1.fillColor = nil;
-            border1.lineDashPattern = nil;
-            [recognizer.view.layer addSublayer:border1];
-            border1.path = [UIBezierPath bezierPathWithRect:recognizer.view.bounds].CGPath;
-            border1.frame = recognizer.view.bounds;
             
-            CAShapeLayer* border2 = [CAShapeLayer layer];
-            [border2 setName:@"boder"];
-            border2.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
-            border2.fillColor = nil;
-            border2.lineDashPattern = nil;
-            [recognizer.view.layer addSublayer:border2];
-            border2.path = [UIBezierPath bezierPathWithRect:recognizer.view.bounds].CGPath;
-            border2.frame = recognizer.view.bounds;
-            
-            CAShapeLayer* border3 = [CAShapeLayer layer];
-            [border3 setName:@"boder"];
-            border3.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
-            border3.fillColor = nil;
-            border3.lineDashPattern = nil;
-            [recognizer.view.layer addSublayer:border3];
-            border3.path = [UIBezierPath bezierPathWithRect:recognizer.view.bounds].CGPath;
-            border3.frame = recognizer.view.bounds;
-            
-            CAShapeLayer* border4 = [CAShapeLayer layer];
-            [border4 setName:@"boder"];
-            border4.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
-            border4.fillColor = nil;
-            border4.lineDashPattern = nil;
-            [recognizer.view.layer addSublayer:border4];
-            border4.path = [UIBezierPath bezierPathWithRect:recognizer.view.bounds].CGPath;
-            border4.frame = recognizer.view.bounds;
-            
-            [recognizer.view setHeightLightState:YES];
-            _toDealWith.insert(static_cast<ItemView*>(recognizer.view));
+            [itemview addBorder];
+            [itemview setHeightLightState:YES];
+            [itemview heightLightPathPoints];
+            _toDealWith.insert(itemview);
         }else if(![recognizer.view getHeightLightState]&&isBoderCreated){
-
-            for(CAShapeLayer* shapeLayer in recognizer.view.layer.sublayers)
-            {
-                if ([shapeLayer.name isEqualToString:@"boder"]){
-                    [shapeLayer setHidden:NO];
-                }
-            }
-            [recognizer.view setHeightLightState:YES];
-            _toDealWith.insert(static_cast<ItemView*>(recognizer.view));
+            
+            [itemview showBorder];
+            [itemview setHeightLightState:YES];
+            [itemview heightLightPathPoints];
+            _toDealWith.insert(itemview);
         }else{
             
-            for(CAShapeLayer* shapeLayer in recognizer.view.layer.sublayers)
-            {
-                if ([shapeLayer.name isEqualToString:@"boder"]){
-                    [shapeLayer setHidden:YES];
-                }
-            }
-            [recognizer.view setHeightLightState:NO];
-            _toDealWith.erase(find(_toDealWith.begin(),_toDealWith.end(),recognizer.view));
+            [itemview hideBorder];
+            [itemview setHeightLightState:NO];
+            [itemview cancelHeightLightPathPoints];
+            _toDealWith.erase(find(_toDealWith.begin(),_toDealWith.end(),itemview));
         }
+        //
+        [self refreshSelectedItemInfo];
         
+        //
+        if (_toDealWith.size()>0||_scrollView.toDealWithPointView.count>0) {
+            [_scrollView setScrollEnabled:NO];
+        }else{
+            [_scrollView setScrollEnabled:YES];
+        }
     }
     
 }
 
 -(void) handleLongPress:(UILongPressGestureRecognizer*) recognizer
 {
-    if(recognizer.state == UIGestureRecognizerStateBegan)
-    {
-        featuresController = [[FeaturesController alloc] init:static_cast<ItemView*>(recognizer.view)];
-        featuresController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-        featuresController.modalPresentationStyle = UIModalPresentationFormSheet;
-        
-        [self presentModalViewController:featuresController animated:YES];
-        [featuresController release];
+    if(recognizer.state == UIGestureRecognizerStateBegan){
+        [_scrollView popupFeaturesPickerPopoverWith:recognizer.view At:[recognizer locationInView:_scrollView]];
     }
 }
 
@@ -418,16 +429,66 @@ void LevelEditor::drawLoadedLevel()
     needHidenButtons.push_back(playButton);
     [playButton release];
     
-    UIButton* hideButton = [[UIButton alloc] init];
-    hideButton.center = CGPointMake(15/16.0*width, 0.95*height);
-    hideButton.bounds = CGRectMake(0, 0, 64*contentscale, 64*contentscale);
-    [hideButton setImage:[UIImage imageNamed:@IMAGE_EDITOR_HIDE_NORMAL] forState:UIControlStateNormal];
-    [hideButton setImage:[UIImage imageNamed:@IMAGE_EDITOR_HIDE_SELECTED] forState:UIControlStateSelected];
-    [hideButton addTarget:self action:@selector(hide:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:hideButton];
-    [hideButton release];
-
+    _zoomInButton = [[UIButton alloc] init];
+    _zoomInButton.center = CGPointMake(12.5/16.0*width, 0.95*height);
+    _zoomInButton.bounds = CGRectMake(0, 0, 64*contentscale, 64*contentscale);
+    [_zoomInButton setImage:[UIImage imageNamed:@IMAGE_EDITOR_ZOOMIN_NORMAL] forState:UIControlStateNormal];
+    [_zoomInButton setImage:[UIImage imageNamed:@IMAGE_EDITOR_ZOOMIN_SELECTED] forState:UIControlStateSelected];
+    [_zoomInButton addTarget:self action:@selector(zoomInOut:) forControlEvents:UIControlEventTouchUpInside];
+    needHidenButtons.push_back(_zoomInButton);
+    [self.view addSubview:_zoomInButton];
+    [_zoomInButton release];
+    
+    _zoomOutButton = [[UIButton alloc] init];
+    _zoomOutButton.center = CGPointMake(14/16.0*width, 0.95*height);
+    _zoomOutButton.bounds = CGRectMake(0, 0, 64*contentscale, 64*contentscale);
+    [_zoomOutButton setImage:[UIImage imageNamed:@IMAGE_EDITOR_ZOOMOUT_NORMAL] forState:UIControlStateNormal];
+    [_zoomOutButton setImage:[UIImage imageNamed:@IMAGE_EDITOR_ZOOMOUT_SELECTED] forState:UIControlStateSelected];
+    [_zoomOutButton addTarget:self action:@selector(zoomInOut:) forControlEvents:UIControlEventTouchUpInside];
+    needHidenButtons.push_back(_zoomOutButton);
+    [self.view addSubview:_zoomOutButton];
+    [_zoomOutButton release];
+    
+    
+    _hideButton = [[UIButton alloc] init];
+    _hideButton.center = CGPointMake(15/16.0*width, 0.95*height);
+    _hideButton.bounds = CGRectMake(0, 0, 64*contentscale, 64*contentscale);
+    [_hideButton setImage:[UIImage imageNamed:@IMAGE_EDITOR_HIDE_NORMAL] forState:UIControlStateNormal];
+    [_hideButton setImage:[UIImage imageNamed:@IMAGE_EDITOR_HIDE_SELECTED] forState:UIControlStateSelected];
+    [_hideButton addTarget:self action:@selector(hide:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:_hideButton];
+    [_hideButton release];
+    
     isButtonHiden = NO;
+}
+
+-(void)refreshSelectedItemInfo
+{
+    if (_toDealWith.size()!=1&&_selectedItemLabel) {
+        if (!_selectedItemLabel.isHidden) {
+            [_selectedItemLabel setHidden:YES];
+        }
+    }else if(_toDealWith.size()==1){
+        ItemView* item = *_toDealWith.begin();
+        NSString* labelContent = [NSString stringWithFormat:@"type:%s, id:%d,localZorder:%d,Animated:%s,GroupCount:%d",[item convertTypeToString].c_str(),item.tag,[item getSubviewIndex],item->isAnimated? "On" : "Off",item.animationGroupCount];
+        if(!_selectedItemLabel){
+            _selectedItemLabel = [[[UILabel alloc] initWithFrame:CGRectMake(0.1*width, 0, 0.9*width, 0.1*height)] autorelease];
+            _selectedItemLabel.text = labelContent;
+            _selectedItemLabel.font = [UIFont fontWithName:@"MarkerFelt-Thin" size:1.5*kDefaultFontSize];
+            _selectedItemLabel.textAlignment = NSTextAlignmentLeft;
+            _selectedItemLabel.textColor = [UIColor whiteColor];
+            _selectedItemLabel.lineBreakMode = NSLineBreakByTruncatingHead ;
+            
+            [self.view addSubview:_selectedItemLabel];
+        }else{
+            _selectedItemLabel.text = labelContent;
+            if (_selectedItemLabel.isHidden) {
+                [_selectedItemLabel setHidden:NO];
+            }
+        }
+    }
+    //点刷新
+//    [_scrollView setNeedsDisplay];
 }
 
 -(void)popup:(id)sender
@@ -439,7 +500,7 @@ void LevelEditor::drawLoadedLevel()
     
     popupViewController = [[PopupViewController alloc] initWithNibName:nibFileName bundle:nil];
     popupViewController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
-
+    
     [self presentModalViewController:popupViewController animated:YES];
     [popupViewController release];
 }
@@ -447,42 +508,132 @@ void LevelEditor::drawLoadedLevel()
 -(void)save:(id)sender
 {
     _fileHandler->_items.clear();
+    _fileHandler->_polygonsDict->removeAllObjects();
     
     for(ItemView* itemView: itemViews)
     {
         [self saveItemInformationInMemory:itemView];
     }
-    int errNo = _fileHandler->saveFile();
-    
-    UILabel* saveSuccess = [[UILabel alloc] init];
-    saveSuccess.center = CGPointMake(self.width/2, self.height/2);
-    saveSuccess.bounds = CGRectMake(0, 0, 0.5*width, 0.3*height);
-    
-    if(errNo==0){
-        saveSuccess.text = @"Save Success!";
+    int result = [_scrollView savePolygonsInfoInMemory];
+    if (result!=0) {
+        NSString* mess;
+        switch (result) {
+            case -1:
+                mess = [NSString stringWithFormat:@"顶点数超过最大顶点数:%d!",b2_maxPolygonVertices];
+                break;
+            case 1:
+                mess = @"线有交叉,请检查!";
+                break;
+            default:
+                mess = @"未知错误!";
+                break;
+        }
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"保存失败!" message:mess delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
+        [alertView show];
+        [alertView release];
     }else{
-        saveSuccess.text = [NSString stringWithFormat:@"Save Failed!errno is %d",errNo];
+        int errNo = _fileHandler->saveFile();
+        
+        UILabel* saveSuccess = [[UILabel alloc] init];
+        saveSuccess.center = CGPointMake(self.width/2, self.height/2);
+        saveSuccess.bounds = CGRectMake(0, 0, 0.5*width, 0.3*height);
+        
+        if(errNo==0){
+            saveSuccess.text = @"Save Success!";
+        }else{
+            saveSuccess.text = [NSString stringWithFormat:@"Save Failed!errno is %d",errNo];
+        }
+        [saveSuccess setTextAlignment:NSTextAlignmentCenter];
+        [saveSuccess setFont:[UIFont systemFontOfSize:32*contentscale]];
+        [saveSuccess setTextColor:[UIColor colorWithWhite:1 alpha:1]];
+        
+        [self.view addSubview:saveSuccess];
+        [saveSuccess release];
+        
+        [UIView animateWithDuration:2 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^(){[saveSuccess setAlpha:0];} completion:^(BOOL finished){[saveSuccess removeFromSuperview];}];
     }
-    [saveSuccess setTextAlignment:NSTextAlignmentCenter];
-    [saveSuccess setFont:[UIFont systemFontOfSize:32*contentscale]];
-    [saveSuccess setTextColor:[UIColor colorWithWhite:1 alpha:1]];
-    
-    [self.view addSubview:saveSuccess];
-    [saveSuccess release];
-    
-    [UIView animateWithDuration:2 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^(){[saveSuccess setAlpha:0];} completion:^(BOOL finished){[saveSuccess removeFromSuperview];}];
 }
 
 -(void)reset:(id)sender
 {
-    UIActionSheet* reSetSheet = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to reset?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Yes" otherButtonTitles:@"No,thanks",nil];
-    reSetSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
-    [reSetSheet showInView:self.view];
-    [reSetSheet release];
+//    UIActionSheet* reSetSheet = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to reset?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Yes" otherButtonTitles:@"No,thanks",nil];
+//    reSetSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
+//    [reSetSheet showInView:self.view];
+//    [reSetSheet release];
+    //道具和路径点清空
+    for(ItemView* itemview : itemViews)
+    {
+        for(PolygonView* pathPoint : itemview->_pathPoints){
+            [pathPoint removeFromSuperview];
+        }
+        [itemview removeFromSuperview];
+    }
+    itemViews.clear();
+    ids.clear();
+    _toDealWith.clear();
+    
+    //多边形清空
+    for(PolygonView* centerview in _scrollView.centerViews){
+        [centerview removeFromSuperview];
+    }
+    [_scrollView.centerViews removeAllObjects];
+    _scrollView->polygontags.clear();
+    [_scrollView.toDealWithPointView removeAllObjects];
+    //显示标签清空
+    if (_selectedItemLabel) {
+        [_selectedItemLabel removeFromSuperview];
+        _selectedItemLabel = nil;
+    }
+    //在让文件管理器清空
+    _fileHandler->reload();
+    //最后重新展示出来
+    [self createItemFromFileHandler];
+    [self createPolygonsFromFileHandler];
+    [self createPathPointsFromAllItems];
+    
 }
 
 -(void)copyItem:(id)sender
 {
+    NSMutableArray* newPolygonViews = [NSMutableArray array];
+    for(PolygonView* centerview in _scrollView.toDealWithPointView){
+        if ([centerview.pointType isEqualToString:@"centerview"]) {
+            int tag = [_scrollView firstUnusedTag];
+            Vec2 percentPosition = Vec2(0.1+centerview.center.x/width,PAGE_COUNTS-(0.08+centerview.center.y/height));
+            __Array* vertexes = __Array::createWithCapacity(centerview.subviews.count);
+            for(PolygonView* pointview in centerview.subviews){
+                CGPoint CClocalpoint = CGPointMake(pointview.center.x,-pointview.center.y);
+                vertexes->addObject(__String::createWithFormat("{%f,%f}",CClocalpoint.x,CClocalpoint.y));
+            }
+            BOOL isConvex = centerview.isConvex;
+            
+            PolygonView* newPolygon = [_scrollView createNewPolygonOfTag:tag AtCCPercentPosition:percentPosition WithCCLocalVertxex:vertexes OfType:isConvex];
+            
+            centerview.isSelected = NO;
+            centerview.backgroundColor = centerview.defaultColor;
+            
+            newPolygon.isSelected = YES;
+            newPolygon.backgroundColor = [UIColor greenColor];
+            [newPolygonViews addObject:newPolygon];
+        }else if([centerview.pointType isEqualToString:@"pointview"]){
+            centerview.isSelected = NO;
+            centerview.backgroundColor = centerview.defaultColor;
+        }else if([centerview.pointType isEqualToString:@"pathpoint"]){
+            if (![centerview->_pathParent getHeightLightState]) {
+                PolygonView* newPathPoint = [_scrollView copyPathPoint:centerview];
+                newPathPoint.isSelected = YES;
+                newPathPoint.backgroundColor = newPathPoint.selectedColor;
+                [newPolygonViews addObject:newPathPoint];
+            }
+            centerview.isSelected = NO;
+            centerview.backgroundColor = centerview.defaultColor;
+        }
+    }
+    [_scrollView.toDealWithPointView removeAllObjects];
+    [_scrollView.toDealWithPointView addObjectsFromArray:newPolygonViews];
+    
+    //
+    std::set<ItemView*> needToAdd;
     for(std::set<ItemView*>::iterator it = _toDealWith.begin();it!=_toDealWith.end();it++)
     {
         ItemView* itemView = *it;
@@ -491,10 +642,25 @@ void LevelEditor::drawLoadedLevel()
         int id = [self firstUnusedId];
         float x = (itemView.center.x + 0.4*itemView.bounds.size.width)/width;
         float y = PAGE_COUNTS - (itemView.center.y + 0.4*itemView.bounds.size.height)/height;
-        float angle = DEFAULT_ANGLE;
-        float scale = DEFAULT_SCALE;
+        float angle = kDefaultAngle;
+        float scale = kDefaultScale;
         int localZorder = itemViews.size();
-        bool iscreated = false;
+        bool isAnimated = itemView->isAnimated;
+        float triggerTime = itemView->triggerTime;
+        std::map<std::string,bool> animationControlInstructions(itemView->_animationControlInstructions);
+        std::vector<std::vector<AnimationInfo>> animationInfos;
+        std::vector<AnimationInfo> eachAnimationGroupInfos;
+        //empty animation gruop alse need to copy
+        for(int i = 0;i<itemView.animationGroupCount;i++){
+            for (PolygonView* pathpoint : itemView->_pathPoints) {
+                Vec2 newPosition = Vec2(pathpoint.center.x-itemView.center.x,itemView.center.y-pathpoint.center.y);
+                pathpoint->_eachGroupCorrespondInfos.at(i).position = newPosition;
+                eachAnimationGroupInfos.push_back(pathpoint->_eachGroupCorrespondInfos.at(i));
+            }
+            animationInfos.push_back(eachAnimationGroupInfos);
+            eachAnimationGroupInfos.clear();
+        }
+       
         void* features = nullptr;
         
         switch(itemView->itemtype){
@@ -534,53 +700,159 @@ void LevelEditor::drawLoadedLevel()
                 }
             }
                 break;
+            case DoubDragon_Anti:
+            {
+                Features_DoubleDragon* oldfeatures = (Features_DoubleDragon*)itemView->features;
+                if (oldfeatures) {
+                    Features_DoubleDragon newFeat(*oldfeatures);
+                    features = &newFeat;
+                }else{
+                    Features_DoubleDragon feat;
+                    features = &feat;
+                }
+            }
+                break;
+            case DoubDragon_Clockwise:
+            {
+                Features_DoubleDragon* oldfeatures = (Features_DoubleDragon*)itemView->features;
+                if (oldfeatures) {
+                    Features_DoubleDragon newFeat(*oldfeatures);
+                    features = &newFeat;
+                }else{
+                    Features_DoubleDragon feat;
+                    features = &feat;
+                }
+            }
+                break;
+            case Serpent_:
+            {
+                Features_Serpent* oldfeatures = (Features_Serpent*)itemView->features;
+                if(oldfeatures){
+                    Features_Serpent newFeat(*oldfeatures);
+                    features = &newFeat;
+                }else{
+                    Features_Serpent feat;
+                    features = &feat;
+                }
+            }
+                break;
             default:
                 break;
         }
         
-        Item item(type,id,x,y,angle,scale,localZorder,iscreated,features);
+        Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
         
         ItemView* newItem = [[ItemView alloc] init:item];
+        [newItem createAllPathPoints];
+        newItem->_animationInfos.clear();
         //copy
         newItem.transform = itemView.transform;
         //
+        [newItem addBorder];
+        [newItem heightLightPathPoints];
+        [newItem setHeightLightState:YES];
+        needToAdd.insert(newItem);
+        
+        [itemView hideBorder];
+        [itemView cancelHeightLightPathPoints];
+        [itemView setHeightLightState:NO];
+        //
         [newItem itemAddGestureRecognizerWithTarget:self];
         
-        [_scrollView insertSubview:newItem atIndex:itemViews.size()];
+        [_scrollView insertSubview:newItem atIndex:localZorder];
         [newItem release];
         //添加到数组
         itemViews.push_back(newItem);
         ids.push_back(newItem.tag);
     }
+    _toDealWith.clear();
+    _toDealWith.insert(needToAdd.begin(),needToAdd.end());
     
+    //
+    [self refreshSelectedItemInfo];
 }
 
 -(void)deleteItem:(id)sender
 {
+    //先删多边形和路径点
+    for(PolygonView* polygonview in _scrollView.toDealWithPointView){
+        if([polygonview.pointType isEqualToString:@"pointview"]&&[polygonview.superview.subviews count]>3)
+            [polygonview removeFromSuperview];
+    }
+    
+    for(PolygonView* polygonview in _scrollView.toDealWithPointView){
+        if ([polygonview.pointType isEqualToString:@"centerview"])
+        {
+            [_scrollView.centerViews removeObject:polygonview];
+            _scrollView->polygontags.remove(polygonview.tag);
+        }else if([polygonview.pointType isEqualToString:@"pathpoint"]){
+            std::vector<PolygonView*>::iterator it = polygonview->_pathParent->_pathPoints.erase(find(polygonview->_pathParent->_pathPoints.begin(), polygonview->_pathParent->_pathPoints.end(),polygonview));
+            for(;it!=polygonview->_pathParent->_pathPoints.end();it++){
+                PolygonView* pathpoint = *it;
+                pathpoint.tag -= 1;
+                pathpoint.pathNum.text = [NSString stringWithFormat:@"%d" ,pathpoint.tag + 1];
+            }
+        }
+        
+        [polygonview removeFromSuperview];
+    }
+    [_scrollView.toDealWithPointView removeAllObjects];
+    
+    //再删道具
     for(std::set<ItemView*>::iterator it = _toDealWith.begin();it!=_toDealWith.end();it++)
     {
         ItemView* selectedItemview = *it;
         //从编辑器中删
         itemViews.erase(find(itemViews.begin(),itemViews.end(),selectedItemview));
-        ids.erase(find(ids.begin(),ids.end(),selectedItemview.tag));
+        ids.remove(selectedItemview.tag);
+        //将附加的路径点删除
+        for (PolygonView* pathpoint : selectedItemview->_pathPoints) {
+            [pathpoint removeFromSuperview];
+        }
         
         //从视图中移除
         [selectedItemview removeFromSuperview];
     }
-    
     _toDealWith.clear();
+    
+    //
+    [self refreshSelectedItemInfo];
+    
+    if(!_scrollView.isScrollEnabled) [_scrollView setScrollEnabled:YES];
+    [_scrollView setNeedsDisplay];
+    
 }
 
 -(void)play:(id)sender
 {
     _fileHandler->_items.clear();
+    _fileHandler->_polygonsDict->removeAllObjects();
     
     for(ItemView* itemView : itemViews)
     {
         [self saveItemInformationInMemory:itemView];
     }
-    _gameManager->scrollViewOffset = (PAGE_COUNTS - 1)*height - _scrollView.contentOffset.y;
-    _gameManager->_levelEditor->playLevel();
+    int result = [_scrollView savePolygonsInfoInMemory];
+    if (result!=0) {
+        NSString* mess;
+        switch (result) {
+            case -1:
+                mess = [NSString stringWithFormat:@"顶点数超过最大顶点数:%d!",b2_maxPolygonVertices];
+                break;
+            case 1:
+                mess = @"线有交叉,请检查!";
+                break;
+            default:
+                mess = @"未知错误!";
+                break;
+        }
+        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"预览失败!" message:mess delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
+        [alertView show];
+        [alertView release];
+    }else{
+        _gameManager->scrollViewOffset = (PAGE_COUNTS - 1)*height - _scrollView.contentOffset.y;
+        _gameManager->_levelEditor->playLevel();
+    }
 }
 
 -(void)hide:(id)sender
@@ -605,9 +877,9 @@ void LevelEditor::drawLoadedLevel()
 - (void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex
 {
     if (buttonIndex==[actionSheet destructiveButtonIndex]) {
-//        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Result" message:@"Complete!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-//        [alert show];
-//        [alert release];
+        //        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Result" message:@"Complete!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        //        [alert show];
+        //        [alert release];
         //先把自己的清空
         for(ItemView* itemview : itemViews)
         {
@@ -616,10 +888,20 @@ void LevelEditor::drawLoadedLevel()
         itemViews.clear();
         ids.clear();
         _toDealWith.clear();
+        
+        //
+        for(PolygonView* centerview in _scrollView.centerViews){
+            [centerview removeFromSuperview];
+        }
+        [_scrollView.centerViews removeAllObjects];
+        _scrollView->polygontags.clear();
+        [_scrollView.toDealWithPointView removeAllObjects];
+        
         //在让文件管理器清空
         _fileHandler->reload();
         //最后重新展示出来
         [self createItemFromFileHandler];
+        [self createPolygonsFromFileHandler];
     }
 }
 
@@ -646,13 +928,21 @@ void LevelEditor::drawLoadedLevel()
     UIButton* btn = (UIButton*)sender;
     
     Item_Type type = static_cast<Item_Type>(btn.tag);
+    if (type == Polygon_) {
+        [_scrollView createNewPolygonAtCenter];
+        return [popupViewController backEditor:nil];
+    }
+    
     int id = [self firstUnusedId];
     float x = 0.5 ;
     float y = PAGE_COUNTS - (_scrollView.contentOffset.y + 0.5*height)/height;
-    float angle = DEFAULT_ANGLE;
-    float scale = DEFAULT_SCALE;
+    float angle = kDefaultAngle;
+    float scale = kDefaultScale;
     int localZorder = itemViews.size();
-    bool iscreated = false;
+    bool isAnimated = kDefaultAnimatedOnState;
+    float triggerTime = kDefaultTriggerTime;
+    std::map<std::string,bool> animationControlInstructions;
+    std::vector<std::vector<AnimationInfo>> animationInfos;
     void* features = nullptr;
     
     switch(type){
@@ -674,17 +964,35 @@ void LevelEditor::drawLoadedLevel()
             features = &feat;
         }
             break;
+        case DoubDragon_Anti:
+        {
+            Features_DoubleDragon feat;
+            features = &feat;
+        }
+            break;
+        case DoubDragon_Clockwise:
+        {
+            Features_DoubleDragon feat;
+            features = &feat;
+        }
+            break;
+        case Serpent_:
+        {
+            Features_Serpent feat;
+            features = &feat;
+        }
+            break;
         default:
             break;
     }
     
-    Item item(type,id,x,y,angle,scale,localZorder,iscreated,features);
+    Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
     
     ItemView* newItem = [[ItemView alloc] init:item];
     
     [newItem itemAddGestureRecognizerWithTarget:self];
     
-    [_scrollView insertSubview:newItem atIndex:itemViews.size()];
+    [_scrollView insertSubview:newItem atIndex:localZorder];
     [newItem release];
     //添加到数组
     itemViews.push_back(newItem);
@@ -705,10 +1013,30 @@ void LevelEditor::drawLoadedLevel()
     float c = itemView.transform.c;
     float d = itemView.transform.d;
     
-    float angle;
-    float scale;
+    float angle = kDefaultAngle;
+    float scale = kDefaultScale;
     int localZorder = [itemView getSubviewIndex];
-    bool iscreated = false;
+    bool isAnimated = itemView->isAnimated;
+    float triggerTime = itemView->triggerTime;
+    std::map<std::string,bool> animationControlInstructions(itemView->_animationControlInstructions);
+    std::vector<std::vector<AnimationInfo>> animationInfos;
+    std::vector<AnimationInfo> eachAnimationGroupInfos;
+    //empty animation group not nessary to save
+    if (itemView->_pathPoints.size()!=0) {
+        for(int i = 0;i<itemView.animationGroupCount;i++){
+            for (PolygonView* pathpoint : itemView->_pathPoints) {
+                //refresh inner vector information
+                Vec2 newPosition = Vec2(pathpoint.center.x-itemView.center.x,itemView.center.y-pathpoint.center.y);
+                pathpoint->_eachGroupCorrespondInfos.at(i).position = newPosition;
+                eachAnimationGroupInfos.push_back(pathpoint->_eachGroupCorrespondInfos.at(i));
+            }
+            animationInfos.push_back(eachAnimationGroupInfos);
+            eachAnimationGroupInfos.clear();
+        }
+    }else{
+        animationControlInstructions.clear();
+    }
+
     void* features = nullptr;
     if(a ==0.0&&b>0.0&&c<0.0&&d==0.0)
     {
@@ -741,6 +1069,9 @@ void LevelEditor::drawLoadedLevel()
             if(oldfeatures){
                 Features_Cicada feat(*oldfeatures);
                 features = &feat;
+            }else{
+                Features_Cicada feat;
+                features = &feat;
             }
         }
             break;
@@ -749,6 +1080,9 @@ void LevelEditor::drawLoadedLevel()
             Features_Dragon* oldfeatures = (Features_Dragon*)itemView->features;
             if(oldfeatures){
                 Features_Dragon feat(*oldfeatures);
+                features = &feat;
+            }else{
+                Features_Dragon feat;
                 features = &feat;
             }
         }
@@ -759,6 +1093,45 @@ void LevelEditor::drawLoadedLevel()
             if(oldfeatures){
                 Features_Dragon feat(*oldfeatures);
                 features = &feat;
+            }else{
+                Features_Dragon feat;
+                features = &feat;
+            }
+        }
+            break;
+        case DoubDragon_Anti:
+        {
+            Features_DoubleDragon* oldfeatures = (Features_DoubleDragon*)itemView->features;
+            if (oldfeatures) {
+                Features_DoubleDragon feat(*oldfeatures);
+                features = &feat;
+            }else{
+                Features_DoubleDragon feat;
+                features = &feat;
+            }
+        }
+            break;
+        case DoubDragon_Clockwise:
+        {
+            Features_DoubleDragon* oldfeatures = (Features_DoubleDragon*)itemView->features;
+            if (oldfeatures) {
+                Features_DoubleDragon feat(*oldfeatures);
+                features = &feat;
+            }else{
+                Features_DoubleDragon feat;
+                features = &feat;
+            }
+        }
+            break;
+        case Serpent_:
+        {
+            Features_Serpent* oldfeatures = (Features_Serpent*)itemView->features;
+            if (oldfeatures) {
+                Features_Serpent feat(*oldfeatures);
+                features = &feat;
+            }else{
+                Features_Serpent feat;
+                features = &feat;
             }
         }
             break;
@@ -766,7 +1139,7 @@ void LevelEditor::drawLoadedLevel()
             break;
     }
     
-    Item item(type,id,x,y,angle,scale,localZorder,iscreated,features);
+    Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
     _fileHandler->_items.push_back(item);
 }
 
@@ -835,14 +1208,75 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)addGestureRecognizerForSelf
 {
-    UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cancelHeightLight)];
+    UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(myViewSingleTap:)];
     tapRecognizer.numberOfTapsRequired = 1;
     [self.view addGestureRecognizer:tapRecognizer];
     [tapRecognizer release];
     
+    UIPanGestureRecognizer* panRecognizser = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(myViewPaning:)];
+    [self.view addGestureRecognizer:panRecognizser];
+    [panRecognizser release];
+    
     UIRotationGestureRecognizer* rotateRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotate:)];
     [self.view addGestureRecognizer:rotateRecognizer];
     [rotateRecognizer release];
+    
+//    UIPinchGestureRecognizer* pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(myScrollViewPreView:)];
+//    [self.view addGestureRecognizer:pinchRecognizer];
+//    [pinchRecognizer release];
+    
+    rotateRecognizer.delegate = self;
+//    pinchRecognizer.delegate = self;
+    
+    [tapRecognizer requireGestureRecognizerToFail:panRecognizser];
+//    [pinchRecognizer requireGestureRecognizerToFail:rotateRecognizer];
+    
+}
+
+-(PolygonView*)clickedPointView:(CGPoint)position
+{
+    NSEnumerator* reveCenterEnum = [_scrollView.centerViews reverseObjectEnumerator];
+    NSEnumerator* revePointEnum;
+    PolygonView* centerview = nil;
+    PolygonView* pointview = nil;
+    
+    while(centerview = [reveCenterEnum nextObject]){
+        CGPoint localposition = [centerview convertPoint:position fromView:self.view];
+        revePointEnum = [centerview.subviews reverseObjectEnumerator];
+        while (pointview = [revePointEnum nextObject]) {
+            if (CGRectContainsPoint(pointview.frame, localposition)) {
+                return pointview;
+            }
+        }
+    }
+    
+    return nil;
+}
+
+-(void)myViewSingleTap:(UITapGestureRecognizer*)recognizer
+{
+    CGPoint position = [recognizer locationInView:self.view];
+    PolygonView* selectedpointview = nil;
+    if (!_scrollView.isPreViewed) {
+        if ((selectedpointview = [self clickedPointView:position])) {
+            selectedpointview.isSelected = !selectedpointview.isSelected;
+            if (selectedpointview.isSelected) {
+                selectedpointview.backgroundColor = selectedpointview.selectedColor;
+                [_scrollView.toDealWithPointView addObject:selectedpointview];
+            }else{
+                selectedpointview.backgroundColor = selectedpointview.defaultColor;
+                [_scrollView.toDealWithPointView removeObject:selectedpointview];
+            }
+            
+            if(_toDealWith.size()>0||_scrollView.toDealWithPointView.count>0)
+                [_scrollView setScrollEnabled:NO];
+            else
+                [_scrollView setScrollEnabled:YES];
+            return ;
+        }
+    }
+    
+    [self cancelHeightLight];
 }
 
 -(void)cancelHeightLight
@@ -850,20 +1284,272 @@ void LevelEditor::drawLoadedLevel()
     std::set<ItemView*>::iterator it;
     for(it = _toDealWith.begin();it!=_toDealWith.end();it++)
     {
-        UIImageView* imageview = *it;
-        if ([imageview getHeightLightState]) {
-            for (CAShapeLayer* shapeLayer in imageview.layer.sublayers) {
-                if([shapeLayer.name isEqualToString:@"boder"]){
-                [shapeLayer setHidden:YES];
+        ItemView* itemview = *it;
+        if ([itemview getHeightLightState]) {
+            [itemview hideBorder];
+            [itemview cancelHeightLightPathPoints];
+            [itemview setHeightLightState:NO];
+        }
+    }
+    _toDealWith.clear();
+    
+    for(PolygonView* polygonview in _scrollView.toDealWithPointView){
+        polygonview.isSelected = NO;
+        polygonview.backgroundColor = polygonview.defaultColor;
+    }
+    [_scrollView.toDealWithPointView removeAllObjects];
+    
+    //
+    [self refreshSelectedItemInfo];
+    
+    //
+    if (!_scrollView.isScrollEnabled) {
+        [_scrollView setScrollEnabled:YES];
+    }
+    
+}
+
+-(void)myViewPaning:(UIPanGestureRecognizer*)recognizer
+{
+    if (!_scrollView.isPreViewed&&!_scrollView.isScrollEnabled) {
+        CGPoint translation = [recognizer translationInView:self.view];
+        
+        
+        //移动道具
+        for(std::set<ItemView*>::iterator it = _toDealWith.begin();it != _toDealWith.end();it++){
+            ItemView* itemview = *it;
+            itemview.center = CGPointMake(itemview.center.x + translation.x, itemview.center.y + translation.y);
+            [itemview translateAllPathPoints:translation];
+        }
+        //移动多边形和路径点
+        for (PolygonView* polygon in _scrollView.toDealWithPointView) {
+            if ([polygon.pointType isEqualToString:@"pointview"]) {
+                PolygonView* centerview = (PolygonView*)polygon.superview;
+                if(centerview.isSelected) continue;
+            }else if([polygon.pointType isEqualToString:@"pathpoint"]){
+                ItemView* parent = polygon->_pathParent;
+                if ([parent getHeightLightState]) continue;
+            }
+            polygon.center = CGPointMake(polygon.center.x + translation.x, polygon.center.y + translation.y);
+        }
+        
+        [recognizer setTranslation:CGPointZero inView:self.view];
+        [_scrollView setNeedsDisplay];
+        
+    }
+    
+}
+
+-(void)zoomInOut:(id)sender
+{
+        
+    if (!_toDealWith.empty()||_scrollView.toDealWithPointView.count!=0) return;
+    
+    if (!_scrollView.isPreViewed) {
+        _scrollView.isPreViewed = YES;
+        [self hideControlPanelAndOperation];
+        
+//        if(!_toDealWith.empty()||_scrollView.toDealWithPointView.count!=0){
+//            for(ItemView* itemview : _toDealWith){
+//                [itemview hideBorder];
+//                [itemview setHeightLightState:NO];
+//            }
+//            _toDealWith.clear();
+//            
+//            for (PolygonView* polygonview in _scrollView.toDealWithPointView) {
+//                polygonview.isSelected = NO;
+//                polygonview.backgroundColor = polygonview.defaultColor;
+//            }
+//            [_scrollView.toDealWithPointView removeAllObjects];
+//            
+//            if(!_scrollView.isScrollEnabled)
+//                [_scrollView setScrollEnabled:YES];
+//        }
+    }
+    
+    float variation = 0.0;
+    if (sender == _zoomInButton) {
+        variation = kDefaultZoomStep;
+    }else{
+        variation = -kDefaultZoomStep;
+    }
+    
+    float newScale = 0.0;
+    if (_scrollView.isPreViewed) {
+        
+        newScale = _scrollView.currentZoomFactor + variation;
+        if (newScale<1.0&&newScale>1/PAGE_COUNTS) {
+            
+            for(ItemView* view : itemViews)
+            {
+                view.center = CGPointMake(view.center.x/_scrollView.contentSize.width*newScale*width, view.center.y/_scrollView.contentSize.height*newScale*PAGE_COUNTS*height);
+                view.bounds = CGRectMake(0, 0, newScale*view.image.size.width, newScale*view.image.size.height);
+                
+                for(PolygonView* pathpoint : view->_pathPoints){
+                    pathpoint.center = CGPointMake(newScale*pathpoint.center.x/_scrollView.contentSize.width*width, newScale*pathpoint.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
+                    pathpoint.bounds = CGRectMake(0, 0, 2*newScale*kDefaultPathPointRadius, 2*newScale*kDefaultPathPointRadius);
+                    //
+                    pathpoint.pathNum.frame = CGRectMake(0, 0, 2*newScale*kDefaultPathPointRadius, 2*newScale*kDefaultPathPointRadius);
+                    pathpoint.pathNum.font = [UIFont systemFontOfSize:newScale*kDefaultFontSize];
                 }
             }
-            [imageview setHeightLightState:NO];
+            
+            for (PolygonView* centerview in _scrollView.centerViews) {
+                centerview.center = CGPointMake(newScale*centerview.center.x/_scrollView.contentSize.width*width, newScale*centerview.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
+                centerview.bounds = CGRectMake(-newScale*kDefaultPolygonPointRadius,-newScale*kDefaultPolygonPointRadius, 2*newScale*kDefaultPolygonPointRadius,2*newScale*kDefaultPolygonPointRadius);
+                
+                for (PolygonView* pointview in centerview.subviews) {
+                    pointview.center = CGPointMake(newScale*pointview.center.x/_scrollView.contentSize.width*width, newScale*pointview.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
+                    pointview.bounds = CGRectMake(0, 0, 2*newScale*kDefaultPolygonPointRadius, 2*newScale*kDefaultPolygonPointRadius);
+                }
+            }
+            
+            float oldContentOffset = _scrollView.contentOffset.y;
+            float ration = -1;
+            float newContentOffset = 0;
+            if (_scrollView.contentSize.height - oldContentOffset - height != 0 ) {
+                ration = oldContentOffset/(_scrollView.contentSize.height - oldContentOffset - height);
+            }
+            
+            _scrollView.currentZoomFactor = newScale;
+            _scrollView.contentSize = CGSizeMake(newScale*width, newScale*PAGE_COUNTS*height);
+            _scrollView.bounds = CGRectMake(0, 0, newScale*width, height);
+            
+            if (ration != -1) {
+                newContentOffset = ration/(ration+1)*(_scrollView.contentSize.height - height);
+            }else{
+                newContentOffset = _scrollView.contentSize.height - height;
+            }
+            _scrollView.contentOffset = CGPointMake(_scrollView.contentOffset.x, newContentOffset);
+            
+        }else if(newScale<=1/PAGE_COUNTS){
+            
+            for (ItemView* view : itemViews) {
+                view.center = CGPointMake(1/PAGE_COUNTS*view.center.x/_scrollView.contentSize.width*width, view.center.y/_scrollView.contentSize.height*height);
+                view.bounds = CGRectMake(0, 0, 1/PAGE_COUNTS*view.image.size.width, 1/PAGE_COUNTS*view.image.size.height);
+                
+                for (PolygonView* pathpoint : view->_pathPoints) {
+                    pathpoint.center = CGPointMake(1/PAGE_COUNTS*pathpoint.center.x/_scrollView.contentSize.width*width, pathpoint.center.y/_scrollView.contentSize.height*height);
+                    pathpoint.bounds = CGRectMake(0, 0, 1/PAGE_COUNTS*2*kDefaultPathPointRadius, 1/PAGE_COUNTS*2*kDefaultPathPointRadius);
+                    //
+                    pathpoint.pathNum.frame = CGRectMake(0,0 , 1/PAGE_COUNTS*2*kDefaultPathPointRadius, 1/PAGE_COUNTS*2*kDefaultPathPointRadius);
+                    pathpoint.pathNum.font = [UIFont systemFontOfSize:1/PAGE_COUNTS*kDefaultFontSize];
+                }
+            }
+            
+            for (PolygonView* centerview in _scrollView.centerViews) {
+                centerview.center = CGPointMake(1/PAGE_COUNTS*centerview.center.x/_scrollView.contentSize.width*width, centerview.center.y/_scrollView.contentSize.height*height);
+                centerview.bounds = CGRectMake(-1/PAGE_COUNTS*kDefaultPolygonPointRadius, -1/PAGE_COUNTS*kDefaultPolygonPointRadius, 1/PAGE_COUNTS*2*kDefaultPolygonPointRadius, 1/PAGE_COUNTS*2*kDefaultPolygonPointRadius);
+                
+                for (PolygonView* pointview in centerview.subviews) {
+                    pointview.center = CGPointMake(1/PAGE_COUNTS*pointview.center.x/_scrollView.contentSize.width*width, pointview.center.y/_scrollView.contentSize.height*height);
+                    pointview.bounds = CGRectMake(0, 0, 1/PAGE_COUNTS*2*kDefaultPolygonPointRadius, 1/PAGE_COUNTS*2*kDefaultPolygonPointRadius);
+                }
+            }
+            
+            _scrollView.currentZoomFactor = 1/PAGE_COUNTS;
+            _scrollView.contentSize = CGSizeMake(1/PAGE_COUNTS*width, height);
+            _scrollView.bounds = CGRectMake(0, 0, 1/PAGE_COUNTS*width, height);
+            
+        }else if(newScale>=1.0){
+            
+            for (ItemView* view : itemViews) {
+                view.center = CGPointMake(view.center.x/_scrollView.contentSize.width*width, view.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
+                view.bounds = CGRectMake(0, 0, view.image.size.width, view.image.size.height);
+                
+                for (PolygonView* pathpoint : view->_pathPoints) {
+                    pathpoint.center = CGPointMake(pathpoint.center.x/_scrollView.contentSize.width*width, pathpoint.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
+                    pathpoint.bounds = CGRectMake(0, 0, 2*kDefaultPathPointRadius, 2*kDefaultPathPointRadius);
+                    //
+                    pathpoint.pathNum.frame = CGRectMake(0, 0, 2*kDefaultPathPointRadius, 2*kDefaultPathPointRadius);
+                    pathpoint.pathNum.font = [UIFont systemFontOfSize:kDefaultFontSize];
+                }
+            }
+            
+            for (PolygonView* centerview in _scrollView.centerViews) {
+                centerview.center = CGPointMake(centerview.center.x/_scrollView.contentSize.width*width, centerview.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
+                centerview.bounds = CGRectMake(-kDefaultPolygonPointRadius, -kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius);
+                
+                for (PolygonView* pointview in centerview.subviews) {
+                    pointview.center = CGPointMake(pointview.center.x/_scrollView.contentSize.width*width, pointview.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
+                    pointview.bounds = CGRectMake(0, 0, 2*kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius);
+                }
+            }
+            
+            float oldContentOffset = _scrollView.contentOffset.y;
+            float ration = -1;
+            float newContentOffset = 0;
+            if (_scrollView.contentSize.height - oldContentOffset - height != 0 ) {
+                ration = oldContentOffset/(_scrollView.contentSize.height - oldContentOffset - height);
+            }
+            
+            _scrollView.currentZoomFactor = 1.0;
+            _scrollView.contentSize = CGSizeMake(width, PAGE_COUNTS*height);
+            _scrollView.bounds = CGRectMake(0, 0, width, height);
+            
+            if (ration != -1) {
+                newContentOffset = ration/(ration+1)*(_scrollView.contentSize.height - height);
+            }else{
+                newContentOffset = _scrollView.contentSize.height - height;
+            }
+            _scrollView.contentOffset = CGPointMake(_scrollView.contentOffset.x, newContentOffset);
+            
         }
     }
     
-    _toDealWith.clear();
+
+    if (_scrollView.currentZoomFactor == 1.0) {
+        if (_scrollView.isPreViewed) {
+            _scrollView.isPreViewed = NO;
+            [self showControlPanelAndOperation];
+        }
+    }
+
 }
 
+-(void)hideControlPanelAndOperation
+{
+    for (UIButton* button : needHidenButtons) {
+        if (button != _zoomInButton && button != _zoomOutButton) {
+            [button setHidden:YES];
+        }
+    }
+    [_hideButton setHidden:YES];
+    [solidLayer setHidden:YES];
+    [dashLayer setHidden:YES];
+    
+    for(ItemView* itemview : itemViews){
+        [itemview setUserInteractionEnabled:NO];
+        for (PolygonView* pathpoint : itemview->_pathPoints) {
+            [pathpoint setUserInteractionEnabled:NO];
+        }
+    }
+    for (PolygonView* centerview in _scrollView.centerViews) {
+        [centerview setUserInteractionEnabled:NO];
+    }
+    
+}
+
+-(void)showControlPanelAndOperation
+{
+    for (UIButton* button : needHidenButtons) {
+        [button setHidden:NO];
+    }
+    [_hideButton setHidden:NO];
+    [solidLayer setHidden:NO];
+    [dashLayer setHidden:NO];
+    
+    for (ItemView* itemview : itemViews) {
+        [itemview setUserInteractionEnabled:YES];
+        for (PolygonView* pathpoint : itemview->_pathPoints) {
+            [pathpoint setUserInteractionEnabled:YES];
+        }
+    }
+    for (PolygonView* centerview in _scrollView.centerViews) {
+        [centerview setUserInteractionEnabled:YES];
+    }
+    
+}
 
 -(void)didReceiveMemoryWarning
 {

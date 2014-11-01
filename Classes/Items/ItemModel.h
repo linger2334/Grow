@@ -15,7 +15,7 @@
 #include "Macro.h"
 #include "TypeBase.h"
 
-class ItemModel : public Sprite,public TypeBase
+class ItemModel :public TypeBase, public Sprite
 {
 public:
     ItemModel();
@@ -24,13 +24,26 @@ public:
     static ItemModel* create(Item& item);
     virtual bool init(Item& item);
     
-    virtual void createBody(std::vector<b2Body*>& bodies){};
+    inline void setAnimatedOn(bool isanimated) { isAnimated = isanimated;}
+    inline void setTriggerTime(float triggertime) { triggerTime = triggertime;}
+    virtual void createAnimates(std::vector<std::vector<AnimationInfo>>& animationInfos,std::map<std::string,bool>& animtaionControlInstructions);
+    virtual void createCardinalSplineAnimates(std::vector<AnimationInfo>& animationInfos);
+    virtual void createCustomCurveAnimates(std::vector<AnimationInfo>& animationInfos);
+    virtual void createBody(){};
+    inline b2Body* getBody() { return _body;}
+    std::function<void(ItemModel*)> _collisionCallBack;
+    virtual void collisionWithPlant(ItemModel* plantHead) { };
     
-    std::function<void()> _collisionCallBack;
-    virtual void collisionWithPlant() { };
+    virtual void update(float dt);
 protected:
     friend class LayerItem;
-    
+    b2Body* _body;
+    bool isAnimated;
+    float triggerTime;
+    int animationGroupCount;
+    ActionInterval* _animatesParallel;
+    ActionInterval* _animatesCardinalSpline;
+    ActionInterval* _animatesCustomCurve;
 };
 
 

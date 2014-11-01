@@ -10,14 +10,24 @@
 #define __Grow__Polygon__
 
 #include <iostream>
-#include "ItemModel.h"
+#include "Macro.h"
+#include "Item.h"
+#include "TypeBase.h"
 
-class Polygon : public ItemModel
+
+class Polygon : public TypeBase,public Node
 {
 public:
-    static Polygon* create(Item& item);
-    virtual bool init(Item& item);
+    Polygon();
+    ~Polygon();
     
+    static Polygon* create(PolygonInfo& polygonInfo);
+    bool init(PolygonInfo& polygonInfo);
+    
+    CC_SYNTHESIZE_READONLY(int, polygonTag, PolygonTag)
+    CC_SYNTHESIZE_READONLY(b2Body*, _body, Body)
+protected:
+    bool isConvex;
 };
 
 #endif /* defined(__Grow__Polygon__) */

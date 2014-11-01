@@ -17,11 +17,14 @@
 class Cicada : public ItemModel
 {
 public:
+    Cicada();
+    ~Cicada();
+    
     static Cicada* create(Item& item);
     bool init(Item& item);
     
-    void createBody(std::vector<b2Body*>& bodies);
-    void collisionWithPlant();
+    void createBody();
+    void collisionWithPlant(ItemModel* plantHead);
     
 protected:
     Sprite* _head;
@@ -29,7 +32,6 @@ protected:
     Sprite* _leftwing;
     Sprite* _rightwing;
     
-    b2Body* _body;
     float w;
     float includedAngle;
     float fanningDuration;

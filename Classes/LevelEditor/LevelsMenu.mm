@@ -94,7 +94,6 @@ void LevelsMenu::selectLevel(cocos2d::Ref *sender, cocos2d::ui::ListView::EventT
     LevelFileHandler* fileHandler = LevelFileHandler::createWithFileName(fileName.c_str());
     GameManager* gameManager = GameManager::getInstance();
     gameManager->_fileHandler = fileHandler;
-    gameManager->_fileHandler->retain();
     gameManager->scrollViewOffset = 0.0;
     
     switch (eventtype) {

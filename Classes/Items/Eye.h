@@ -17,16 +17,17 @@
 class Eye : public ItemModel
 {
 public:
+    Eye();
+    ~Eye();
+    
     static Eye* create(Item& item);
     bool init(Item& item);
     
-    void collisionWithPlant();
-    void createBody(std::vector<b2Body*>& bodies);
+    void collisionWithPlant(ItemModel* plantHead);
+    void createBody();
     
 protected:
     friend class LayerItem;
-    
-    b2Body* _body;
 };
 
 #endif /* defined(__Grow__Eye__) */

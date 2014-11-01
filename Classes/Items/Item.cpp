@@ -38,19 +38,65 @@ Features_Dragon::Features_Dragon(const Features_Dragon& other)
     backTransparency = other.backTransparency;
 }
 
-Features_Polygon::Features_Polygon(bool _isConvex,std::vector<std::pair<float,float>>& _vertexs)
+Features_DoubleDragon::Features_DoubleDragon(float W,float BellyTransparency)
 {
+    w = W;
+    bellyTransparency = BellyTransparency;
+}
+
+Features_DoubleDragon::Features_DoubleDragon(const Features_DoubleDragon& other)
+{
+    w = other.w;
+    bellyTransparency = other.bellyTransparency;
+}
+
+Features_Serpent::Features_Serpent(float AbsorptionRate,float HoleTransparency)
+{
+    absorptionRate = AbsorptionRate;
+    holeTransparency = HoleTransparency;
+}
+
+Features_Serpent::Features_Serpent(const Features_Serpent& other)
+{
+    absorptionRate = other.absorptionRate;
+    holeTransparency = other.holeTransparency;
+}
+
+PolygonInfo::PolygonInfo(int _tag,Vec2 _position,bool _isConvex,std::vector<Vec2>& _vertexes)
+{
+    tag = _tag;
+    position = _position;
     isConvex = _isConvex;
-    vertexs = _vertexs;
+    vertexes = _vertexes;
 }
 
-Features_Polygon::Features_Polygon(const Features_Polygon& other)
+PolygonInfo::PolygonInfo(const PolygonInfo& other)
 {
+    tag = other.tag;
+    position = other.position;
     isConvex = other.isConvex;
-    vertexs = other.vertexs;
+    vertexes = other.vertexes;
 }
 
-Item::Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _iscreated,void* _features)
+AnimationInfo::AnimationInfo(float _waitTime,float _rotation,float _rotationSpeed,float _moveSpeed,Vec2 _position)
+{
+    waitTime = _waitTime;
+    rotation = _rotation;
+    rotationSpeed = _rotationSpeed;
+    moveSpeed = _moveSpeed;
+    position = _position;
+}
+
+AnimationInfo::AnimationInfo(const AnimationInfo& other)
+{
+    waitTime = other.waitTime;
+    rotation = other.rotation;
+    rotationSpeed = other.rotationSpeed;
+    moveSpeed = other.moveSpeed;
+    position = other.position;
+}
+
+Item::Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _isAnimated,float _triggerTime,std::map<std::string,bool>& _animationControlInstructions, std::vector<std::vector<AnimationInfo>>& _animationInfos,void* _features)
 {
     type = _type;
     id = _id;
@@ -59,38 +105,46 @@ Item::Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,i
     angle = _angle;
     scale = _scale;
     localZorder = _localZorder;
-    iscreated = _iscreated;
+    isAnimated = _isAnimated;
+    triggerTime = _triggerTime;
+    animationControlInstructions = _animationControlInstructions;
+    animationInfos = _animationInfos;
     features = _features;
     if(_features){
         switch(type){
             case Cicada:
             {
-                Features_Cicada* feat = new Features_Cicada();
-                feat->w = ((Features_Cicada*)_features)->w;
-                feat->includedAngle = ((Features_Cicada*)_features)->includedAngle;
-                feat->fanningDuration = ((Features_Cicada*)_features)->fanningDuration;
-                feat->interval = ((Features_Cicada*)_features)->interval;
-                feat->bellyTransparency = ((Features_Cicada*)_features)->bellyTransparency;
-                features = feat;
+                features = new Features_Cicada(*((Features_Cicada*)_features));
             }
                 break;
                 
             case Dragon_Anti:
             {
-                Features_Dragon* feat = new Features_Dragon();
-                feat->w = ((Features_Dragon*)_features)->w;
-                feat->backTransparency= ((Features_Dragon*)_features)->backTransparency;
-                features = feat;
+                features = new Features_Dragon(*((Features_Dragon*)_features));
             }
                 break;
                 
             case Dragon_Clockwise:
             {
-                Features_Dragon* feat = new Features_Dragon();
-                feat->w = ((Features_Dragon*)_features)->w;
-                feat->backTransparency= ((Features_Dragon*)_features)->backTransparency;
-                features = feat;
+                features = new Features_Dragon(*((Features_Dragon*)_features));
             }
+                break;
+            
+            case DoubDragon_Anti:
+            {
+                features = new Features_DoubleDragon(*((Features_DoubleDragon*)_features));
+            }
+                break;
+            case DoubDragon_Clockwise:
+            {
+                features = new Features_DoubleDragon(*((Features_DoubleDragon*)_features));
+            }
+                break;
+            case Serpent_:
+            {
+                features = new Features_Serpent(*((Features_Serpent*)_features));
+            }
+                break;
                 
             default:
                 break;
@@ -107,37 +161,45 @@ Item::Item(const Item& other)
     angle = other.angle;
     scale = other.scale;
     localZorder = other.localZorder;
-    iscreated = other.iscreated;
+    isAnimated = other.isAnimated;
+    triggerTime = other.triggerTime;
+    animationControlInstructions = other.animationControlInstructions;
+    animationInfos = other.animationInfos;
     features = other.features;
     if(other.features){
         switch(type){
             case Cicada:
             {
-                Features_Cicada* feat = new Features_Cicada();
-                feat->w = ((Features_Cicada*)other.features)->w;
-                feat->includedAngle = ((Features_Cicada*)other.features)->includedAngle;
-                feat->fanningDuration = ((Features_Cicada*)other.features)->fanningDuration;
-                feat->interval = ((Features_Cicada*)other.features)->interval;
-                feat->bellyTransparency = ((Features_Cicada*)other.features)->bellyTransparency;
-                features = feat;
+                features = new Features_Cicada(*((Features_Cicada*)other.features));
             }
                 break;
                 
             case Dragon_Anti:
             {
-                Features_Dragon* feat = new Features_Dragon();
-                feat->w = ((Features_Dragon*)other.features)->w;
-                feat->backTransparency= ((Features_Dragon*)other.features)->backTransparency;
-                features = feat;
+                features = new Features_Dragon(*((Features_Dragon*)other.features));
             }
                 break;
                 
             case Dragon_Clockwise:
             {
-                Features_Dragon* feat = new Features_Dragon();
-                feat->w = ((Features_Dragon*)other.features)->w;
-                feat->backTransparency= ((Features_Dragon*)other.features)->backTransparency;
-                features = feat;
+                features = new Features_Dragon(*((Features_Dragon*)other.features));
+            }
+                break;
+                
+            case DoubDragon_Anti:
+            {
+                features = new Features_DoubleDragon(*((Features_DoubleDragon*)other.features));
+            }
+                break;
+                
+            case DoubDragon_Clockwise:
+            {
+                features = new Features_DoubleDragon(*((Features_DoubleDragon*)other.features));
+            }
+                break;
+            case Serpent_:
+            {
+                features = new Features_Serpent(*((Features_Serpent*)other.features));
             }
                 break;
                 
@@ -168,10 +230,25 @@ Item::~Item()
                 delete (Features_Dragon*)features;
             }
                 break;
-            case Polygon:
+                
+            case DoubDragon_Anti:
             {
-                delete (Features_Polygon*)features;
+                delete (Features_DoubleDragon*)features;
             }
+                break;
+                
+            case DoubDragon_Clockwise:
+            {
+                delete (Features_DoubleDragon*)features;
+            }
+                break;
+                
+            case Serpent_:
+            {
+                delete (Features_Serpent*)features;
+            }
+                break;
+                
             default:
                 break;
         }

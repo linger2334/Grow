@@ -7,29 +7,32 @@
 //
 
 #import <UIKit/UIKit.h>
+#include "Item.h"
 
-@interface PolygonView : UIView{
-    CGPoint originalLocation;
-    CGPoint lastLocation;
-    BOOL isSelected;
-    UIView* activePointView;
-    UIView* centerview;
+@class ItemView;
+
+@interface PolygonView : UIImageView{
+@public std::vector<AnimationInfo> _eachGroupCorrespondInfos;
+@public    ItemView* _pathParent;
 }
 
-@property(nonatomic,copy)UIColor *pointColor;
+@property(nonatomic,assign)BOOL isSelected;
+@property(nonatomic,assign)BOOL isConvex;
+@property(nonatomic,copy)NSString* pointType;
+@property(nonatomic,assign)UILabel* pathNum;
+@property(nonatomic,copy)UIColor* defaultColor;
+@property(nonatomic,copy)UIColor* selectedColor;
+@property(nonatomic,copy)UIColor* heightLightedColor;
 @property(nonatomic,copy)UIColor *lineColor;
-@property(nonatomic,strong)NSArray* pointViews;;
 
+-(id)init;
 -(id)initWithFrame:(CGRect)frame;
+-(id)initWithEachGroupCorrespondInfos:(std::vector<AnimationInfo>&)info;
 
--(void)drawRect:(CGRect)rect;
-
-//-(std::vector<std::pair<float,float>>&)getPoints;
--(NSArray*)getPoints;
--(void)addPointViewFrom:(NSArray*)points;
--(void)createPointViewAtCenter;
-
-+(CGPoint)convertPoint:(CGPoint)point1 fromRect1:(CGSize)rect1 toRect2:(CGSize)rect2;
-+(CGPoint)convertCGPoint:(CGPoint)point1 fromRect1:(CGSize)rect1 toRect2:(CGSize)rect2;
+-(NSArray*)getUIVertexs;
+-(NSArray*)getGlLocalVertexes;
+-(float)checkDetPointA:(CGPoint)pointA pointB:(CGPoint)pointB pointC:(CGPoint)pointC;
+-(NSComparisonResult)compare:(PolygonView*)otherview;
+-(NSMutableArray*)reorderPointViewsInAntiClockwise:(NSMutableArray*)pointviews;
 
 @end

@@ -37,7 +37,8 @@ public:
     cocos2d::Point anchorPoint;
 };
 
-static GB2ShapeCache *_sharedGB2ShapeCache = NULL;
+GB2ShapeCache* GB2ShapeCache::_sharedGB2ShapeCache = nullptr;
+GB2ShapeCache::CGarbo GB2ShapeCache::Garbo;
 
 GB2ShapeCache* GB2ShapeCache::getInstance(void) {
 	if (!_sharedGB2ShapeCache) {

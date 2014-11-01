@@ -10,6 +10,17 @@
 #include "GameManager.h"
 #include "SceneGame.h"
 #include "GB2ShapeCache-x.h"
+#include "LayerItem.h"
+
+Rock::Rock()
+{
+    
+}
+
+Rock::~Rock()
+{
+
+}
 
 Rock* Rock::create(Item& item)
 {
@@ -41,6 +52,10 @@ bool Rock::init(Item& item)
             default:
                 return false;
         }
+        
+        setRotation(CC_RADIANS_TO_DEGREES(item.angle));
+        setScale(item.scale);
+        
         result = true;
     }else{
         result = false;
@@ -49,7 +64,7 @@ bool Rock::init(Item& item)
     return result;
 }
 
-void Rock::createBody(std::vector<b2Body*>& bodies)
+void Rock::createBody()
 {
     b2World* world = GameManager::getInstance()->getBox2dWorld();
     b2BodyDef bodyDef;
@@ -60,17 +75,16 @@ void Rock::createBody(std::vector<b2Body*>& bodies)
     bodyDef.userData = this;
     _body = world->CreateBody(&bodyDef);
     
-    GB2ShapeCache* shapeCache = GB2ShapeCache::getInstance();
-    shapeCache->addShapesWithFile("Item_fixtures.plist");
+    GB2ShapeCache* _fixturesCache = ((LayerItem*)getParent())->_fixturesCache;
     switch (_type) {
         case Rock_Circle:
-            shapeCache->addFixturesToBody(_body, "Rock_Circle");
+            _fixturesCache->addFixturesToBody(_body, "Rock_Circle");
             break;
         case Rock_Ellipse:
-            shapeCache->addFixturesToBody(_body, "Rock_Ellipse");
+            _fixturesCache->addFixturesToBody(_body, "Rock_Ellipse");
             break;
         case Rock_Gray:
-            shapeCache->addFixturesToBody(_body, "Rock_Gray");
+            _fixturesCache->addFixturesToBody(_body, "Rock_Gray");
             break;
         default:
             break;
@@ -95,8 +109,6 @@ void Rock::createBody(std::vector<b2Body*>& bodies)
     bodymassData.mass *= getScale();
     bodymassData.I *= getScale();
     _body->SetMassData(&bodymassData);
-    
-    bodies.push_back(_body);
 }
 
 

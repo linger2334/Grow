@@ -20,12 +20,25 @@ namespace cocos2d {
 		cocos2d::Point anchorPointForShape(const std::string &shape);
 		void reset();
 		float getPtmRatio() { return ptmRatio; }
-		~GB2ShapeCache() {}
+		~GB2ShapeCache() { }
 		
 	private:
+        //这里只能声明,类里面的静态变量要在类外部定义
+        static GB2ShapeCache *_sharedGB2ShapeCache;
 		std::map<std::string, BodyDef *> shapeObjects;
 		GB2ShapeCache(void) {}
 		float ptmRatio;
+        
+        class CGarbo{
+        public:
+            ~CGarbo()
+            {
+                if(GB2ShapeCache::_sharedGB2ShapeCache){
+                    delete GB2ShapeCache::_sharedGB2ShapeCache;
+                }
+            }
+        };
+        static CGarbo Garbo;
 	};
 }
 

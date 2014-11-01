@@ -1,7 +1,7 @@
 #include "AppDelegate.h"
+#include "common.h"
 #include "LevelsMenu.h"
-
-USING_NS_CC;
+#include "SceneGame.h"
 
 AppDelegate::AppDelegate() {
 
@@ -19,18 +19,18 @@ bool AppDelegate::applicationDidFinishLaunching() {
         glview = GLView::create("My Game");
         director->setOpenGLView(glview);
     }
-    
-    if (glview->getFrameSize().width>768.0) {
-        glview->setDesignResolutionSize(768, 1024, ResolutionPolicy::FIXED_WIDTH);
+    if (director->getWinSize().width>768) {
+         glview->setDesignResolutionSize(768, 1024, ResolutionPolicy::FIXED_HEIGHT);
     }
+   
     // turn on display FPS
-    director->setDisplayStats(true);
+    director->setDisplayStats(false);
 
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0 / 60);
 
     // create a scene. it's an autorelease object
-    auto scene = LevelsMenu::createScene();
+   auto scene = LevelsMenu::createScene();
 
     // run
     director->runWithScene(scene);

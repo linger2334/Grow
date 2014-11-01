@@ -10,6 +10,17 @@
 #include "GameManager.h"
 #include "SceneGame.h"
 #include "GB2ShapeCache-x.h"
+#include "LayerItem.h"
+
+Dragon::Dragon()
+{
+    
+}
+
+Dragon::~Dragon()
+{
+
+}
 
 Dragon* Dragon::create(Item& item)
 {
@@ -42,14 +53,14 @@ bool Dragon::init(Item& item)
         switch (_type) {
             case Dragon_Anti:
             {
-                bodyFilename = "DragonBody_Anti.png";
+                bodyFilename = "DragonTrunk_Anti.png";
                 backFilename = "DragonBack_Anti.png";
                 rotateDirection = -1;
             }
                 break;
             case Dragon_Clockwise:
             {
-                bodyFilename = "DragonBody_Clockwise.png";
+                bodyFilename = "DragonTrunk_Clockwise.png";
                 backFilename = "DragonBack_Clockwise.png";
                 rotateDirection = 1;
             }
@@ -69,11 +80,11 @@ bool Dragon::init(Item& item)
         dragonBack->setPosition(getBoundingBox().size.width/2,getBoundingBox().size.height/2);
         addChild(dragonBack);
         
-        ActionInterval* rotation = RotateBy::create(2*M_PI/w,rotateDirection*360);
-        runAction(RepeatForever::create(rotation));
+        setRotation(CC_RADIANS_TO_DEGREES(item.angle));
+        setScale(item.scale);
         
-        ActionInterval* flickering = FadeTo::create(0.4,255*backTransparency);
-        ActionInterval* flickering_reverse = FadeTo::create(0.4, 255);
+        ActionInterval* flickering = FadeTo::create(1,255*backTransparency);
+        ActionInterval* flickering_reverse = FadeTo::create(1, 255);
         ActionInterval* sequence = Sequence::createWithTwoActions(flickering, flickering_reverse);
         dragonBack->runAction(RepeatForever::create(sequence));
         
@@ -82,11 +93,11 @@ bool Dragon::init(Item& item)
         result = false;
     }
     
-    _collisionCallBack = std::bind(&Dragon::collisionWithPlant, this);
+    _collisionCallBack = std::bind(&Dragon::collisionWithPlant, this,std::placeholders::_1);
     return result;
 }
 
-void Dragon::createBody(std::vector<b2Body*>& bodies)
+void Dragon::createBody()
 {
     b2World* world = GameManager::getInstance()->getBox2dWorld();
     b2BodyDef bodyDef;
@@ -97,14 +108,12 @@ void Dragon::createBody(std::vector<b2Body*>& bodies)
     bodyDef.userData = this;
     _body = world->CreateBody(&bodyDef);
     
-    GB2ShapeCache* shapeCache = GB2ShapeCache::getInstance();
-    shapeCache->addShapesWithFile("Item_fixtures.plist");
     switch (_type) {
         case Dragon_Anti:
-            shapeCache->addFixturesToBody(_body, "Dragon_Anti");
+            ((LayerItem*)getParent())->_fixturesCache->addFixturesToBody(_body, "Dragon_Anti");
             break;
         case Dragon_Clockwise:
-            shapeCache->addFixturesToBody(_body, "Dragon_Clockwise");
+            ((LayerItem*)getParent())->_fixturesCache->addFixturesToBody(_body, "Dragon_Clockwise");
             break;
         default:
             break;
@@ -129,15 +138,13 @@ void Dragon::createBody(std::vector<b2Body*>& bodies)
     bodymassData.mass *= getScale();
     bodymassData.I *= getScale();
     _body->SetMassData(&bodymassData);
-    
-    bodies.push_back(_body);
+    //
+    scheduleUpdate();
 }
 
-void Dragon::collisionWithPlant()
+void Dragon::collisionWithPlant(ItemModel* plantHead)
 {
-    PhysicsHandler* handler = GameManager::getInstance()->getPhysicsHandler();
-    handler->getItemBodies().erase(find(handler->getItemBodies().begin(),handler->getItemBodies().end(),_body));
-    handler->getWorld()->DestroyBody(_body);
+    ((LayerItem*)getParent())->getItems().remove(this);
     this->removeFromParent();
     /////////other effect 
     

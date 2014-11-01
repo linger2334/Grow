@@ -29,12 +29,42 @@ struct Features_Dragon{
     Features_Dragon(const Features_Dragon& );
 };
 
-struct Features_Polygon{
-    bool isConvex;
-    std::vector<std::pair<float,float>> vertexs;
+struct Features_DoubleDragon{
+    float w;
+    float bellyTransparency;
     
-    Features_Polygon(bool isConvex,std::vector<std::pair<float,float>>& vertexs);
-    Features_Polygon(const Features_Polygon& );
+    Features_DoubleDragon(float W = kDefaultDragonW,float BellyTransparency=kDefaultDragonBellyTransparency);
+    Features_DoubleDragon(const Features_DoubleDragon& );
+    
+};
+
+struct Features_Serpent{
+    float absorptionRate;
+    float holeTransparency;
+    
+    Features_Serpent(float AbsorptionRate = kDefaultSerpentAbsorptionRate, float HoleTransparency = kDefaultSerpentHoleTransparency);
+    Features_Serpent(const Features_Serpent& );
+};
+
+struct PolygonInfo{
+    int tag;
+    Vec2 position;
+    bool isConvex;
+    std::vector<Vec2> vertexes;
+    
+    PolygonInfo(int _tag,Vec2 _position,bool _isConvex,std::vector<Vec2>& _vertexes);
+    PolygonInfo(const PolygonInfo& );
+};
+
+struct AnimationInfo{
+    float waitTime;
+    float rotation;
+    float rotationSpeed;
+    float moveSpeed;
+    Vec2 position;
+
+    AnimationInfo(float _waitTime=kDefaultAnimationWaitTime,float _rotation=kDefaultAnimationRotation,float _rotationSpeed=kDefaultAnimationRotationSpeed, float _moveSpeed=kDefaultAnimationMoveSpeed,Vec2 _position= kDefaultAnimationPosition);
+    AnimationInfo(const AnimationInfo&);
 };
 
 struct Item{
@@ -45,14 +75,17 @@ struct Item{
     float angle;
     float scale;
     int localZorder;
-    bool iscreated;
+    bool isAnimated;
+    float triggerTime;
+    std::map<std::string,bool> animationControlInstructions;
+    std::vector<std::vector<AnimationInfo>> animationInfos;
     void* features;
     
-    Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _iscreated = false,void* _features = nullptr);
+    Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _isAnimated,float _triggerTime,std::map<std::string,bool>& _animationControlInstrutcions,std::vector<std::vector<AnimationInfo>>& _animationInfos,void* _features = nullptr);
     
     Item(const Item& );
     ~Item();
-    
+    //容器中是对象时用,指针时需函数指针
     bool operator<(const Item& value)const
     {
         return id < value.id;

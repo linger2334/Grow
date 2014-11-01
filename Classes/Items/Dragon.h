@@ -17,14 +17,16 @@
 class Dragon:public ItemModel
 {
 public:
+    Dragon();
+    ~Dragon();
+    
     static Dragon* create(Item& item);
     bool init(Item& item);
     
-    void createBody(std::vector<b2Body*>& bodies);
-    void collisionWithPlant();
+    void createBody();
+    void collisionWithPlant(ItemModel* plantHead);
 protected:
     friend class LayerItem;
-    b2Body* _body;
     
 };
 

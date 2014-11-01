@@ -9,6 +9,8 @@
 #include "LightNode2.h"
 #include "LayerLight.h"
 #include "LayerDirt.h"
+#include "LayerPlantBase.h"
+
 
 enum MapGridType
 {
@@ -27,7 +29,11 @@ enum SceneGameChildZorder
     MapGoods = MapStone+10,
 //////////////////////////////////////道具和关卡编辑器
     MapItem = MapGoods + 10,
-    MapLevelEditorMenu = 888
+    MapUIBorder =MapItem + 10,
+    MapLight = MapUIBorder + 10,
+    MapUI   =  1000,
+    MapLevelEditorMenu
+  //  MapLevelEditorMenu = 888
 ////////////////////////////////////////////
 };
 //End
@@ -41,99 +47,65 @@ enum SceneGameChildZorder
 #include "LayerItem.h"
 #include "PhysicsHandler.h"
 
-class SceneGame: public Layer,public b2ContactListener
+class LayerUI;
+class LayerUIBorder;
+class LayerMapGrid;
+class SceneGame: public Layer
 {
 //
 public:
     SceneGame();
     ~SceneGame();
-
     static Scene* createScene();
     CREATE_FUNC(SceneGame);
     bool init();
+    virtual  void update(float dt);
+    virtual  void onEnter();
+    virtual  void onExit();
     
     ////////////////////////////////////////////////////////////////Begin
     void  initInfo();
     
     ////////////////////////////////////////////////////////////////
     
-    void _layoutGameLayer(Node* gameLayer);
-    void  MoveDirtLayer(int x);
-    void  MovePlant(int x);
-    void  MoveLayers(int yLen);
-    
-    void  moveDownMapGrid(int moveLen);
-    void  moveDownMapGrid(float yLen);
-    void  moveDownAlphaMask(float yLen);
+    void  _layoutGameLayer(Node* gameLayer);
     void  moveDownGameView(float yLen);
     
-    bool  testMapGridCrash(Vec2 point,int type);//
-    
-    Node* testLight();
-    
-    ////////////////////////////////////////////////////////////////
-    
-    void  moveActionCallBack(float dt);
     
     /////////////////////////////////////////////////////////////////
     virtual bool onTouchBegan(Touch*,Event*);
     virtual void onTouchMoved(Touch*,Event*);
     virtual void onTouchEnded(Touch*,Event*);
-    //    virtual void onTouchCancelled(Touch*,Event*);
+    // virtual void onTouchCancelled(Touch*,Event*);
     
-    void testBorderLine();
+    void  addUIBorderBody();
     
-    
-    std::list<Node*>   _linghtList1;
-    Sprite*          _leftBorder[2];
-    Sprite*          _rightBorder[2];
-    
-    LightNode2*                 linghtNode;
-    MapGrid                     _mapGrid;
-    Sprite*                     _dirtSprite;
-    Texture2D*                  _textureAlphaMask;
+    void  initDirt();
     GameManager*                _gameManager;
-    
-    Sprite*                     _maskAlphaSprite;
-    LayerRollImage*             _backgroundLayer;
-    LayerRollImage*             _dirtLayer;
-    LayerPlant_1*               _plantLayer;
-    LayerBorder*                _borderlayer;
+    LayerUI*                    _layerui;
+    LayerUIBorder*              _layerUIBorder;
+    LayerMapGrid*               _layerMapGrid;
+    LayerRollImage*             _layerBackground;
+    LayerRollImage*             _layerDirt;
+    LayerPlantBase*               _layerPlant;
+    LayerBorder*                _layerBorder;
     LayerGoods1*                _goodsLayer;
-    LayerRollImage*            _borderLeftLayer;
-    LayerRollImage*            _borderRightLayer;
-    LayerLight*                _lightLayer;
+    LayerLight*                 _layerLight;
     
+    bool                _isReGrow;
+    Sprite*                     _btnAddSpeed;
+    Sprite*                     _btnSubSpeed;
     
-    Sprite*             _btnAddSpeed;
-    Sprite*             _btnSubSpeed;
-    bool                        _isMoving;
+    Label*                      _labelHeight;
     
-    std::list<BorderCell>       _borderList;
-    std::map<GridCell,bool>     _borders;
-    
-    std::list<BorderCell>       _borderList1;
-    SpriteBatchNode*            _bordersNode;
-    Plant_1*                    _plantBorder;
-    Node*                       _light;
-    Sprite*                     _spLight;
-    float                       _growHeight;
-    bool                        _isMovingLight;
-    Vector<Sprite*>             _linghtList;
-    float                       _lightListTopHeight;
-    bool                        _lightRuningMove;
-    
-    Sprite*                     _plangHead;
-    Vec2                      _touchPrePoint;
+    float                       _mapHeight;
+    b2Body* _headBody;
     ////////////////////////////////////////////////////////////////End
     
     //场景初始化
     void initPhysics();
     inline PhysicsHandler* getPhysicsHandler() {return _physicsHandler;}
     virtual void draw(Renderer *renderer, const Mat4& transform, uint32_t flags);
-    
-    void update(float dt);
-    
     //editor
     void initLevelEditorMenu();
     friend class GameManager;
@@ -155,8 +127,7 @@ private:
     PhysicsHandler* _physicsHandler;
     TypeBase* plantHead;
 ////////////////////////////////////Begin
-    Sprite*     _lightSprite;
-    
+    Sprite*                     _lightSprite;
 //////////////////////////////////////////////End
 };
 

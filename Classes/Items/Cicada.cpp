@@ -10,6 +10,17 @@
 #include "GameManager.h"
 #include "SceneGame.h"
 #include "GB2ShapeCache-x.h"
+#include "LayerItem.h"
+
+Cicada::Cicada()
+{
+    
+}
+
+Cicada::~Cicada()
+{
+
+}
 
 class Cicada* Cicada::create(Item& item)
 {
@@ -49,6 +60,9 @@ bool Cicada::init(Item& item)
         addChild(_leftwing);
         addChild(_rightwing);
         
+        setRotation(CC_RADIANS_TO_DEGREES(item.angle));
+        setScale(item.scale);
+        
         w = kDefaultCicadaW;
         includedAngle = kDefaultCicadaIncludedAngle;
         fanningDuration = kDefaultCicadaFanningDuration;
@@ -63,20 +77,21 @@ bool Cicada::init(Item& item)
             bellyTransparency = features->bellyTransparency;
         }
         
-        ActionInterval* shine = FadeTo::create(1,bellyTransparency*255);
-        ActionInterval* shine_reverse = FadeTo::create(1, 255);
+        ActionInterval* shine = FadeTo::create(kDefaultFlickeringHalfCycle ,bellyTransparency*255);
+        ActionInterval* shine_reverse = FadeTo::create(kDefaultFlickeringHalfCycle, 255);
         _belly->runAction(RepeatForever::create(Sequence::createWithTwoActions(shine, shine_reverse)));
         
+//        setTexture("Cicada.png");
         result = true;
     }else{
         result = false;
     }
     
-    _collisionCallBack = std::bind(&Cicada::collisionWithPlant, this);
+    _collisionCallBack = std::bind(&Cicada::collisionWithPlant, this,std::placeholders::_1);
     return result;
 }
 
-void Cicada::createBody(std::vector<b2Body*>& bodies)
+void Cicada::createBody()
 {
     b2World* world = GameManager::getInstance()->getBox2dWorld();
     
@@ -88,9 +103,7 @@ void Cicada::createBody(std::vector<b2Body*>& bodies)
     bodyDef.userData = this;
     _body= world->CreateBody(&bodyDef);
     
-    GB2ShapeCache* shapeCache = GB2ShapeCache::getInstance();
-    shapeCache->addShapesWithFile("Item_fixtures.plist");
-    shapeCache->addFixturesToBody(_body, "Cicada");
+    ((LayerItem*)getParent())->_fixturesCache->addFixturesToBody(_body, "Cicada");
     
     for (b2Fixture* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
         b2Shape* shape = fixture->GetShape();
@@ -111,20 +124,24 @@ void Cicada::createBody(std::vector<b2Body*>& bodies)
     bodymassData.mass *= getScale();
     bodymassData.I *= getScale();
     _body->SetMassData(&bodymassData);
-    
-    bodies.push_back(_body);
+    //
+    scheduleUpdate();
 }
 
-void Cicada::collisionWithPlant()
+void Cicada::collisionWithPlant(ItemModel* plantHead)
 {
-    PhysicsHandler* handler = GameManager::getInstance()->getPhysicsHandler();
-    handler->getItemBodies().erase(find(handler->getItemBodies().begin(),handler->getItemBodies().end(),_body));
-    handler->getWorld()->DestroyBody(_body);
-    this->removeFromParent();
+    GameManager::getInstance()->getBox2dWorld()->DestroyBody(_body);
+    _body = nullptr;
+    ((LayerItem*)getParent())->getItems().remove(this);
+    //
+    stopAllActions();
+    ActionInterval* disappear = FadeTo::create(1, 0);
+    CallFunc* remove = CallFunc::create([&](){
+        this->removeFromParent();
+    });
+    runAction(Sequence::create(disappear,remove, NULL));
+    
     /////other effect
-    
-    
-    
-    
+    GameManager::getInstance()->getLayerPlant()->doReGrow(80, 60);
 }
 

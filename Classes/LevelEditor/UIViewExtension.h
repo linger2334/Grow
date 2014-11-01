@@ -50,11 +50,32 @@
 
 @interface ItemView : UIImageView{
 @public Item_Type itemtype;
+@public bool isAnimated;
+@public float triggerTime;
+@public std::map<std::string,bool> _animationControlInstructions;
+@public std::vector<std::vector<AnimationInfo>> _animationInfos;
+@public std::vector<PolygonView*> _pathPoints;
 @public void* features;
 }
+//第一次添加路径点时使用
+@property(nonatomic,assign)int animationGroupCount;
 
 -(id)init:(Item&)item;
 
+-(BOOL)isBorderCreated;
+-(void)addBorder;
+-(void)showBorder;
+-(void)refreshBorder;
+-(void)hideBorder;
+//
+-(void)insertAnimationGroupControlInstructions;
+
+-(void)createAllPathPoints;
+-(PolygonView*)createPathPointWith:(std::vector<AnimationInfo>&)eachGroupCorrespondInfos;
+-(void)translateAllPathPoints:(CGPoint)translation;
+-(void)heightLightPathPoints;
+-(void)cancelHeightLightPathPoints;
+-(std::string)convertTypeToString;
 -(void)dealloc;
 
 @end

@@ -10,6 +10,19 @@
 #include "GameManager.h"
 #include "SceneGame.h"
 #include "GB2ShapeCache-x.h"
+#include "LayerItem.h"
+#include "LayerLight.h"
+
+
+Flame::Flame()
+{
+    
+}
+
+Flame::~Flame()
+{
+
+}
 
 Flame* Flame::create(Item& item)
 {
@@ -47,16 +60,20 @@ bool Flame::init(Item& item)
             default:
                 return false;
         }
+        
+        setRotation(CC_RADIANS_TO_DEGREES(item.angle));
+        setScale(item.scale);
+        
         result = true;
     }else{
         result = false;
     }
     
-    _collisionCallBack = std::bind(&Flame::collisionWithPlant, this);
+    _collisionCallBack = std::bind(&Flame::collisionWithPlant, this,std::placeholders::_1);
     return result;
 }
 
-void Flame::createBody(std::vector<b2Body*>& bodies)
+void Flame::createBody()
 {
     b2World* world = GameManager::getInstance()->getBox2dWorld();
     b2BodyDef bodyDef;
@@ -67,23 +84,22 @@ void Flame::createBody(std::vector<b2Body*>& bodies)
     bodyDef.userData = this;
     _body = world->CreateBody(&bodyDef);
     
-    GB2ShapeCache* shapeCache = GB2ShapeCache::getInstance();
-    shapeCache->addShapesWithFile("Item_fixtures.plist");
+    GB2ShapeCache* _fixturesCache = ((LayerItem*)getParent())->_fixturesCache;
     switch (_type) {
         case Flame_Red:
-            shapeCache->addFixturesToBody(_body, "Flame_Red");
+            _fixturesCache->addFixturesToBody(_body, "Flame_Red");
             break;
         case Flame_Green:
-            shapeCache->addFixturesToBody(_body, "Flame_Green");
+            _fixturesCache->addFixturesToBody(_body, "Flame_Green");
             break;
         case Flame_Blue:
-            shapeCache->addFixturesToBody(_body, "Flame_Blue");
+            _fixturesCache->addFixturesToBody(_body, "Flame_Blue");
             break;
         case Flame_White:
-            shapeCache->addFixturesToBody(_body, "Flame_White");
+            _fixturesCache->addFixturesToBody(_body, "Flame_White");
             break;
         case Flame_Orange:
-            shapeCache->addFixturesToBody(_body, "Flame_Orange");
+            _fixturesCache->addFixturesToBody(_body, "Flame_Orange");
             break;
         default:
             break;
@@ -108,23 +124,32 @@ void Flame::createBody(std::vector<b2Body*>& bodies)
     bodymassData.mass *= getScale();
     bodymassData.I *= getScale();
     _body->SetMassData(&bodymassData);
-    
-    bodies.push_back(_body);
+    //
+    scheduleUpdate();
 }
-
-void Flame::collisionWithPlant()
+#include "LayerPlant.h"
+void Flame::collisionWithPlant(ItemModel* plantHead)
 {
+   // if((int)getUserData()==100)return;
     PhysicsHandler* handler = GameManager::getInstance()->getPhysicsHandler();
-    handler->getItemBodies().erase(find(handler->getItemBodies().begin(),handler->getItemBodies().end(),_body));
     handler->getWorld()->DestroyBody(_body);
-    
-    this->removeFromParent();
+    _body = nullptr;
+    ((LayerItem*)getParent())->getItems().remove(this);
+    stopAllActions();
+   // this->removeFromParent();
     /////other effect
-    
-    
+    auto fadeout = FadeTo::create(1, 0);
+    auto call = CallFuncN::create([=](Node* node)
+                                 {
+                                      Vec2 pt = getPosition();
+                                     node->removeFromParent();
+                                    GameManager::getInstance()->getLayerLight()->addOneLight(pt);
+                               
+                                 });
+    Sequence* seq = Sequence::create(fadeout,call,nullptr);
+    this->runAction(seq);
+  
 }
-
-
 
 
 

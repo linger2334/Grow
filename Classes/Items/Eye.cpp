@@ -10,6 +10,18 @@
 #include "GameManager.h"
 #include "SceneGame.h"
 #include "GB2ShapeCache-x.h"
+#include "LayerItem.h"
+
+
+Eye::Eye()
+{
+    
+}
+
+Eye::~Eye()
+{
+
+}
 
 class Eye* Eye::create(Item& item)
 {
@@ -29,16 +41,19 @@ bool Eye::init(Item& item)
     if (ItemModel::init(item)) {
         setTexture("Eye.png");
         
+        setRotation(CC_RADIANS_TO_DEGREES(item.angle));
+        setScale(item.scale);
+        
         result = true;
     }else{
         result = false;
     }
     
-    _collisionCallBack = std::bind(&Eye::collisionWithPlant, this);
+    _collisionCallBack = std::bind(&Eye::collisionWithPlant,this,std::placeholders::_1);
     return result;
 }
 
-void Eye::createBody(std::vector<b2Body*>& bodies)
+void Eye::createBody()
 {
     b2World* world = GameManager::getInstance()->getBox2dWorld();
     b2BodyDef bodyDef;
@@ -49,10 +64,7 @@ void Eye::createBody(std::vector<b2Body*>& bodies)
     bodyDef.userData = this;
     _body = world->CreateBody(&bodyDef);
     
-    GB2ShapeCache* shapeCache = GB2ShapeCache::getInstance();
-    shapeCache->addShapesWithFile("Item_fixtures.plist");
-    
-    shapeCache->addFixturesToBody(_body, "Eye");
+    ((LayerItem*)getParent())->_fixturesCache->addFixturesToBody(_body, "Eye");
     
     for (b2Fixture* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
         b2Shape* shape = fixture->GetShape();
@@ -73,16 +85,13 @@ void Eye::createBody(std::vector<b2Body*>& bodies)
     bodymassData.mass *= getScale();
     bodymassData.I *= getScale();
     _body->SetMassData(&bodymassData);
-    
-    bodies.push_back(_body);
+    //
+    scheduleUpdate();
 }
 
-void Eye::collisionWithPlant()
+void Eye::collisionWithPlant(ItemModel* plantHead)
 {
-    PhysicsHandler* handler = GameManager::getInstance()->getPhysicsHandler();
-    handler->getItemBodies().erase(find(handler->getItemBodies().begin(),handler->getItemBodies().end(),_body));
-    handler->getWorld()->DestroyBody(_body);
-    
+    ((LayerItem*)getParent())->getItems().remove(this);
     this->removeFromParent();
     /////other effect
     
