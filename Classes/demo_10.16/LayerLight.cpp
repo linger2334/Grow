@@ -9,16 +9,11 @@ bool  LayerLight::init()
     _lightBatch = SpriteBatchNode::create("light_2.png");
     addChild(_lightBatch);
     GameManager::getInstance()->_layerLight = this;
-      srand(time(nullptr));
-    for (int i=0; i<5; i++) {
-      
-        Vec2 randPt((rand()%11)*50+50,(rand()%11)*60+200);
-        addOneLight(randPt);
-    }
     return true;
 }
 void LayerLight::addOneLight(Vec2 ptlight)
 {
+    //return ;
     srand(time(nullptr));
     float height = rand()%20+40 ;
     if (!_lightListFirst.empty()) {
@@ -27,7 +22,7 @@ void LayerLight::addOneLight(Vec2 ptlight)
     }
     LightNode2* nodelinght =  LightNode2::create();
     nodelinght->_cpList = &GameManager::getInstance()->getCPListRefByIndex(0);
-    nodelinght->_plantNode = GameManager::getInstance()->getLayerPlant()->_plant;
+    nodelinght->_plantNode = ((LayerPlant_1*)(GameManager::getInstance()->getLayerPlant()))->_plant;
     nodelinght->initByTopHeight(height);
     nodelinght->_isAutoMoving = true;
     
@@ -39,6 +34,7 @@ void LayerLight::addOneLight(Vec2 ptlight)
 }
 void  LayerLight::addOneLight()
 {
+       // return ;
     srand(time(nullptr));
     float height = rand()%20+40 ;
     if (!_lightListFirst.empty()) {
@@ -47,7 +43,7 @@ void  LayerLight::addOneLight()
     }
     LightNode2* nodelinght =  LightNode2::create();
     nodelinght->_cpList = &GameManager::getInstance()->getCPListRefByIndex(0);
-    nodelinght->_plantNode = GameManager::getInstance()->getLayerPlant()->_plant;
+    nodelinght->_plantNode = ((LayerPlant_1*)(GameManager::getInstance()->getLayerPlant()))->_plant;
     nodelinght->initByTopHeight(height);
     nodelinght->_isAutoMoving = true;
     
@@ -84,7 +80,7 @@ LightNode2*  LayerLight::createOneLightNode(float height)
 {
     LightNode2* nodelinght =  LightNode2::create();
     nodelinght->_cpList = &GameManager::getInstance()->getCPListRefByIndex(0);
-    nodelinght->_plantNode = GameManager::getInstance()->getLayerPlant()->_plant;
+    nodelinght->_plantNode = ((LayerPlant_1*)(GameManager::getInstance()->getLayerPlant()))->_plant;
     nodelinght->initByTopHeight(height*40);
     
     nodelinght->_isAutoMoving = true;;
@@ -120,7 +116,43 @@ Node*      LayerLight::createOneSpriteLight()
     return light;
     
 }
-
+void LayerLight::removeOneLight(Vec2 ptlight)
+{
+   
+    if(_lightListFirst.empty())return;
+    
+   auto light = _lightListFirst.back();
+    //
+    light->_state = LightNode2::LightNode2::StateStop;
+    Vec2 v2 =light->getPosition() ;
+    Vec2 v1 =  ptlight;
+    
+    
+    Vec2 cp1 = (v1 - v2)*0.3;
+    Vec2 cp2 = (v1 - v2)*0.7;
+    
+    Vec2 tcp1 = MathHelper::getRotatePosition(v2, v2+cp1, 45);
+    Vec2 tcp2 = MathHelper::getRotatePosition(v2, v2+cp2, 45);
+    
+    ccBezierConfig v;
+    v.controlPoint_1 = tcp1 - v2;
+    v.controlPoint_2 = tcp2 - v2;
+    v.endPosition = v1 -v2;
+    
+    BezierBy* bezier = BezierBy::create(2.5, v);
+    FadeOut* fade= FadeOut::create(0.6);
+    CallFuncN* call = CallFuncN::create([=](Node* node)
+                                        {
+                                            _lightListFirst.remove((LightNode2*)node);
+                                            node->removeFromParent();
+                                        });
+    
+    Sequence* seq = Sequence::create(bezier,fade,call,nullptr);
+    light->stopAllActions();
+    
+    light->runAction(seq);
+    
+}
 void LayerLight::lightCallback(Node* node1)
 {
     srand(time(nullptr));

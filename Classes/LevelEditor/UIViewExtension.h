@@ -62,6 +62,8 @@
 
 -(id)init:(Item&)item;
 
+-(float)getRotateAngle;
+
 -(BOOL)isBorderCreated;
 -(void)addBorder;
 -(void)showBorder;

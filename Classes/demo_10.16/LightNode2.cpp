@@ -67,7 +67,7 @@ bool LightNode2::init()
 }
 void LightNode2::update(float dt)
 {
-    
+    if(_state == StateStop)return;
     if(isStateNeedInit())
     {
          doInitState();
@@ -179,23 +179,31 @@ void  LightNode2::runInitAction()
     this->setOpacity(0);
     FadeTo* fadeTo = FadeTo::create(INIT_ACTION_TIME,MIN_OPACITY);
     Vec2 pt = _initEndPosition - this->getPosition();
-    MoveBy* moveTo = MoveBy::create(1.5,pt);
+    // MoveBy* moveTo = MoveBy::create(1.5,pt);
     
     auto call = CallFuncN::create([](Node* node)
                                   {
                                       static_cast<LightNode2*>(node)->doNormalState();
                                   });
-//    ccBezierConfig v;
-//    v.controlPoint_1 = this->getPosition();
-//    v.controlPoint_2 =
-//    v.endPosition = _initEndPosition;
-//
-//    v.controlPoint_1 = convertToNodeSpace(ccp(140, 200));
-//    v.controlPoint_2 = convertToNodeSpace(ccp(320, 50));
-//    v.endPosition = convertToNodeSpace(ccp(500, 300));
-//    Action* action = BezierTo::create(3, v);
-//    sprite->runAction(action);
-    Sequence* seq = Sequence::create(fadeTo,moveTo,call,nullptr);
+    Vec2 v2 =getPosition();
+    Vec2 v1 = this->_initEndPosition;
+    
+    //float len = v1.getDistance(v2);
+    
+    Vec2 cp1 = (v1 - v2)*0.3;
+    Vec2 cp2 = (v1 - v2)*0.7;
+    
+    Vec2 tcp1 = MathHelper::getRotatePosition(v2, v2+cp1, 45);
+    Vec2 tcp2 = MathHelper::getRotatePosition(v2, v2+cp2, 45);
+    
+    ccBezierConfig v;
+    v.controlPoint_1 = tcp1 - v2;
+    v.controlPoint_2 = tcp2 - v2;
+    v.endPosition = v1 -v2;
+    
+    BezierBy* bezier = BezierBy::create(1.5, v);
+    
+    Sequence* seq = Sequence::create(fadeTo,bezier,call,nullptr);
     
     this->runAction(seq);
     

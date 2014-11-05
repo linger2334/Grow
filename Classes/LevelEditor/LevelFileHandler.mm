@@ -40,6 +40,8 @@ bool LevelFileHandler::init(const char *filename)
 {
     _filename = filename;
     _polygonsDict = nullptr;
+    scrollViewZoomFactor = 1.0;
+    scrollViewContentOffSet = (PAGE_COUNTS-1)*WinSize.height;
     this->loadFile();
     return true;
 }

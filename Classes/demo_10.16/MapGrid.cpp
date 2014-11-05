@@ -42,7 +42,7 @@ bool MapGrid::_isNeedDelete(int x,int y ,int stepX,int stepY,int lenLoop,int len
 
 void MapGrid::_checkClear(int x,int y, int width,int height)
 {
-    static int _sclear_width =6;
+    static int _sclear_width =4;
     //  std::list<GridCell> clearlist;
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
@@ -56,8 +56,8 @@ void MapGrid::_checkClear(int x,int y, int width,int height)
             }
             if(_isNeedDelete(tx, ty, 1, 0, _sclear_width*2+1, _sclear_width)||
                _isNeedDelete(tx, ty, 0, 1, _sclear_width*2+1, _sclear_width)||
-               _isNeedDelete(tx, ty, -1, 1, _sclear_width*2+1, 4)||
-               _isNeedDelete(tx, ty, 1, 1, _sclear_width*2+1, 4))
+               _isNeedDelete(tx, ty, -1, 1, _sclear_width*2+1, 2)||
+               _isNeedDelete(tx, ty, 1, 1, _sclear_width*2+1, 2))
             {
                 changeGridCell(tx,ty,GridType::None);
             }
@@ -75,8 +75,9 @@ void  MapGrid::changeGridCell(int x,int y,unsigned char type)
         GridCell cell(x,y);
         if(_layerBorder->isHasBorder(cell))
         {
+            if(_layerPlant)
             _layerPlant->removeLightBorderByCell(cell._y*_gridWidth+cell._x);
-            _layerBorder->removeBorder(cell);
+            if (_layerBorder)  _layerBorder->removeBorder(cell);
         }
     }
     setValue(x, y, type);
@@ -93,7 +94,7 @@ bool  MapGrid::touchClearGrid(Point touchPoint)
     GridCell cell = getMapGridCellByPosition(touchPoint);
    // log("Touch Clear Grid x: %f , y: %f",touchPoint.x,touchPoint.y);
   // return   clearGridCell(cell._x,cell._y);
-    return clearGridCellBorderByRange(cell,8)>0;
+    return clearGridCellBorderByRange(cell,6)>0;
 }
 void MapGrid::testClear(int x,int y,int len)
 {
@@ -184,14 +185,17 @@ int  MapGrid::clearGridCellBorderByRange(GridCell cell, int radius)
     int isClear = -1;
     int radiusEQ = radius*radius;
      std::list<GridCell> clearList;
+    int count =0;
     for (; y1<cell._y+radius; y1++) {
          for (x1= cell._x-radius; x1<cell._x+radius; x1++) {
-              if (isOutMapGrid(x1, y1))continue;
+             
                 int w1,h1;
                 w1 = abs(x1 - cell._x);
                 h1 = abs(y1 - cell._y);
                 if (w1*w1 + h1*h1 < radiusEQ)
                 {
+                    count++;
+                    if (isOutMapGrid(x1, y1))continue;
                     GridCell tempCell(x1,y1);
                     if(getValue(tempCell._x, tempCell._y)==GridType::Dirt)
                     {
@@ -205,9 +209,9 @@ int  MapGrid::clearGridCellBorderByRange(GridCell cell, int radius)
                 }
             }
       }
-    if(clearList.size()>=180)return -1;
-    
-    //  _layerPlant->removeBorderLight();
+    if(clearList.size()>=count-4)return -1;
+//    if(_layerPlant)
+//     _layerPlant->removeBorderLight();
     auto ip =clearList.begin();
     auto end = clearList.end();
     while (ip!=end) {
@@ -217,7 +221,7 @@ int  MapGrid::clearGridCellBorderByRange(GridCell cell, int radius)
 #define CLEAR_RANG 6
     if (isClear >0) {
         int xstep= cell._x- radius-CLEAR_RANG,ystep= cell._y- radius-CLEAR_RANG,wstep=radius*2+CLEAR_RANG*2,hstep= radius*2+CLEAR_RANG*2;
-       _checkClear(xstep,ystep,wstep,hstep);
+        _checkClear(xstep,ystep,wstep,hstep);
         _layerBorder->updateBorder(xstep,ystep,wstep,hstep);
     }
     return isClear;

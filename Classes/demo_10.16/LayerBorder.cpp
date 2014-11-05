@@ -4,7 +4,7 @@
 #include "MathHelper.h"
 #include "BorderLine.h"
 #include "TypeBase.h"
-
+#include "Macro.h"
 #define BORDER_WIDTH 32
 #define TABLE(T) _sQuadVecMap.insert(std::make_pair(T,quad))
 #define BORDER_HEIGHT 8.0f
@@ -571,8 +571,8 @@ void LayerBorder::addBorderLineToBox2dWorld(const BorderLine& line)
         QuadVec vec = _sQuadVecMap.find(i._maskDir)->second;
         
         auto p = _mapGrid->getPositionByMapGridCell(i._cell);
-       // auto pt =Vec2(vec.rb.x,vec.rb.y)+ p;
-        auto pt = Vec2(4,4)+p;
+        auto pt =Vec2(vec.rb.x,vec.rb.y)+ p;
+        //auto pt = Vec2(4,4)+p;
         auto v = b2Vec2(pt.x / PTM_RATIO, pt.y / PTM_RATIO);
     
         if(index > 0 && ((int)v.x == (int)verts[index-1].x)&&

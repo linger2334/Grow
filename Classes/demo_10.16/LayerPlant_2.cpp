@@ -1,4 +1,4 @@
-#include "LayerPlant.h"
+#include "LayerPlant_2.h"
 #include "GameManager.h"
 #include "ContorlPoint.h"
 #include "LayerLight.h"
@@ -28,8 +28,9 @@
 #define MAX_GROW_ANGLE_LEFT  (-90)
 #define MAX_GROW_ANGLE_RIGHT 90
 
+
 #define CRASH_TEST_LENGTH_2 80
-bool LayerPlant_1::init()
+bool LayerPlant_2::init()
 {
     LayerPlantBase::init();
     GameManager::getInstance()->_layerplant = this;
@@ -48,117 +49,84 @@ bool LayerPlant_1::init()
     _plant = Plant_1::create();
     _plant->initPlantInfo(HeadCursorV2(ContorlPointV2(Vec2(0,0),80,0,0),HEAD_HEIGHT,ROTATE_LENGTH),GROW_HEIGHT);
     addChild(_plant);
- 
+    
     _plant->setPosition(Vec2(Director::getInstance()->getWinSize().width*0.5f,0));
-    _plant1 = Plant_1::create();
-    _plant1->initPlantInfo(HeadCursorV2(ContorlPointV2(Vec2(0,0),80,-30,0),HEAD_HEIGHT,ROTATE_LENGTH),GROW_HEIGHT);
-    addChild(_plant1);
-    _plant1->setPosition(Vec2(Director::getInstance()->getWinSize().width*0.55f,0));
-
+    
     _isNeedGrow =true;
-
+    
     _leafTopHeight = _plant->_headCur._cp._height;
     _left =true;
     Size size = GameManager::getInstance()->getVisibleSize();
-
-    _render = RenderTexture::create(size.width, size.height);
-
+    //  _plant->setVisible(false);
+    _render = RenderTexture::create(size.width, size.height, Texture2D::PixelFormat::RGBA8888);
+    
     _render->setPosition(Vec2(size.width*0.5,size.height*0.5));
-    //addChild(_render);
-   // _plant->setVisible(false);
+    
     setGrowSpeed(GROW_STEP);
     _islightRuningAction=false;
     _world = GameManager::getInstance()->getBox2dWorld();
     _isCheckAddleaf = false;
     createHeadB2Body();
     updateHeadB2Body();
-    for (int i =0; i<100;i++) {
-        growDirList.push_back(FaceRight);
-        growDirList1.push_back(FaceLeft);
-    }
-    for (int i =0; i<120;i++) {
-        growDirList.push_back(FaceLeft);
-        growDirList1.push_back(FaceRight);
-    }
-//    for (int i =0; i<100;i++) {
-//        growDirList.push_back(FaceTop);
-//    }
-    for (int i =0; i<240;i++) {
-        growDirList.push_back(FaceRight);
-        growDirList1.push_back(FaceLeft);
-    }
-//    for (int i =0; i<100;i++) {
-//        growDirList.push_back(FaceTop);
-//    }
-    _plantBody =nullptr;
+    
     return true;
 }
 
-float LayerPlant_1::getPlantTopHeightInView()
+float LayerPlant_2::getPlantTopHeightInView()
 {
-    return _plant->convertToWorldSpace(_plant->_cpLineNode._cpList.back()._point).y;
+    return _plant->convertToWorldSpace(_plant->_headCur.getPosition()).y;
 }
-void LayerPlant_1::renderPlant()
+void LayerPlant_2::renderPlant()
 {
- 
+    
     return ;
-   _plant->setVisible(true);
-
-   _render->beginWithClear(0, 0, 0, 0);
-   _plant->visit();
-   _render->end();
-   _plant->setVisible(false);
+    _plant->setVisible(true);
+    
+    _render->beginWithClear(0, 0, 0, 0);
+    _plant->visit();
+    _render->end();
+    _plant->setVisible(false);
 }
-void LayerPlant_1::onEnter()
+void LayerPlant_2::onEnter()
 {
     GameLayerRollY::onEnter();
     CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("plant_grow_music_1.mp3");
     
     _musicId =CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("plant_grow_music_1.mp3",true);
     CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(_musicId);
-    CocosDenshion::SimpleAudioEngine::getInstance()->setEffectsVolume(0.0);
+    CocosDenshion::SimpleAudioEngine::getInstance()->setEffectsVolume(0.02);
 }
-void LayerPlant_1::onExit()
+void LayerPlant_2::onExit()
 {   GameLayerRollY::onExit();
-  
+    
     CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(_musicId);
-
+    
+    //if(_plant)_plant->onExit();
 }
-void  LayerPlant_1::update(float dt)
+void  LayerPlant_2::update(float dt)
 {
-//    if (!growDirList.empty()) {
-//       // grow2(growDirList.back());
-//        _plant->_headCur._rotateLenght =100;
-//        _plant1->_headCur._rotateLenght =100;
-//        _plant1->grow((FaceDirection)growDirList.front(), 1);
-//        _plant->grow((FaceDirection)growDirList1.front(), 1);
-//        growDirList.pop_front();
-//        growDirList1.pop_front();
-//        updateHead(dt);
-//    }
-//    return;
     if(GameManager::getInstance()->isPause())
     {
         CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(_musicId);
         return;
     }
-      bool isGrow =false;
+    bool isGrow =false;
     if (_isReGrow) {
         if(reGrow(dt)<=0)
             _isReGrow = false;
-         updateHead(dt);
+        updateHead(dt);
         isGrow = true;
     }
     else
     {
         float growLen = _growSpeed*dt;
         while (growLen>0) {
-        growLen = grow2(growLen);
-        if(growLen >= 0)
-        {
-            isGrow =true;
-            updateHead(dt);
-        }
+            growLen = grow2(growLen);
+            if(growLen >= 0)
+            {
+                isGrow =true;
+                updateHead(dt);
+            }
         }
     }
     
@@ -179,8 +147,8 @@ void  LayerPlant_1::update(float dt)
     if (isGrow) {
         CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(_musicId);
         updateHeadB2Body();
-         renderPlant();
-        //updatePlantLine(_plant);
+        renderPlant();
+        
     }
     else
     {
@@ -188,15 +156,15 @@ void  LayerPlant_1::update(float dt)
         _musicId =CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("plant_grow_music_1.mp3",true);
         CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(_musicId);
     }
-
+    
 }
- void  LayerPlant_1::doReGrow(float speed, float len)
+void  LayerPlant_2::doReGrow(float speed, float len)
 {
     _isReGrow = true;
     _reGrowSpeed = speed;
     _reGrowLength = len;
 }
-int   LayerPlant_1::reGrow(float dt)
+int   LayerPlant_2::reGrow(float dt)
 {
     float ret = 0;
     float reGrowLen = _reGrowSpeed*dt;
@@ -224,9 +192,9 @@ int   LayerPlant_1::reGrow(float dt)
     _plant->_headCur._cp._radius = radius;
     return ret;
 }
-void  LayerPlant_1::checkAddLeaf()
+void  LayerPlant_2::checkAddLeaf()
 {
-   
+    
     float randlen = rand()%LEAF_RAND_LENGTH+LEAF_LENGHT;
     if (_isCheckAddleaf &&  _plant->_headCur._cp._height - _leafTopHeight > 40)
     {
@@ -245,7 +213,7 @@ void  LayerPlant_1::checkAddLeaf()
         {
             sp->setAnchorPoint(Vec2(0,0.5));
             angle =   _plant->_headCur._cp._angle-30 + 22 -rand()%20;
-            _left = true;         
+            _left = true;
         }
         float time = (_growSpeed - 30.0f)/ 210.0f;
         FadeIn* fadein = FadeIn::create(2- time*1.2);
@@ -266,9 +234,9 @@ void  LayerPlant_1::checkAddLeaf()
 }
 
 
-void LayerPlant_1::getPlantRayCrashLength(float outLens[3])
+void LayerPlant_2::getPlantRayCrashLength(float outLens[3])
 {
- 
+    
     Vec2 cpt = CONVERT(_plant->_headCur._cp.getTopPositionByLength(MAX_CRASH_RAY_LENGTH));
     Vec2 cpo = CONVERT(_plant->_headCur.getPosition());
     static int angles[3] = { -40 , 0 ,40};
@@ -283,28 +251,28 @@ void LayerPlant_1::getPlantRayCrashLength(float outLens[3])
     }
 }
 
-bool    LayerPlant_1::isRayCastCrashStone(Vec2 pt)
+bool    LayerPlant_2::isRayCastCrashStone(Vec2 pt)
 {
     RayCastStoneCallback cash;
     Vec2 po = CONVERT( _plant->_headCur.getPosition());
     _world->RayCast(&cash,b2Vec2(po.x/PTM_RATIO,po.y/PTM_RATIO), b2Vec2(pt.x/PTM_RATIO,pt.y/PTM_RATIO));
     return cash._crash;
 }
-bool    LayerPlant_1::isRayCastCrashMapGrid(Vec2 pt)
+bool    LayerPlant_2::isRayCastCrashMapGrid(Vec2 pt)
 {
     RayCastMapGridCallback cash;
     Vec2 po = CONVERT( _plant->_headCur.getPosition());
     _world->RayCast(&cash,b2Vec2(po.x/PTM_RATIO,po.y/PTM_RATIO), b2Vec2(pt.x/PTM_RATIO,pt.y/PTM_RATIO));
     return cash._crash;
 }
-bool   LayerPlant_1::isRayCastCrash(Vec2 pt)
+bool   LayerPlant_2::isRayCastCrash(Vec2 pt)
 {
     RayCastCallback cash;
     Vec2 po = CONVERT( _plant->_headCur.getPosition());
     _world->RayCast(&cash,b2Vec2(po.x/PTM_RATIO,po.y/PTM_RATIO), b2Vec2(pt.x/PTM_RATIO,pt.y/PTM_RATIO));
     return cash._crash;
 }
-bool   LayerPlant_1::isCashPoint(Vec2 pt, int type)
+bool   LayerPlant_2::isCashPoint(Vec2 pt, int type)
 {
     RayCastCallback cash;
     Vec2 po = CONVERT( _plant->_headCur.getPosition());
@@ -312,40 +280,46 @@ bool   LayerPlant_1::isCashPoint(Vec2 pt, int type)
     return cash._crash||isMapGridCrash(pt); //isCrashPointGridAndStone(pt);
 }
 
-bool   LayerPlant_1::isCrashPointGridAndStone(Vec2 pt)
+bool   LayerPlant_2::isCrashPointGridAndStone(Vec2 pt)
 {
     return isRayCastCrashMapGrid(pt)||isRayCastCrashStone(pt)||_gameManager->_physicsHandler->isPointContact(pt);
 }
-
-GrowContext LayerPlant_1::getMinRangeCanGrowContext()
+class QueryAABBCallBack :public b2QueryCallback
+{
+public:
+    virtual bool ReportFixture(b2Fixture* fixture);
+};
+GrowContext LayerPlant_2::getMinRangeCanGrowContext()
 {
     GrowContext canGrow(true);
+    
     bool isMapCrashLeft = false,isMapCrashRight = false,
     isStoneCrashleft = false,isStoneCrashRight=false;
-    Vec2 leftNext = CONVERT(_plant->getNextGrowUnitLengthPosition(FaceLeft));
-    Vec2 rightNext = CONVERT(_plant->getNextGrowUnitLengthPosition(FaceRight));
+    Vec2 leftNext=CONVERT(_plant->getNextGrowUnitLengthPosition(FaceLeft));
+    Vec2 rightNext =CONVERT(_plant->getNextGrowUnitLengthPosition(FaceRight));
     isMapCrashLeft = isRayCastCrashMapGrid(leftNext);
     isMapCrashRight = isRayCastCrashMapGrid(rightNext);
     isStoneCrashleft = isStoneCrash(leftNext);
     isStoneCrashRight = isStoneCrash(rightNext);
+    
     bool isCrashTop = isCrashPointGridAndStone(CONVERT(_plant->getNextGrowUnitLengthPosition(FaceTop)));
-
+    
     float headAngle = _plant->_headCur.getAngle();
     bool isCrashLeft = isMapCrashLeft||isStoneCrashleft;
     bool isCrashRight = isMapCrashRight || isStoneCrashRight;
-
+    
     if (isCrashLeft)
     {
-       canGrow._left = false;
+        canGrow._left = false;
     }
     if (isCrashRight) {
-       canGrow._right = false;
+        canGrow._right = false;
     }
     if (isCrashTop) {
         canGrow._top =false;
     }
-
-    float angle1 = 120;
+    
+    float angle1 = 90;
     if (isStoneCrashleft&&isStoneCrashRight) {
         angle1 = 130;
         auto  cptop = _plant->_headCur._cp;
@@ -355,8 +329,7 @@ GrowContext LayerPlant_1::getMinRangeCanGrowContext()
         
         Vec2 cpl = cptop.getPositionLeftByLength(60);
         Vec2 cpo = cptop.getContorlPosition();
-        //Vec2 cpl = cpo + Vec2(-60,0);
-        
+        // Vec2 cpl = cpo + Vec2(-60,0);
         float stepAnalge = 180.0f /9.0f;
         for (int i = 0 ; i< 9 ; i++) {
             
@@ -379,23 +352,20 @@ GrowContext LayerPlant_1::getMinRangeCanGrowContext()
         else if (rc>= lc && !isMapCrashRight)canGrow._right = true;
     }
     Vec2 cpo = _plant->_headCur.getPosition();
-    bool isHeadInStone = isStoneCrash(CONVERT(cpo));
-    bool isTestStoneLeft = isRayCastCrashStone(CONVERT((cpo+Vec2(-100,0))));
-    bool isTestStoneRight = isRayCastCrashStone(CONVERT((cpo+Vec2(100,0))));
+    bool isTestStoneLeft =isStoneCrash(CONVERT(cpo+Vec2(-80,0)));
+    bool isTestStoneRight = isStoneCrash(CONVERT(cpo+Vec2(80,0)));
     
     float angleLeft = -angle1;
-    float angleRight = angle1;
-    
-    if (!isHeadInStone) {
-        if (isTestStoneLeft) {
-            angleLeft = -40;
-        }
-        if (isTestStoneRight)
-        {
-            angleRight =  40;
-        }
+    if (isTestStoneLeft) {
+        angleLeft = -40;
     }
-
+    float angleRight = angle1;
+    if (isTestStoneRight)
+    {
+        angleRight = 40;
+    }
+    
+    
     if( headAngle < angleLeft)
     {
         canGrow._left = false;
@@ -425,7 +395,7 @@ GrowContext LayerPlant_1::getMinRangeCanGrowContext()
     return canGrow;
 }
 
- int   LayerPlant_1::getPlantHeadViewWidthType()
+int   LayerPlant_2::getPlantHeadViewWidthType()
 {
     int ret ;
     float  x = CONVERT(_plant->_headCur.getPosition()).x;
@@ -436,12 +406,12 @@ GrowContext LayerPlant_1::getMinRangeCanGrowContext()
     return ret;
 }
 
-void LayerPlant_1::getGroeDirListTest( std::vector<FaceDirection>& dirList)
+void LayerPlant_2::getGroeDirListTest( std::vector<FaceDirection>& dirList)
 {
     int type = getPlantHeadViewWidthType();
     int listtype = 0;
     float angle =_plant->_headCur.getAngle();
-      listtype = angle                                                                                                                                                                                                       <= 0 ? 1:2;
+    listtype = angle                                                                                                                                                                                                       <= 0 ? 1:2;
     if (listtype == 1) {
         dirList.push_back(FaceDirection::FaceRight);
         dirList.push_back(FaceDirection::FaceLeft);
@@ -453,21 +423,20 @@ void LayerPlant_1::getGroeDirListTest( std::vector<FaceDirection>& dirList)
     }
 }
 
-GrowContext LayerPlant_1::getRayGrowLength(float vec[3],float testLength)
+GrowContext LayerPlant_2::getRayGrowLength(float vec[3],float testLength)
 {
-   GrowContext canGrow(false);
-   if(vec[FaceLeft] > testLength){ canGrow._left  = true;}
-   if(vec[FaceRight] > testLength){ canGrow._right  = true;}
-   return canGrow;
+    GrowContext canGrow(false);
+    
+    if(vec[FaceLeft] > testLength){ canGrow._left  = true;}
+    if(vec[FaceRight] > testLength){ canGrow._right  = true;}
+    return canGrow;
 }
-float LayerPlant_1::grow2(float len)
+float LayerPlant_2::grow2(float len)
 {
-
     float retLen = -1;
     
     bool isGrow = false;
     FaceDirection trnDir;
-    
     
     auto minGrow = getMinRangeCanGrowContext();
     std::vector<FaceDirection> growDirList;
@@ -476,7 +445,7 @@ float LayerPlant_1::grow2(float len)
     GrowContext canGrow(false);
     getPlantRayCrashLength(vecLen);
     getGroeDirListTest(growDirList);
-
+    
     for (int i =0 ; i<4; i++)
     {
         GrowContext grow;
@@ -486,21 +455,17 @@ float LayerPlant_1::grow2(float len)
         {
             if(minGrow.isCanGrowByDir(ip)&& grow.isCanGrowByDir(ip))
             {
-                    isGrow = true;
-                    trnDir = ip;
-                    break ;
+                isGrow = true;
+                trnDir = ip;
+                break ;
             }
         }
-            if (isGrow )break;
+        if (isGrow )break;
     }
     
     _plant->_headCur._rotateLenght = 60;
-    //_plant1->_headCur._rotateLenght = 60;
     if (isGrow) {
         retLen =_plant->grow(trnDir, len);
-//        auto   trnDir1 = trnDir==FaceLeft? FaceRight:FaceLeft;
-        //auto turndir1 = getPlantGrowDir(_plant1,_plant);
-      // _plant1->grow(turndir1, len);
         if(retLen>0)
             if (_plant->_headCur._cp._point.y>_plant->_headTopHeight) {
                 _plant->_headTopHeight= _plant->_headCur._cp._point.y;
@@ -510,7 +475,6 @@ float LayerPlant_1::grow2(float len)
         float testlen =512;
         if (len > testlen) {
             _plant->checkHeightSub(testlen);
-            _plant1->checkHeightSub(testlen);
             _leafTopHeight-=testlen;
             checkLeafSubHeight(testlen);
             GameManager::getInstance()->getLayerLight()->subLightHeight(testlen);
@@ -522,22 +486,20 @@ float LayerPlant_1::grow2(float len)
     return retLen;
 }
 
-float LayerPlant_1::getPlantTopHeight()
+float LayerPlant_2::getPlantTopHeight()
 {
-  return  _plant->convertToWorldSpace(_plant->_headCur.getContorlPoint()._point).y;
+    return  _plant->convertToWorldSpace(_plant->_headCur.getContorlPoint()._point).y;
 }
 
-void  LayerPlant_1::moveDown(float y)
+void  LayerPlant_2::moveDown(float y)
 {
     float oldY = _plant->getPositionY();
     float newY = oldY -y;
     if (newY < -300) {
         _plant->subPlantCP(200);
-         //  _plant1->subPlantCP(200);
         newY = newY +200;
     }
     _plant->setPositionY(newY);
-    // _plant1->setPositionY(newY);
     std::list<Node*> removeList ;
     auto list = _leafBatch->getChildren();
     for (auto i = list.begin();i!=list.end();i++) {
@@ -552,7 +514,7 @@ void  LayerPlant_1::moveDown(float y)
     }
     renderPlant();
 }
- void   LayerPlant_1::checkLeafSubHeight(float _len)
+void   LayerPlant_2::checkLeafSubHeight(float _len)
 {
     auto list = _leafBatch->getChildren();
     for (auto i = list.begin();i!=list.end();i++) {
@@ -561,26 +523,18 @@ void  LayerPlant_1::moveDown(float y)
         (*i)->setUserData((void*)(int)(height-=_len));
     }
 }
-void  LayerPlant_1::updateHead(float dt)
+void  LayerPlant_2::updateHead(float dt)
 {
-
-    for(int i =0;i<1;i++)
-    {
-       
-        auto rip = _plant->_cpLineNode._cpList.rbegin();
-        auto rend =_plant->_cpLineNode._cpList.rend();
-        if (i==1)
-        {
-            rip = _plant1->_cpLineNode._cpList.rbegin();
-            rend =_plant1->_cpLineNode._cpList.rend();
-        }
-
+    
+    auto rip = _plant->_cpLineNode._cpList.rbegin();
+    auto rend =_plant->_cpLineNode._cpList.rend();
+    
     if (rip ==rend) {
-        break ;
+        return ;
     }
     float  topHeight  = rip->_height;
     while (rip!=rend) {
-      //rip->_radius = 100;
+        //rip->_radius = 100;
         if (topHeight - rip->_height <= 60) {
             rip->_radius = (topHeight - rip->_height)/60 *10;
         }
@@ -597,26 +551,25 @@ void  LayerPlant_1::updateHead(float dt)
         rip->_radius*=2;
         rip++;
     }
+    
+    auto list = _leafBatch->getChildren();
+    for (auto i = list.begin();i!=list.end();i++) {
+        
+        // int height = reinterpret_cast<int>((int*)(*i)->getUserData());
+        float height = (long)(*i)->getUserData();
+        if (topHeight - height <= 1000) {
+            float scale = (topHeight - height)/1000*0.3 + 0.1;
+            (*i)->setScale(scale);
+            
+        }
+        else (*i)->setScale(0.4);
+        
+        
     }
- 
-//    auto list = _leafBatch->getChildren();
-//    for (auto i = list.begin();i!=list.end();i++) {
-//        
-//      // int height = reinterpret_cast<int>((int*)(*i)->getUserData());
-//        float height = (long)(*i)->getUserData();
-//        if (topHeight - height <= 1000) {
-//            float scale = (topHeight - height)/1000*0.3 + 0.1;
-//            (*i)->setScale(scale);
-//        
-//       }
-//       else (*i)->setScale(0.4);
-//        
-//        
-//    }
-
+    
 }
 
-void  LayerPlant_1::showCrashBorderLight()
+void  LayerPlant_2::showCrashBorderLight()
 {
     auto gamemanager = GameManager::getInstance();
     LayerBorder* border = gamemanager->getLayerBorder();
@@ -638,18 +591,18 @@ void  LayerPlant_1::showCrashBorderLight()
     for (; y < height; y++) {
         for (int tx = x;tx < width ;tx++) {
             auto gridCell =GridCell(tx,y);
-           // log("map %d,%d",gridCell._x,gridCell._y);
+            // log("map %d,%d",gridCell._x,gridCell._y);
             auto ip = border->_borderMap.find(gridCell);
             if (ip!=end) {
                 list.push_back(gridCell);
-         
+                
             }
         }
     }
-
+    
     for (auto& i : list) {
         Sprite* sp = Sprite::createWithTexture(_crashBorderBatch->getTexture());
-
+        
         auto pt = mapGrid->getPositionByMapGridCell(i);
         pt += Vec2(4,4);
         sp->setPosition(pt);
@@ -659,11 +612,11 @@ void  LayerPlant_1::showCrashBorderLight()
         sp->setTag(i._y*mapGrid->_gridWidth+i._x);
         FadeTo* fadeto = FadeTo::create(2,60);
         sp->runAction(fadeto);
-       _crashBorderBatch->addChild(sp);
+        _crashBorderBatch->addChild(sp);
     }
     
 }
-void LayerPlant_1::removeBorderLight()
+void LayerPlant_2::removeBorderLight()
 {
     auto& list = _crashBorderBatch->getChildren();
     for (auto& i: list) {
@@ -679,15 +632,15 @@ void LayerPlant_1::removeBorderLight()
         i->runAction(seq);
     }
 }
-void LayerPlant_1::removeLightBorderByCell(int tag)
+void LayerPlant_2::removeLightBorderByCell(int tag)
 {
-   
+    
     auto node = _crashBorderBatch->getChildByTag(tag);
     if (node) {
         node->removeFromParent();
     }
 }
-void  LayerPlant_1::createHeadB2Body()
+void  LayerPlant_2::createHeadB2Body()
 {
     b2BodyDef bodyDef;
     bodyDef.type = b2_staticBody;
@@ -713,80 +666,10 @@ void  LayerPlant_1::createHeadB2Body()
     body->CreateFixture(&fixtureDef);
     _headBody = body;
 }
-void  LayerPlant_1::updateHeadB2Body()
+void  LayerPlant_2::updateHeadB2Body()
 {
     Vec2 cp =CONVERT(_plant->_headCur.getPosition());
     b2Vec2 newpt(cp.x/PTM_RATIO,cp.y/PTM_RATIO);
     float angle = _plant->_headCur.getAngle();
     _headBody->SetTransform(newpt, -CC_DEGREES_TO_RADIANS( angle));
-}
-FaceDirection LayerPlant_1::getPlantGrowDir(Plant_1* p1,Plant_1* p2)
-{
-    FaceDirection ret ;
-    
-    Vec2 v1= p1->_headCur.getPosition();
-    Vec2 v2= p2->_headCur.getPosition();
-    
-    float a1 = p1->_headCur.getAngle();
-    float a2 = p2->_headCur.getAngle();
-    if (a1>a2) {
-        if(a1<0)ret = FaceRight;
-        else   ret = FaceLeft;
-         
-    }
-    else
-    {
-        if(a1<0)ret = FaceRight;
-        else   ret = FaceLeft;
-    }
-    return ret;
-}
-void LayerPlant_1::updatePlantLine(Plant_1 *p1)
-{
-    if(_plantBody)_world->DestroyBody(_plantBody);
-    
-    _plantBody=nullptr;
-    auto list = p1->_cpLineNode._cpList;
-    int size =list.size();
-    if (size<2) {
-        return ;
-    }
-    static TypeBase dirtLine(111);
-    b2BodyDef bodyDef;
-    bodyDef.type = b2_staticBody;
-    bodyDef.position = b2Vec2(0,0);
-    static ItemModel itemModel;
-    itemModel._type =88;
-    bodyDef.userData = &itemModel;
-    _plantBody = _world->CreateBody(&bodyDef);
-    b2FixtureDef fixtureDef;
-    b2Vec2* verts = new b2Vec2[list.size()];
-    int index =0 ;
-    float count = 0;
-    
-    memset(verts,0,sizeof(list.size()*sizeof(b2Vec2)));
-    BorderDirection oldDir = BorderDirection::RightBottom_In;
-    float index2 = -1;
-    for (auto i : list ) {
-
-        auto pt =p1->convertToWorldSpace(i._point);
-        // auto pt = Vec2(4,4)+p;
-        auto v = b2Vec2(pt.x / PTM_RATIO, pt.y / PTM_RATIO);
-        
-        if(index > 0 && ((int)v.x == (int)verts[index-1].x)&&
-           ((int)v.y == (int)verts[index-1].y)){count++;continue;}
-        verts[index] =v;
-        index++;
-        count = 0;
-    }
-    
-    if(index>=2)
-    {
-        b2ChainShape b2line;
-        b2line.CreateChain(verts,index);
-        fixtureDef.shape = &b2line;
-        fixtureDef.filter.groupIndex = -1;
-        _plantBody->CreateFixture(&fixtureDef);
-    }
-    delete [] verts;
 }

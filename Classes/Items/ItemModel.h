@@ -41,6 +41,7 @@ protected:
     bool isAnimated;
     float triggerTime;
     int animationGroupCount;
+    Vector<Action*> _allCyclicAnimations;
     ActionInterval* _animatesParallel;
     ActionInterval* _animatesCardinalSpline;
     ActionInterval* _animatesCustomCurve;

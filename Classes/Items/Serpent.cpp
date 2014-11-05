@@ -100,7 +100,7 @@ void Serpent::collisionWithPlant(ItemModel *plantHead)
     ((LayerItem*)getParent())->getItems().remove(this);
     this->removeFromParent();
     
-    GameManager::getInstance()->getLayerPlant()->doReGrow(80, 60);
+    ((LayerPlant_1*)(GameManager::getInstance()->getLayerPlant()))->doReGrow(80, 60);
 }
 
 void Serpent::update(float delta)

@@ -5,7 +5,7 @@
 #include "LayerPlant.h"
 #include "BorderLine.h"
 #include "LayerBorder.h"
-#include "LayerGoods.h"
+
 #include "LightNode2.h"
 #include "LayerLight.h"
 #include "LayerDirt.h"
@@ -50,7 +50,7 @@ enum SceneGameChildZorder
 class LayerUI;
 class LayerUIBorder;
 class LayerMapGrid;
-class SceneGame: public Layer
+class SceneGame: public Layer,public b2ContactListener
 {
 //
 public:
@@ -89,7 +89,7 @@ public:
     LayerRollImage*             _layerDirt;
     LayerPlantBase*               _layerPlant;
     LayerBorder*                _layerBorder;
-    LayerGoods1*                _goodsLayer;
+   // LayerGoods1*                _goodsLayer;
     LayerLight*                 _layerLight;
     
     bool                _isReGrow;
@@ -105,7 +105,6 @@ public:
     //场景初始化
     void initPhysics();
     inline PhysicsHandler* getPhysicsHandler() {return _physicsHandler;}
-    virtual void draw(Renderer *renderer, const Mat4& transform, uint32_t flags);
     //editor
     void initLevelEditorMenu();
     friend class GameManager;
@@ -117,6 +116,7 @@ protected:
 
     //调试绘图
     Mat4 _modelViewMV;
+    void draw(Renderer *renderer, const Mat4& transform, uint32_t flags);
     void onDraw();
     CustomCommand _customCommand;
     

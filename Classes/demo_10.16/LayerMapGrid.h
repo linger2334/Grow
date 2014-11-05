@@ -16,17 +16,16 @@ public:
     bool initWithHeight(float height);
     bool initWithSaveConfig();
     bool saveMapGrid();
-    virtual void update(float dt);
     
+    virtual void update(float dt);
     void  moveDownMapGrid(int moveLen);
     void  moveDownMapGrid(float yLen);
     void  moveDownAlphaMask(float yLen);
 
-    
     virtual bool onTouchBegan(Touch*,Event*);
     virtual void onTouchMoved(Touch*,Event*);
     virtual void onTouchEnded(Touch*,Event*);
-    //    virtual void onTouchCancelled(Touch*,Event*);
+    //virtual void onTouchCancelled(Touch*,Event*);
     
     virtual void moveDown(float yLen);
     
@@ -38,6 +37,7 @@ public:
     Sprite*                     _maskAlphaSprite;
     MapGrid                     _mapGrid;
     GameManager*                _gameManager;
+    bool                _isFirstMoveTouch;
 };
 
 #endif /* defined(__Grow_Goods_test__LayerMapGrid__) */

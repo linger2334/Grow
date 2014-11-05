@@ -94,12 +94,8 @@ void LevelsMenu::selectLevel(cocos2d::Ref *sender, cocos2d::ui::ListView::EventT
     LevelFileHandler* fileHandler = LevelFileHandler::createWithFileName(fileName.c_str());
     GameManager* gameManager = GameManager::getInstance();
     gameManager->_fileHandler = fileHandler;
-    gameManager->scrollViewOffset = 0.0;
     
     switch (eventtype) {
-        case ui::ListView::EventType::ON_SELECTED_ITEM_START:
-            
-            break;
         case ui::ListView::EventType::ON_SELECTED_ITEM_END:
             
             if(levelNumber+1 == listView->getItems().size()){
@@ -107,6 +103,9 @@ void LevelsMenu::selectLevel(cocos2d::Ref *sender, cocos2d::ui::ListView::EventT
             }else{
                 Director::getInstance()->replaceScene(SceneGame::createScene());
             }
+            break;
+            
+        default:
             break;
     }
 

@@ -123,9 +123,9 @@
 -(id)init:(Item&)item
 {
     self = [super init];
-    const float width = GameManager::getInstance()->editor_width;
-    const float height = GameManager::getInstance()->editor_height;
-    //    const float contentscale = GameManager::getInstance()->editor_contentscale;
+    const float scrollviewWidth = GameManager::getInstance()->_levelEditor->_myViewController->_scrollView.contentSize.width;
+    const float scrollviewHeight = GameManager::getInstance()->_levelEditor->_myViewController->_scrollView.contentSize.height/PAGE_COUNTS;
+    const float currentZoomFactor = GameManager::getInstance()->_levelEditor->_myViewController->_scrollView.currentZoomFactor;
     
     if (self) {
         
@@ -135,8 +135,8 @@
         _animationControlInstructions = item.animationControlInstructions;
         _animationInfos = item.animationInfos;
         animationGroupCount = item.animationInfos.size();
-        float x = item.x*width;
-        float y = (PAGE_COUNTS - item.y)*height;
+        float x = item.x*scrollviewWidth;
+        float y = (PAGE_COUNTS - item.y)*scrollviewHeight;
         
         self.center = CGPointMake(x, y);
         [self setTag:item.id];
@@ -246,43 +246,76 @@
         self.transform = CGAffineTransformRotate(self.transform,item.angle);
         self.transform = CGAffineTransformScale(self.transform,item.scale,item.scale);
     }
-    
+    self.bounds = CGRectMake(0, 0, self.bounds.size.width*currentZoomFactor, self.bounds.size.height*currentZoomFactor);
     self.clipsToBounds = NO;
     return self;
+}
+
+-(float)getRotateAngle
+{
+    float angle = kDefaultAngle;
+    float a = self.transform.a;
+    float b = self.transform.b;
+    float c = self.transform.c;
+    float d = self.transform.d;
+    
+    if(a ==0.0&&b>0.0&&c<0.0&&d==0.0)
+    {
+        angle = M_PI_2;
+    }
+    else if(a<0.0&&b==0.0&&c==0.0&&d<0.0)
+    {
+        angle = M_PI;
+    }
+    else if(a==0.0&&b<0.0&&c>0.0&&d==0.0)
+    {
+        angle = 3*M_PI_2;
+    }
+    else
+    {
+        angle = atanf(b/a);
+        if (angle*b<0.0) {
+            angle+=M_PI;
+        }
+    }
+    
+    return angle;
 }
 
 -(void)createAllPathPoints
 {
     std::vector<AnimationInfo> eachGroupCorrespondInfos;
-    
-    for(int subIndex = 0;subIndex<_animationInfos.front().size();subIndex++){
-        for (int i = 0; i<animationGroupCount; i++) {
-            eachGroupCorrespondInfos.push_back(_animationInfos.at(i).at(subIndex));
+    if(!_animationInfos.empty()){
+        for(int subIndex = 0;subIndex<_animationInfos.front().size();subIndex++){
+            for (int i = 0; i<animationGroupCount; i++) {
+                eachGroupCorrespondInfos.push_back(_animationInfos.at(i).at(subIndex));
+            }
+            PolygonView* newPathPoint = [self createPathPointWith:eachGroupCorrespondInfos];
+            OCScrollView* scrollview = GameManager::getInstance()->_levelEditor->_myViewController->_scrollView;
+            [scrollview addGestureRecognizerForCenterView:newPathPoint];
+            
+            self->_pathPoints.push_back(newPathPoint);
+            [scrollview addSubview:newPathPoint];
+            [newPathPoint release];
+            
+            eachGroupCorrespondInfos.clear();
         }
-        PolygonView* newPathPoint = [self createPathPointWith:eachGroupCorrespondInfos];
-        OCScrollView* scrollview = GameManager::getInstance()->_levelEditor->_myViewController->_scrollView;
-        [scrollview addGestureRecognizerForCenterView:newPathPoint];
-        
-        self->_pathPoints.push_back(newPathPoint);
-        [scrollview addSubview:newPathPoint];
-        [newPathPoint release];
-        
-        eachGroupCorrespondInfos.clear();
     }
-    
 }
 
 -(PolygonView*)createPathPointWith:(std::vector<AnimationInfo>&) eachGroupCorrespondInfos
 {
+    float currentZoomFactor = GameManager::getInstance()->_levelEditor->_myViewController->_scrollView.currentZoomFactor;
     PolygonView* pathPoint = [[PolygonView alloc] initWithEachGroupCorrespondInfos:eachGroupCorrespondInfos];
     pathPoint->_pathParent = self;
-    pathPoint.center = CGPointMake(self.center.x + eachGroupCorrespondInfos.front().position.x,self.center.y - eachGroupCorrespondInfos.front().position.y);
-    pathPoint.bounds = CGRectMake(0,0,2*kDefaultPathPointRadius,2*kDefaultPathPointRadius);
+    pathPoint.center = CGPointMake(self.center.x + eachGroupCorrespondInfos.front().position.x*currentZoomFactor,self.center.y - eachGroupCorrespondInfos.front().position.y*currentZoomFactor);
+    pathPoint.bounds = CGRectMake(0,0,2*kDefaultPathPointRadius*currentZoomFactor,2*kDefaultPathPointRadius*currentZoomFactor);
     pathPoint.pointType = @"pathpoint";
     pathPoint.tag = _pathPoints.size();
+    
     pathPoint.pathNum = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, pathPoint.bounds.size.width, pathPoint.bounds.size.height)] autorelease];
     pathPoint.pathNum.text = [NSString stringWithFormat:@"%d", pathPoint.tag +1];
-    pathPoint.pathNum.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    pathPoint.pathNum.font = [UIFont systemFontOfSize:kDefaultFontSize*currentZoomFactor];
     pathPoint.pathNum.textAlignment = NSTextAlignmentCenter;
     pathPoint.pathNum.textColor = [UIColor whiteColor];
     [pathPoint addSubview:pathPoint.pathNum];
@@ -334,7 +367,7 @@
 -(void)addBorder
 {
     CAShapeLayer* border1 = [CAShapeLayer layer];//便利构造器，autorelease
-    [border1 setName:@"boder"];
+    [border1 setName:@"border"];
     border1.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
     border1.fillColor = nil;
     border1.lineDashPattern = nil;
@@ -343,7 +376,7 @@
     border1.frame = self.bounds;
     
     CAShapeLayer* border2 = [CAShapeLayer layer];
-    [border2 setName:@"boder"];
+    [border2 setName:@"border"];
     border2.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
     border2.fillColor = nil;
     border2.lineDashPattern = nil;
@@ -352,7 +385,7 @@
     border2.frame = self.bounds;
     
     CAShapeLayer* border3 = [CAShapeLayer layer];
-    [border3 setName:@"boder"];
+    [border3 setName:@"border"];
     border3.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
     border3.fillColor = nil;
     border3.lineDashPattern = nil;
@@ -361,7 +394,7 @@
     border3.frame = self.bounds;
     
     CAShapeLayer* border4 = [CAShapeLayer layer];
-    [border4 setName:@"boder"];
+    [border4 setName:@"border"];
     border4.strokeColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1].CGColor;
     border4.fillColor = nil;
     border4.lineDashPattern = nil;
@@ -374,7 +407,7 @@
 {
     for(CAShapeLayer* shapeLayer in self.layer.sublayers)
     {
-        if ([shapeLayer.name isEqualToString:@"boder"]){
+        if ([shapeLayer.name isEqualToString:@"border"]){
             shapeLayer.path = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
             [shapeLayer setHidden:NO];
         }
@@ -386,7 +419,6 @@
     for(CAShapeLayer* shapeLayer in self.layer.sublayers){
         if ([shapeLayer.name isEqualToString:@"border"]) {
             shapeLayer.path = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
-            [shapeLayer setHidden:NO];
         }
     }
     
@@ -396,7 +428,7 @@
 {
     for(CAShapeLayer* shapeLayer in self.layer.sublayers)
     {
-        if ([shapeLayer.name isEqualToString:@"boder"]){
+        if ([shapeLayer.name isEqualToString:@"border"]){
             [shapeLayer setHidden:YES];
         }
     }

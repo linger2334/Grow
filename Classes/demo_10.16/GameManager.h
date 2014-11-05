@@ -11,7 +11,7 @@
 #include "PhysicsHandler.h"
 
 class SceneGame;
-class LayerPlant_1;
+class LayerPlantBase;
 class LightNodeListHelper;
 class LayerLight;
 class LayerBorder;
@@ -110,7 +110,7 @@ public:
     
     SceneGame* getGameScene(){return _sceneGame;}
     
-    LayerPlant_1* getLayerPlant(){return _layerplant;}
+    LayerPlantBase* getLayerPlant(){return _layerplant;}
 
     
     LightNodeListHelper* getLightListHelper(){return _lightListHelper;}
@@ -163,19 +163,19 @@ public:
     std::function<bool(cocos2d::Vec2,int type)>  _plantGrowCrashTestCallback;
     std::function<int(cocos2d::Vec2)>  _mapCrashTestCallBack;
     
-    LayerPlant_1*       _layerplant;
+    LayerPlantBase*     _layerplant;
     LayerLight*         _layerLight;
     LayerBorder*        _layerBorder;
     LayerUI*            _layerUI;
     LayerUIBorder*      _layerUIBorder;
-    LayerMapGrid*        _layerMapGrid;
+    LayerMapGrid*       _layerMapGrid;
     LayerItem*          _layerItem;
     
     int                 _nowRuningLevel;
     b2World*            _world;
     
-    ItemModel*   _sLineItemModel;
-    ItemModel*   _sPlantHeadItemModel;
+    ItemModel*          _sLineItemModel;
+    ItemModel*          _sPlantHeadItemModel;
     static GameManager* _sGameManager;
     
     
@@ -185,11 +185,23 @@ public:
     float editor_width;
     float editor_height;
     float editor_contentscale;
-    float scrollViewOffset;
     
     inline void setPhysicsHandler(PhysicsHandler* physicsHandler) { _physicsHandler = physicsHandler;}
     inline PhysicsHandler* getPhysicsHandler() { return _physicsHandler;}
     PhysicsHandler* _physicsHandler;
+    //add for memory release
+private:
+    class Recycle{
+    public:
+        ~Recycle()
+        {
+            if(_sGameManager){
+                _sGameManager->releaseGameInfo();
+                delete _sGameManager;
+            }
+        }
+    };
+    static Recycle garbo;
 };
 
 

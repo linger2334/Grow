@@ -11,6 +11,9 @@
 #include "SceneGame.h"
 #include "GB2ShapeCache-x.h"
 #include "LayerItem.h"
+#include "CustomAction.h"
+
+
 
 Cicada::Cicada()
 {
@@ -33,6 +36,8 @@ class Cicada* Cicada::create(Item& item)
     CC_SAFE_DELETE(cicada);
     return nullptr;
 }
+
+#ifdef CICADA_OLD
 
 bool Cicada::init(Item& item)
 {
@@ -81,7 +86,6 @@ bool Cicada::init(Item& item)
         ActionInterval* shine_reverse = FadeTo::create(kDefaultFlickeringHalfCycle, 255);
         _belly->runAction(RepeatForever::create(Sequence::createWithTwoActions(shine, shine_reverse)));
         
-//        setTexture("Cicada.png");
         result = true;
     }else{
         result = false;
@@ -90,6 +94,37 @@ bool Cicada::init(Item& item)
     _collisionCallBack = std::bind(&Cicada::collisionWithPlant, this,std::placeholders::_1);
     return result;
 }
+
+#else
+
+bool Cicada::init(Item& item)
+{
+    bool result;
+    if (ItemModel::init(item)) {
+        
+        setTexture("Cicada_Trunk.png");
+        
+        _eye = Sprite::create("Cicada_Eye.png");
+        _eye->setPosition(getBoundingBox().size.width/2, getBoundingBox().size.height/2);
+        addChild(_eye);
+        
+        setRotation(CC_RADIANS_TO_DEGREES(item.angle));
+        setScale(item.scale);
+        
+        ActionInterval* shine = FadeTo::create(kDefaultFlickeringHalfCycle ,kDefaultCicadaBellyTransparency*255);
+        ActionInterval* shine_reverse = FadeTo::create(kDefaultFlickeringHalfCycle, 255);
+        _eye->runAction(RepeatForever::create(Sequence::createWithTwoActions(shine, shine_reverse)));
+
+        result = true;
+    }else{
+        result = false;
+    }
+    
+    _collisionCallBack = std::bind(&Cicada::collisionWithPlant, this,std::placeholders::_1);
+    return result;
+}
+
+#endif
 
 void Cicada::createBody()
 {
@@ -142,6 +177,6 @@ void Cicada::collisionWithPlant(ItemModel* plantHead)
     runAction(Sequence::create(disappear,remove, NULL));
     
     /////other effect
-    GameManager::getInstance()->getLayerPlant()->doReGrow(80, 60);
+    ((LayerPlant_1*)(GameManager::getInstance()->getLayerPlant()))->doReGrow(80, 60);
 }
 

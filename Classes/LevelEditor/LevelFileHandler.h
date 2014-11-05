@@ -26,6 +26,8 @@ public:
     int saveFile();
     void reload();
     
+    float scrollViewZoomFactor;
+    float scrollViewContentOffSet;
     std::list<Item> _items;
     __Dictionary* _polygonsDict;
     std::string _filename;

@@ -17,6 +17,7 @@ public:
     
     void addOneLight();
     void addOneLight(Vec2 ptlight);
+    void removeOneLight(Vec2 ptlight);
     std::list<LightNode2*> _lightListFirst;
     std::list<LightNode2*> _lightListExt;
     

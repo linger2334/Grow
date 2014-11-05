@@ -14,7 +14,7 @@ class MapGrid
 {
 public:
     MapGrid():_gridData(nullptr),_gridWidth(0),_gridHeight(0),_startHeight(0),
-    _maxViewHeight(0),_unitGridSize(cocos2d::Size(8,8)),_mapGridStarty(0){}
+    _maxViewHeight(0),_unitGridSize(cocos2d::Size(8,8)),_mapGridStarty(0),_layerPlant(nullptr),_layerBorder(nullptr){}
     ~MapGrid()
     {
         if (_gridData) {

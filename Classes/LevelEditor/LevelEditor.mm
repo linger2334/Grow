@@ -177,14 +177,15 @@ void LevelEditor::drawLoadedLevel()
 -(void)addScrollView
 {
     _scrollView = [[OCScrollView alloc] initWithFrame:CGRectMake(0, 0, width, height)];
-    _scrollView.contentSize = CGSizeMake(width, PAGE_COUNTS*height);
-    _scrollView.contentOffset = CGPointMake(0, (PAGE_COUNTS-1)*height - GameManager::getInstance()->scrollViewOffset);
+    _scrollView.currentZoomFactor = _fileHandler->scrollViewZoomFactor;
+    _scrollView.bounds = CGRectMake(0, 0, _scrollView.currentZoomFactor*width, height);
+    _scrollView.contentSize = CGSizeMake(_scrollView.currentZoomFactor*width, _scrollView.currentZoomFactor*PAGE_COUNTS*height);
+    _scrollView.contentOffset = CGPointMake(0, _fileHandler->scrollViewContentOffSet);
     _scrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@IMAGE_MATERIAL_DIRT]];
     _scrollView.bounces = NO;
     _scrollView.scrollEnabled = YES;
     _scrollView.directionalLockEnabled = YES;
     [_scrollView setPagingEnabled:NO];
-    //    [_scrollView setDecelerationRate:0.0];
 
     _scrollView.delegate = self;
     _scrollView.contentMode = UIViewContentModeRedraw;
@@ -266,7 +267,7 @@ void LevelEditor::drawLoadedLevel()
 -(void)handlePan:(UIPanGestureRecognizer*)recognizer
 {
     CGPoint translation = [recognizer translationInView:self.view];
-    if (!_scrollView.isPreViewed&&!_scrollView.isScrollEnabled) {
+    if (!_scrollView.isScrollEnabled) {
         //移动道具
         for(std::set<ItemView*>::iterator it = _toDealWith.begin();it != _toDealWith.end();it++){
             ItemView* itemview = *it;
@@ -306,12 +307,10 @@ void LevelEditor::drawLoadedLevel()
     //            itemView.transform = CGAffineTransformRotate(itemView.transform, recognizer.rotation);
     //        }
     //    }
-    if (!_scrollView.isPreViewed) {
-        for (ItemView* itemView : _toDealWith) {
-            itemView.transform = CGAffineTransformRotate(itemView.transform, recognizer.rotation);
-        }
-        recognizer.rotation = 0;
+    for (ItemView* itemView : _toDealWith) {
+        itemView.transform = CGAffineTransformRotate(itemView.transform, recognizer.rotation);
     }
+    recognizer.rotation = 0;
 
 }
 
@@ -438,6 +437,7 @@ void LevelEditor::drawLoadedLevel()
     needHidenButtons.push_back(_zoomInButton);
     [self.view addSubview:_zoomInButton];
     [_zoomInButton release];
+    needHidenButtons.push_back(_zoomInButton);
     
     _zoomOutButton = [[UIButton alloc] init];
     _zoomOutButton.center = CGPointMake(14/16.0*width, 0.95*height);
@@ -448,6 +448,7 @@ void LevelEditor::drawLoadedLevel()
     needHidenButtons.push_back(_zoomOutButton);
     [self.view addSubview:_zoomOutButton];
     [_zoomOutButton release];
+    needHidenButtons.push_back(_zoomOutButton);
     
     
     _hideButton = [[UIButton alloc] init];
@@ -514,6 +515,8 @@ void LevelEditor::drawLoadedLevel()
     {
         [self saveItemInformationInMemory:itemView];
     }
+    _fileHandler->_items.sort(Itemlesser);
+    
     int result = [_scrollView savePolygonsInfoInMemory];
     if (result!=0) {
         NSString* mess;
@@ -590,19 +593,24 @@ void LevelEditor::drawLoadedLevel()
     [self createItemFromFileHandler];
     [self createPolygonsFromFileHandler];
     [self createPathPointsFromAllItems];
+    //刷新前可能已经选中道具
+    if (!_scrollView.isScrollEnabled) {
+        [_scrollView setScrollEnabled:YES];
+    }
     
 }
 
 -(void)copyItem:(id)sender
 {
+    //先拷贝多边形和点
     NSMutableArray* newPolygonViews = [NSMutableArray array];
     for(PolygonView* centerview in _scrollView.toDealWithPointView){
         if ([centerview.pointType isEqualToString:@"centerview"]) {
             int tag = [_scrollView firstUnusedTag];
-            Vec2 percentPosition = Vec2(0.1+centerview.center.x/width,PAGE_COUNTS-(0.08+centerview.center.y/height));
+            Vec2 percentPosition = Vec2(0.1+centerview.center.x/_scrollView.contentSize.width,PAGE_COUNTS-(0.08+centerview.center.y/(_scrollView.contentSize.height/PAGE_COUNTS)));
             __Array* vertexes = __Array::createWithCapacity(centerview.subviews.count);
             for(PolygonView* pointview in centerview.subviews){
-                CGPoint CClocalpoint = CGPointMake(pointview.center.x,-pointview.center.y);
+                CGPoint CClocalpoint = CGPointMake(pointview.center.x/_scrollView.currentZoomFactor,-pointview.center.y/_scrollView.currentZoomFactor);
                 vertexes->addObject(__String::createWithFormat("{%f,%f}",CClocalpoint.x,CClocalpoint.y));
             }
             BOOL isConvex = centerview.isConvex;
@@ -640,9 +648,9 @@ void LevelEditor::drawLoadedLevel()
         
         Item_Type type = itemView->itemtype;
         int id = [self firstUnusedId];
-        float x = (itemView.center.x + 0.4*itemView.bounds.size.width)/width;
-        float y = PAGE_COUNTS - (itemView.center.y + 0.4*itemView.bounds.size.height)/height;
-        float angle = kDefaultAngle;
+        float x = (itemView.center.x + 0.4*itemView.bounds.size.width)/_scrollView.contentSize.width;
+        float y = PAGE_COUNTS - (itemView.center.y + 0.4*itemView.bounds.size.height)/(_scrollView.currentZoomFactor*height);
+        float angle = [itemView getRotateAngle];
         float scale = kDefaultScale;
         int localZorder = itemViews.size();
         bool isAnimated = itemView->isAnimated;
@@ -650,11 +658,14 @@ void LevelEditor::drawLoadedLevel()
         std::map<std::string,bool> animationControlInstructions(itemView->_animationControlInstructions);
         std::vector<std::vector<AnimationInfo>> animationInfos;
         std::vector<AnimationInfo> eachAnimationGroupInfos;
-        //empty animation gruop alse need to copy
+        //empty animation group alse need to copy
         for(int i = 0;i<itemView.animationGroupCount;i++){
             for (PolygonView* pathpoint : itemView->_pathPoints) {
-                Vec2 newPosition = Vec2(pathpoint.center.x-itemView.center.x,itemView.center.y-pathpoint.center.y);
-                pathpoint->_eachGroupCorrespondInfos.at(i).position = newPosition;
+                //只有第一组需要刷新位置
+                if (i == 0) {
+                    Vec2 newPosition = Vec2((pathpoint.center.x-itemView.center.x)/_scrollView.currentZoomFactor,(itemView.center.y-pathpoint.center.y)/_scrollView.currentZoomFactor);
+                    pathpoint->_eachGroupCorrespondInfos.at(i).position = newPosition;
+                }
                 eachAnimationGroupInfos.push_back(pathpoint->_eachGroupCorrespondInfos.at(i));
             }
             animationInfos.push_back(eachAnimationGroupInfos);
@@ -746,7 +757,7 @@ void LevelEditor::drawLoadedLevel()
         [newItem createAllPathPoints];
         newItem->_animationInfos.clear();
         //copy
-        newItem.transform = itemView.transform;
+//        newItem.transform = itemView.transform;
         //
         [newItem addBorder];
         [newItem heightLightPathPoints];
@@ -832,6 +843,8 @@ void LevelEditor::drawLoadedLevel()
     {
         [self saveItemInformationInMemory:itemView];
     }
+    _fileHandler->_items.sort(Itemlesser);
+    
     int result = [_scrollView savePolygonsInfoInMemory];
     if (result!=0) {
         NSString* mess;
@@ -850,7 +863,8 @@ void LevelEditor::drawLoadedLevel()
         [alertView show];
         [alertView release];
     }else{
-        _gameManager->scrollViewOffset = (PAGE_COUNTS - 1)*height - _scrollView.contentOffset.y;
+        _fileHandler->scrollViewZoomFactor = _scrollView.currentZoomFactor;
+        _fileHandler->scrollViewContentOffSet = _scrollView.contentOffset.y;
         _gameManager->_levelEditor->playLevel();
     }
 }
@@ -935,7 +949,7 @@ void LevelEditor::drawLoadedLevel()
     
     int id = [self firstUnusedId];
     float x = 0.5 ;
-    float y = PAGE_COUNTS - (_scrollView.contentOffset.y + 0.5*height)/height;
+    float y = PAGE_COUNTS - (_scrollView.contentOffset.y + 0.5*height)/(_scrollView.currentZoomFactor*height);
     float angle = kDefaultAngle;
     float scale = kDefaultScale;
     int localZorder = itemViews.size();
@@ -992,11 +1006,12 @@ void LevelEditor::drawLoadedLevel()
     
     [newItem itemAddGestureRecognizerWithTarget:self];
     
-    [_scrollView insertSubview:newItem atIndex:localZorder];
-    [newItem release];
     //添加到数组
     itemViews.push_back(newItem);
     ids.push_back(newItem.tag);
+    
+    [_scrollView insertSubview:newItem atIndex:localZorder];
+    [newItem release];
     
     //返回
     [popupViewController backEditor:newItem];
@@ -1006,8 +1021,8 @@ void LevelEditor::drawLoadedLevel()
 {
     Item_Type type = itemView->itemtype;
     int id = static_cast<int>(itemView.tag);
-    float x = itemView.center.x/width;
-    float y = PAGE_COUNTS - itemView.center.y/height;
+    float x = itemView.center.x/_scrollView.contentSize.width;
+    float y = PAGE_COUNTS - itemView.center.y/(_scrollView.contentSize.height/PAGE_COUNTS);
     float a = itemView.transform.a;
     float b = itemView.transform.b;
     float c = itemView.transform.c;
@@ -1026,8 +1041,11 @@ void LevelEditor::drawLoadedLevel()
         for(int i = 0;i<itemView.animationGroupCount;i++){
             for (PolygonView* pathpoint : itemView->_pathPoints) {
                 //refresh inner vector information
-                Vec2 newPosition = Vec2(pathpoint.center.x-itemView.center.x,itemView.center.y-pathpoint.center.y);
-                pathpoint->_eachGroupCorrespondInfos.at(i).position = newPosition;
+                if (i == 0) {
+                    Vec2 newPosition = Vec2((pathpoint.center.x-itemView.center.x)/_scrollView.currentZoomFactor,(itemView.center.y-pathpoint.center.y)/_scrollView.currentZoomFactor);
+                    pathpoint->_eachGroupCorrespondInfos.at(i).position = newPosition;
+                }
+                
                 eachAnimationGroupInfos.push_back(pathpoint->_eachGroupCorrespondInfos.at(i));
             }
             animationInfos.push_back(eachAnimationGroupInfos);
@@ -1061,6 +1079,8 @@ void LevelEditor::drawLoadedLevel()
         }
         scale = fabsf(a/cosf(angle));
     }
+    //已经取消缩放
+    scale = kDefaultScale;
     
     switch (type) {
         case Cicada:
@@ -1213,9 +1233,9 @@ void LevelEditor::drawLoadedLevel()
     [self.view addGestureRecognizer:tapRecognizer];
     [tapRecognizer release];
     
-    UIPanGestureRecognizer* panRecognizser = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(myViewPaning:)];
-    [self.view addGestureRecognizer:panRecognizser];
-    [panRecognizser release];
+    UIPanGestureRecognizer* panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(myViewPaning:)];
+    [self.view addGestureRecognizer:panRecognizer];
+    [panRecognizer release];
     
     UIRotationGestureRecognizer* rotateRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotate:)];
     [self.view addGestureRecognizer:rotateRecognizer];
@@ -1228,8 +1248,7 @@ void LevelEditor::drawLoadedLevel()
     rotateRecognizer.delegate = self;
 //    pinchRecognizer.delegate = self;
     
-    [tapRecognizer requireGestureRecognizerToFail:panRecognizser];
-//    [pinchRecognizer requireGestureRecognizerToFail:rotateRecognizer];
+    [tapRecognizer requireGestureRecognizerToFail:panRecognizer];
     
 }
 
@@ -1257,23 +1276,21 @@ void LevelEditor::drawLoadedLevel()
 {
     CGPoint position = [recognizer locationInView:self.view];
     PolygonView* selectedpointview = nil;
-    if (!_scrollView.isPreViewed) {
-        if ((selectedpointview = [self clickedPointView:position])) {
-            selectedpointview.isSelected = !selectedpointview.isSelected;
-            if (selectedpointview.isSelected) {
-                selectedpointview.backgroundColor = selectedpointview.selectedColor;
-                [_scrollView.toDealWithPointView addObject:selectedpointview];
-            }else{
-                selectedpointview.backgroundColor = selectedpointview.defaultColor;
-                [_scrollView.toDealWithPointView removeObject:selectedpointview];
-            }
-            
-            if(_toDealWith.size()>0||_scrollView.toDealWithPointView.count>0)
-                [_scrollView setScrollEnabled:NO];
-            else
-                [_scrollView setScrollEnabled:YES];
-            return ;
+    if ((selectedpointview = [self clickedPointView:position])) {
+        selectedpointview.isSelected = !selectedpointview.isSelected;
+        if (selectedpointview.isSelected) {
+            selectedpointview.backgroundColor = selectedpointview.selectedColor;
+            [_scrollView.toDealWithPointView addObject:selectedpointview];
+        }else{
+            selectedpointview.backgroundColor = selectedpointview.defaultColor;
+            [_scrollView.toDealWithPointView removeObject:selectedpointview];
         }
+        
+        if(_toDealWith.size()>0||_scrollView.toDealWithPointView.count>0)
+            [_scrollView setScrollEnabled:NO];
+        else
+            [_scrollView setScrollEnabled:YES];
+        return ;
     }
     
     [self cancelHeightLight];
@@ -1311,9 +1328,8 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)myViewPaning:(UIPanGestureRecognizer*)recognizer
 {
-    if (!_scrollView.isPreViewed&&!_scrollView.isScrollEnabled) {
+    if (!_scrollView.isScrollEnabled) {
         CGPoint translation = [recognizer translationInView:self.view];
-        
         
         //移动道具
         for(std::set<ItemView*>::iterator it = _toDealWith.begin();it != _toDealWith.end();it++){
@@ -1342,29 +1358,9 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)zoomInOut:(id)sender
 {
-        
-    if (!_toDealWith.empty()||_scrollView.toDealWithPointView.count!=0) return;
     
     if (!_scrollView.isPreViewed) {
         _scrollView.isPreViewed = YES;
-        [self hideControlPanelAndOperation];
-        
-//        if(!_toDealWith.empty()||_scrollView.toDealWithPointView.count!=0){
-//            for(ItemView* itemview : _toDealWith){
-//                [itemview hideBorder];
-//                [itemview setHeightLightState:NO];
-//            }
-//            _toDealWith.clear();
-//            
-//            for (PolygonView* polygonview in _scrollView.toDealWithPointView) {
-//                polygonview.isSelected = NO;
-//                polygonview.backgroundColor = polygonview.defaultColor;
-//            }
-//            [_scrollView.toDealWithPointView removeAllObjects];
-//            
-//            if(!_scrollView.isScrollEnabled)
-//                [_scrollView setScrollEnabled:YES];
-//        }
     }
     
     float variation = 0.0;
@@ -1379,11 +1375,12 @@ void LevelEditor::drawLoadedLevel()
         
         newScale = _scrollView.currentZoomFactor + variation;
         if (newScale<1.0&&newScale>1/PAGE_COUNTS) {
-            
+            //重排道具及其路径点
             for(ItemView* view : itemViews)
             {
                 view.center = CGPointMake(view.center.x/_scrollView.contentSize.width*newScale*width, view.center.y/_scrollView.contentSize.height*newScale*PAGE_COUNTS*height);
                 view.bounds = CGRectMake(0, 0, newScale*view.image.size.width, newScale*view.image.size.height);
+                [view refreshBorder];
                 
                 for(PolygonView* pathpoint : view->_pathPoints){
                     pathpoint.center = CGPointMake(newScale*pathpoint.center.x/_scrollView.contentSize.width*width, newScale*pathpoint.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
@@ -1393,7 +1390,7 @@ void LevelEditor::drawLoadedLevel()
                     pathpoint.pathNum.font = [UIFont systemFontOfSize:newScale*kDefaultFontSize];
                 }
             }
-            
+            //重排多边形及其顶点
             for (PolygonView* centerview in _scrollView.centerViews) {
                 centerview.center = CGPointMake(newScale*centerview.center.x/_scrollView.contentSize.width*width, newScale*centerview.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
                 centerview.bounds = CGRectMake(-newScale*kDefaultPolygonPointRadius,-newScale*kDefaultPolygonPointRadius, 2*newScale*kDefaultPolygonPointRadius,2*newScale*kDefaultPolygonPointRadius);
@@ -1427,6 +1424,7 @@ void LevelEditor::drawLoadedLevel()
             for (ItemView* view : itemViews) {
                 view.center = CGPointMake(1/PAGE_COUNTS*view.center.x/_scrollView.contentSize.width*width, view.center.y/_scrollView.contentSize.height*height);
                 view.bounds = CGRectMake(0, 0, 1/PAGE_COUNTS*view.image.size.width, 1/PAGE_COUNTS*view.image.size.height);
+                [view refreshBorder];
                 
                 for (PolygonView* pathpoint : view->_pathPoints) {
                     pathpoint.center = CGPointMake(1/PAGE_COUNTS*pathpoint.center.x/_scrollView.contentSize.width*width, pathpoint.center.y/_scrollView.contentSize.height*height);
@@ -1456,6 +1454,7 @@ void LevelEditor::drawLoadedLevel()
             for (ItemView* view : itemViews) {
                 view.center = CGPointMake(view.center.x/_scrollView.contentSize.width*width, view.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
                 view.bounds = CGRectMake(0, 0, view.image.size.width, view.image.size.height);
+                [view refreshBorder];
                 
                 for (PolygonView* pathpoint : view->_pathPoints) {
                     pathpoint.center = CGPointMake(pathpoint.center.x/_scrollView.contentSize.width*width, pathpoint.center.y/_scrollView.contentSize.height*PAGE_COUNTS*height);
@@ -1501,7 +1500,6 @@ void LevelEditor::drawLoadedLevel()
     if (_scrollView.currentZoomFactor == 1.0) {
         if (_scrollView.isPreViewed) {
             _scrollView.isPreViewed = NO;
-            [self showControlPanelAndOperation];
         }
     }
 

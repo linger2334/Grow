@@ -147,7 +147,6 @@
     return localVertexes;
 }
 
-
 -(float)checkDetPointA:(CGPoint)pointA pointB:(CGPoint)pointB pointC:(CGPoint)pointC
 {
     float result = pointA.x*pointB.y + pointB.x*pointC.y + pointC.x*pointA.y - pointA.y*pointB.x -pointB.y*pointC.x - pointC.y*pointA.x;

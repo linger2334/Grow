@@ -1,5 +1,5 @@
-#ifndef __Grow_Demo__LayerPlant__
-#define __Grow_Demo__LayerPlant__
+#ifndef __Grow_Demo__LayerPlant_2__
+#define __Grow_Demo__LayerPlant_2__
 #include "PlantBase.h"
 #include "common.h"
 #include "CPLineNode.h"
@@ -8,23 +8,21 @@
 #include "Box2D/Box2D.h"
 #include "LayerPlantBase.h"
 
-class LayerPlant_1 : public LayerPlantBase
+class LayerPlant_2 : public LayerPlantBase
 {
 public:
-    CREATE_FUNC(LayerPlant_1);
+    CREATE_FUNC(LayerPlant_2);
     virtual  bool init();
     virtual  void onEnter();
     virtual  void onExit();
     virtual void  moveDown(float y);
     virtual void update(float dt);
     void  updateHead(float dt);
-    float grow(float len);
-    float grow1(float len);
     float grow2(float len);
     virtual float getPlantTopHeightInView();
     float getPlantTopHeight();
     void  checkAddLeaf();
-    
+
     void removeBorderLight();
     void removeLightBorderByCell(int tag);
     void showCrashBorderLight();
@@ -37,7 +35,7 @@ public:
     
     void createHeadB2Body();
     void updateHeadB2Body();
-
+    
     void getGroeDirListTest( std::vector<FaceDirection>& dirList);
     GrowContext getMinRangeCanGrowContext();
     GrowContext getFirstCanGrowContext();
@@ -52,19 +50,14 @@ public:
     
     int    getPlantHeadViewWidthType();
     
-    FaceDirection getPlantGrowDir(Plant_1* p1,Plant_1* p2);
-    
-    void  updatePlantLine(Plant_1* p1);
-    
-    void doReGrow(float speed, float len);
+    void    doReGrow(float speed, float len);
     
     int   reGrow(float dt);
-    float      _reGrowLength;
-    Plant_1*  _plant;
-     Plant_1*  _plant1;
-    bool    _isNeedGrow;
-    bool    _isReGrow;
-    float   _reGrowSpeed;
+    float       _reGrowLength;
+    Plant_1*    _plant;
+    bool        _isNeedGrow;
+    bool        _isReGrow;
+    float       _reGrowSpeed;
     
     std::list<Sprite*> _leafList;
     SpriteBatchNode*   _leafBatch;
@@ -75,7 +68,7 @@ public:
     Vec2               _leafPoint;
     bool               _isCheckAddleaf;
     
-
+    
     float              _turnGrowLength;
     
     Sprite*             _lightSprite;
@@ -85,11 +78,8 @@ public:
     
     b2Body*             _headBody;
     b2World*            _world;
-    b2Body*             _plantBody;
-    std::list<int>      growDirList;
-    std::list<int>      growDirList1;
+    
     int                 _musicId;
-   // bool                _turn
 };
 
 

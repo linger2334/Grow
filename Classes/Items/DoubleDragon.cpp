@@ -144,7 +144,7 @@ void DoubleDragon::collisionWithPlant(ItemModel *plantHead)
         remove = CallFunc::create([&](){
             this->removeFromParent();
             //other effect
-            GameManager::getInstance()->getLayerPlant()->doReGrow(80,60);
+            ((LayerPlant_1*)(GameManager::getInstance()->getLayerPlant()))->doReGrow(80, 60);
         });
     }
     

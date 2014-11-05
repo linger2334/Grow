@@ -13,6 +13,7 @@
 #include "Box2d/Box2d.h"
 #include "Macro.h"
 #include "ItemModel.h"
+//#define CICADA_OLD 1
 
 class Cicada : public ItemModel
 {
@@ -27,6 +28,7 @@ public:
     void collisionWithPlant(ItemModel* plantHead);
     
 protected:
+#ifdef CICADA_OLD
     Sprite* _head;
     Sprite* _belly;
     Sprite* _leftwing;
@@ -37,6 +39,10 @@ protected:
     float fanningDuration;
     float interval;
     float bellyTransparency;
+#else
+    Sprite* _eye;
+    
+#endif
     
 };
 

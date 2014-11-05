@@ -108,7 +108,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" tag="6" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Ovq-WZ-E2l">
-                    <rect key="frame" x="240" y="194" width="83" height="132"/>
+                    <rect key="frame" x="236" y="189" width="91" height="130"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <state key="normal" title="Cicada" image="Cicada.png">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -189,7 +189,7 @@
         </view>
     </objects>
     <resources>
-        <image name="Cicada.png" width="83" height="132"/>
+        <image name="Cicada.png" width="91" height="130"/>
         <image name="DoubDragon_Anti.png" width="177" height="176"/>
         <image name="DoubDragon_Clockwise.png" width="177" height="176"/>
         <image name="Dragon_Anti.png" width="191" height="207"/>

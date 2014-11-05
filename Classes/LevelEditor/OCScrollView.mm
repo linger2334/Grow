@@ -49,9 +49,9 @@
 -(void)createNewPolygonAtCenter
 {
     //中心点
-    CGPoint center = CGPointMake(width/2, self.contentOffset.y + height/2);
-    PolygonView* centerview = [[PolygonView alloc] initWithFrame:CGRectMake(center.x - kDefaultPolygonPointRadius, center.y - kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius)];
-    centerview.bounds = CGRectMake(-kDefaultPolygonPointRadius, -kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius);
+    CGPoint center = CGPointMake(width/2*currentZoomFactor, self.contentOffset.y + height/2);
+    PolygonView* centerview = [[PolygonView alloc] initWithFrame:CGRectMake(center.x - kDefaultPolygonPointRadius*currentZoomFactor, center.y - kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor)];
+    centerview.bounds = CGRectMake(-kDefaultPolygonPointRadius*currentZoomFactor, -kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor);
     centerview.backgroundColor = [UIColor grayColor];
     centerview.defaultColor = centerview.backgroundColor;
     centerview.pointType = @"centerview";
@@ -86,6 +86,8 @@
             default:
                 break;
         }
+        dx *= currentZoomFactor;
+        dy *= currentZoomFactor;
         PolygonView* pointview = [self createPointViewAtLocalPoint:CGPointMake(dx,dy)];
         [centerview addSubview:pointview];
         [pointview release];
@@ -97,8 +99,8 @@
 
 -(PolygonView*)createNewPolygonOfTag:(int)tag AtCCPercentPosition:(cocos2d::Vec2)position WithCCLocalVertxex:(cocos2d::__Array *)vertexes OfType:(bool)isConvex
 {
-    PolygonView* centerview = [[PolygonView alloc] initWithFrame:CGRectMake(position.x*width-kDefaultPolygonPointRadius, (PAGE_COUNTS-position.y)*height - kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius)];
-    centerview.bounds = CGRectMake(-kDefaultPolygonPointRadius, -kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius);
+    PolygonView* centerview = [[PolygonView alloc] initWithFrame:CGRectMake((position.x*width-kDefaultPolygonPointRadius)*currentZoomFactor, ((PAGE_COUNTS-position.y)*height - kDefaultPolygonPointRadius)*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor)];
+    centerview.bounds = CGRectMake(-kDefaultPolygonPointRadius*currentZoomFactor, -kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor);
     centerview.backgroundColor = [UIColor grayColor];
     centerview.defaultColor = centerview.backgroundColor;
     centerview.pointType = @"centerview";
@@ -115,7 +117,7 @@
     CCARRAY_FOREACH(vertexes, vertexElement){
         Vec2 pos = PointFromString(static_cast<__String*>(vertexElement)->getCString());
         pos.y *= -1;
-        PolygonView* pointview = [self createPointViewAtLocalPoint:CGPointMake(pos.x,pos.y)];
+        PolygonView* pointview = [self createPointViewAtLocalPoint:CGPointMake(pos.x*currentZoomFactor,pos.y*currentZoomFactor)];
         [centerview addSubview:pointview];
         [pointview release];
     }
@@ -147,7 +149,7 @@
 {
     PolygonView* newPointView = [[PolygonView alloc] init];
     newPointView.center = localPoint;
-    newPointView.bounds = CGRectMake(0, 0, 2*kDefaultPolygonPointRadius, 2*kDefaultPolygonPointRadius);
+    newPointView.bounds = CGRectMake(0, 0, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor);
     newPointView.pointType = @"pointview";
     
     return newPointView;
@@ -189,8 +191,10 @@
     newPathPointInfo.rotation = kDefaultAnimationRotation;
     newPathPointInfo.rotationSpeed = kDefaultAnimationRotationSpeed;
     newPathPointInfo.moveSpeed = kDefaultAnimationMoveSpeed;
-    newPathPointInfo.position = Vec2(0,itemview.bounds.size.height);
+    newPathPointInfo.position = kDefaultAnimationPosition;
     std::vector<AnimationInfo> eachGroupCorrespondInfos(itemview.animationGroupCount,newPathPointInfo);
+    eachGroupCorrespondInfos.front().position = Vec2(0,itemview.image.size.height);
+    
     PolygonView* newPathPoint = [itemview createPathPointWith:eachGroupCorrespondInfos];
     [self addGestureRecognizerForCenterView:newPathPoint];
     
@@ -210,9 +214,7 @@
 {
     ItemView* itemview = pathpoint->_pathParent;
     std::vector<AnimationInfo> eachGroupCorrespondInfos(pathpoint->_eachGroupCorrespondInfos);
-    for(AnimationInfo& info : eachGroupCorrespondInfos){
-        info.position = Vec2(pathpoint.center.x-itemview.center.x + 2*kDefaultPathPointRadius,itemview.center.y-pathpoint.center.y - 2*kDefaultPathPointRadius);
-    }
+    eachGroupCorrespondInfos.front().position = Vec2((pathpoint.center.x-itemview.center.x)/currentZoomFactor + 2*kDefaultPathPointRadius,(itemview.center.y-pathpoint.center.y)/currentZoomFactor - 2*kDefaultPathPointRadius);
     PolygonView* newPathPoint = [itemview createPathPointWith:eachGroupCorrespondInfos];
     [self addGestureRecognizerForCenterView:newPathPoint];
     
@@ -295,7 +297,7 @@
 {
     CGPoint translation = [recognizer translationInView:self];
 
-    if (!self.isPreViewed&&!self.isScrollEnabled) {
+    if (!self.isScrollEnabled) {
         //移动多边形和路径点
         for(PolygonView* polygonview in self.toDealWithPointView){
             if ([polygonview.pointType isEqualToString:@"pointview"]) {
@@ -345,14 +347,14 @@
 
 -(void)OCScrollViewDoubleTap:(UITapGestureRecognizer*)recognizer
 {
-    if (!isPreViewed) {
-        CGPoint position = [recognizer locationInView:self];
+    CGPoint position = [recognizer locationInView:self];
+    if (self.centerViews.count != 0) {
         for (PolygonView* centerview in self.centerViews) {
             CGPoint localPoint = [centerview convertPoint:position fromView:self];
             if (CGRectContainsPoint(centerview.bounds, localPoint)) return;
             
             for (PolygonView* pointview in centerview.subviews) {
-                if (CGRectContainsPoint(pointview.frame, position)) return;
+                if (CGRectContainsPoint(pointview.frame, localPoint)) return;
             }
         }
         
@@ -371,9 +373,13 @@
     int result = 0;
     
     for (PolygonView* polygon in self.centerViews) {
-        NSArray* vertexes = [polygon getGlLocalVertexes];
+        NSMutableArray* vertexes = [NSMutableArray arrayWithArray:[polygon getGlLocalVertexes]];
         //
         int vertexCount = vertexes.count;
+        for(int i = 0;i<vertexCount;i++){
+            vertexes[i] = [NSValue valueWithCGPoint:CGPointMake([vertexes[i] CGPointValue].x/currentZoomFactor, [vertexes[i] CGPointValue].y/currentZoomFactor)];
+        }
+        
         if (vertexCount>b2_maxPolygonVertices) {
             result = -1;
             break;
@@ -396,7 +402,7 @@
         std::string mainKey = StringUtils::format("polygon%d",polygon.tag-1000);
         __Dictionary* propertyDict = __Dictionary::create();
         
-        __String* position = __String::createWithFormat("{%f,%f}",polygon.center.x/width,PAGE_COUNTS - polygon.center.y/height);
+        __String* position = __String::createWithFormat("{%f,%f}",polygon.center.x/self.contentSize.width,PAGE_COUNTS - polygon.center.y/(self.contentSize.height/PAGE_COUNTS));
         __Bool* isConvex = __Bool::create(polygon.isConvex);
         __Array* Vertexes = __Array::createWithCapacity(vertexes.count);
         for (NSValue* vertex in vertexes) {

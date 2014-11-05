@@ -1,5 +1,6 @@
 #include "LayerMapGrid.h"
 #include "LayerBorder.h"
+#include "LayerPlant.h"
 #define TOUCH_MIN_LENGTH 32
 
 #define MAX_CRASH_LENGTH 50
@@ -11,15 +12,16 @@ bool LayerMapGrid::init()
     _mapGrid._maxViewHeight = _gameManager->getMapGridUnitVisibleSize().height;
     _mapGrid._unitGridSize = _gameManager->getMapGridUnitSize();
     _mapGrid._sceneGame = _gameManager->getGameScene();
-    _mapGrid._layerPlant =  _gameManager->_layerplant;
+    _mapGrid._layerPlant = static_cast<LayerPlant_1*>(_gameManager->_layerplant);
     _gameManager->setLayerMapGrid(this);
     
     cocos2d::Size visibleSize = Director::getInstance()->getWinSize();
     cocos2d:: Size gridSize =_gameManager->getMapGridUnitVisibleSize();
     _mapGrid.resize(gridSize.width, gridSize.height*2);
+    
     _mapGrid.setData(0, 0, 255);
     _textureAlphaMask = new Texture2D();
-    _textureAlphaMask->initWithData(_mapGrid._gridData,gridSize.width*(gridSize.height), Texture2D::PixelFormat::A8,gridSize.width, gridSize.height, cocos2d::Size(gridSize.width,gridSize.height));
+    _textureAlphaMask->initWithData(_mapGrid._gridData,gridSize.width*(gridSize.height+1), Texture2D::PixelFormat::A8,gridSize.width, gridSize.height+1, cocos2d::Size(gridSize.width,gridSize.height+1));
     _textureAlphaMask->autorelease();
     
     _maskAlphaSprite = Sprite::createWithTexture(_textureAlphaMask);
@@ -30,6 +32,7 @@ bool LayerMapGrid::init()
     _maskAlphaSprite->setRotationX(180);
     _maskAlphaSprite->setPosition(Vec2(_gameManager->getVisibleSize().width*0.5,0));
     addChild(_maskAlphaSprite);
+    return  true;
 }
  bool LayerMapGrid::initGameInfo()
 {
@@ -38,19 +41,8 @@ bool LayerMapGrid::init()
 }
 void LayerMapGrid::update(float dt)
 {
-    _textureAlphaMask->updateWithData(_mapGrid.getDataByOriginY(), 0,0, _mapGrid._gridWidth, _mapGrid._maxViewHeight);
- //   static  float dttemp = 0;
-//    dttemp += dt;
-//    if (dttemp<0.1) return ;
-//    dttemp = 0;
-//    for (int i =0; i<4; i++)
-//    {
-//    if (_clearList.empty())return ;
-//        Vec2 tem = _clearList.front();
-//    auto cell = _mapGrid.getMapGridCellByPosition(tem.x, tem.y);
-//    int flag = _mapGrid.clearGridCellBorderByRange(cell, 8);
-//    if (flag<0) {_clearList.pop_front();}
-//    }
+    _textureAlphaMask->updateWithData(_mapGrid.getDataByOriginY(), 0,0, _mapGrid._gridWidth, _mapGrid._maxViewHeight+1);
+
 }
 
 void LayerMapGrid::moveDown(float yLen)
@@ -100,8 +92,9 @@ void LayerMapGrid::moveDownMapGrid(float yLen)
     _mapGrid._mapGridStarty += yLen;
     int n =  _mapGrid._mapGridStarty/_mapGrid._unitGridSize.height;
     if (n>0)
-    {moveDownMapGrid(n);
+    {
         _mapGrid._mapGridStarty -= n*_mapGrid._unitGridSize.height;
+        moveDownMapGrid(n);
     }
 }
 
@@ -125,9 +118,10 @@ bool LayerMapGrid::onTouchBegan(Touch* touch,Event* event)
     Point pt = touch->getLocation();
    // _clearList.push_back(pt);
     _touchPrePoint = pt;
+    _isFirstMoveTouch = true;
     return true;
 }
-
+#include "LayerPlant.h"
 void LayerMapGrid::onTouchMoved(Touch* touch,Event* event)
 {
         cocos2d::Point pt = touch->getLocation();
@@ -137,13 +131,39 @@ void LayerMapGrid::onTouchMoved(Touch* touch,Event* event)
           if(_mapGrid.touchClearGrid(touch->getLocation()))
 //                //  _borderlayer->updateBorder(0, 0, _mapGrid._gridWidth, _mapGrid._maxViewHeight);
             _touchPrePoint = pt;
-
+            if(_isFirstMoveTouch)
+            {
+            auto node =((LayerPlant_1*)(GameManager::getInstance()->getLayerPlant()))->_plant;
+            Vec2 pt1 =node->convertToWorldSpace(node->_headCur.getPosition());
+            float len = pt1.getDistance(pt);
+            if (len <150) {
+                GridCell cell = _mapGrid.getMapGridCellByPosition(pt1);
+                // log("Touch Clear Grid x: %f , y: %f",touchPoint.x,touchPoint.y);
+                // return   clearGridCell(cell._x,cell._y);
+                _mapGrid.clearGridCellBorderByRange(cell,6);
+               
+            }
+            }
+                _isFirstMoveTouch =false;
         }
-    
+
 }
 
 void LayerMapGrid::onTouchEnded(Touch* touch,Event* event)
 {
+    if(_isFirstMoveTouch)
+    {
+        auto node =((LayerPlant_1*)(GameManager::getInstance()->getLayerPlant()))->_plant;
+        Vec2 pt1 =node->convertToWorldSpace(node->_headCur.getPosition());
+        float len = pt1.getDistance(touch->getLocation());
+        if (len <150) {
+            GridCell cell = _mapGrid.getMapGridCellByPosition(pt1);
+            // log("Touch Clear Grid x: %f , y: %f",touchPoint.x,touchPoint.y);
+            // return   clearGridCell(cell._x,cell._y);
+            _mapGrid.clearGridCellBorderByRange(cell,6);
+            
+        }
+    }
     _mapGrid.touchClearGrid(touch->getLocation());
 }
 

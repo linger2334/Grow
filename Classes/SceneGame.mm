@@ -28,10 +28,10 @@ SceneGame::~SceneGame()
 {
     _gameManager->_sceneGame = nullptr;
     _gameManager->setBox2dWorld(nullptr);
-    CC_SAFE_RELEASE(_gameManager->_fileHandler);
     CC_SAFE_DELETE(world);
     CC_SAFE_DELETE(_debugDraw);
     CC_SAFE_RELEASE(_physicsHandler);
+    CC_SAFE_RELEASE(_gameManager->_fileHandler);
 }
 
 
@@ -55,7 +55,7 @@ bool SceneGame::init()
 //    //
 //
     _mapHeight = 0;
-    initInfo();
+   initInfo();
 //    _isMoving=false;
 //    
 //    scheduleUpdate();
@@ -67,6 +67,7 @@ void SceneGame::initInfo()
 {
     initPhysics();
     _gameManager->_world = world;
+    _gameManager->setBox2dWorld(world);
     _gameManager->setPhysicsHandler(_physicsHandler);
     _layerMapGrid = LayerMapGrid::create();
     _layoutGameLayer(_layerMapGrid);
@@ -76,14 +77,14 @@ void SceneGame::initInfo()
 
     _layerBorder  = LayerBorder::create();
     _layoutGameLayer(_layerBorder);
-   // _layerPlant = LayerPlant_1::create();
-    //_layoutGameLayer(_plantLayer);
+//    _layerPlant = LayerPlant_1::create();
+//    _layoutGameLayer(_layerPlant);
    
    
     _layerDirt = LayerDirt::create();
     _layoutGameLayer(_layerDirt);
-//    _layerBackground = LayerBackGround::create();
-//    _layoutGameLayer(_layerBackground);
+    _layerBackground = LayerBackGround::create();
+    _layoutGameLayer(_layerBackground);
     
     _layerBorder = LayerBorder::create();
     _layoutGameLayer(_layerBorder);
@@ -96,10 +97,13 @@ void SceneGame::initInfo()
     
     _layerPlant  = LayerPlant_1::create();
     _layoutGameLayer(_layerPlant);
+    _gameManager->_layerplant = (LayerPlantBase*)(_layerPlant);
+    _layerMapGrid->_mapGrid._layerPlant =  dynamic_cast<LayerPlant_1*>(_layerPlant);
+    _layerMapGrid->_mapGrid._layerBorder = _layerBorder;
     
     _layerLight = LayerLight::create();
     _layoutGameLayer(_layerLight);
-//    addChild(_layerBackground,SceneGameChildZorder::MapBackground);
+    addChild(_layerBackground,SceneGameChildZorder::MapBackground);
     addChild(_layerPlant,SceneGameChildZorder::MapBackground+3);
     addChild(maskOnlyAlpha,SceneGameChildZorder::MapAlphaDrawing-1);
     addChild(_layerMapGrid,SceneGameChildZorder::MapAlphaDrawing);
@@ -109,19 +113,19 @@ void SceneGame::initInfo()
     addChild(_layerUIBorder,SceneGameChildZorder::MapDirt+2);
     addChild(_layerLight,SceneGameChildZorder::MapLight);
     addChild(_layerui,SceneGameChildZorder::MapUI);
-    
-   // initLevelEditorMenu();
+   // _layerBackground->setVisible(false);
+//    initLevelEditorMenu();
 //    _layerItem = LayerItem::create();
 //    _layerItem->setAnchorPoint(Vec2(0.5,0));
 //    _layerItem->setPosition(Vec2(VisibleSize.width/2,0));
 //    _layerItem->loadItemsAndBodys();
 //    this->addChild(_layerItem,MapItem);
-    //
-//
+    
+
     
     _layerMapGrid->initGameInfo();
-    _layerMapGrid->_mapGrid.testClear(40, 0, 40);
-    _layerMapGrid->_mapGrid._layerBorder->updateBorder(0, 0, 80, 120);
+  //  _layerMapGrid->_mapGrid.testClear(40, 0, 40);
+   // _layerMapGrid->_mapGrid._layerBorder->updateBorder(0, 0, 80, 120);
 //    /////////////////////////////////////////////////////////////////
 //
 //    /////////////////////////////////////////////////////////////////
@@ -132,9 +136,10 @@ void SceneGame::initInfo()
 //
     _layerItem = LayerItem::create();
     _layerItem->setAnchorPoint(Vec2(0.5,0));
-    _layerItem->setPosition(Vec2(VisibleSize.width/2,-_mapHeight));
-    //首次加载
-    _layerItem->loadItemsAndBodys(_mapHeight);
+    _layerItem->setPosition(Vec2(VisibleSize.width/2,0));
+    _layerItem->loadAllItemsAndBodys();
+    //_layerItem->loadItemsAndBodys(_mapHeight);
+   //  _layerItem->loadPolygons();
     _gameManager->_layerItem = _layerItem;
       initLevelEditorMenu();
     this->addChild(_layerItem,MapItem);
@@ -185,8 +190,8 @@ void SceneGame::initInfo()
     initDirt();
 
     CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(BACKGROUND_MUSIC);
-    CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(0.4);
-
+    CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(0.0);
+    
     
     //CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
     return ;
@@ -209,8 +214,7 @@ void SceneGame::initPhysics()
     world = new b2World(gravity);
     
     _physicsHandler = PhysicsHandler::create(world);
-    CC_SAFE_RETAIN(_physicsHandler);
-
+    _physicsHandler->retain();
     
     world->SetAllowSleeping(false);
     world->SetContinuousPhysics(true);
@@ -224,9 +228,9 @@ void SceneGame::initPhysics()
     _debugDraw->SetFlags(flags);
     
 }
-
 void SceneGame::draw(Renderer *renderer, const Mat4& transform, uint32_t flags)
 {
+    
     Layer::draw(renderer,transform,flags);
     
     GL::enableVertexAttribs(cocos2d::GL::VERTEX_ATTRIB_FLAG_POSITION);
@@ -246,6 +250,7 @@ void SceneGame::draw(Renderer *renderer, const Mat4& transform, uint32_t flags)
 void SceneGame::onDraw()
 {
   
+    return ;
     Director* director = Director::getInstance();
     CCASSERT(nullptr!=director, "Director id null when seting matrix stack");
     
@@ -259,58 +264,18 @@ void SceneGame::onDraw()
 void SceneGame::update(float dt)
 {
   
-   // moveDownGameView(30*dt);
-//    static float dttemp =0;
-//    if (_isReGrow) {
-//        dttemp += dt;
-//        if(dttemp>0.2)
-//        {
-////        ((LayerPlant_1*)_layerPlant)->_plant->_cpLineNode._cpList.pop_back();
-////        ((LayerPlant_1*)_layerPlant)->_plant->_headCur._cp =*(((LayerPlant_1*)_layerPlant)->_plant->_cpLineNode._cpList.rbegin());
-////        ((LayerPlant_1*)_layerPlant)->updateHead(dt);
-////        ((LayerPlant_1*)_layerPlant)->renderPlant();
-////            int x = _gameManager->getMapGridUnitVisibleSize().width;
-////            int y = _gameManager->getMapGridUnitVisibleSize().height;
-////        for (int j = 0; j<y; j++) {
-////            for (int i =0 ; i<x; i++) {
-////                GridCell cell(i,j);
-////                if(_layerBorder->isHasBorder(cell))
-////                {
-////                    auto tcell =_layerMapGrid->_mapGrid.getGridCellByView(cell);
-////                    _layerMapGrid->_mapGrid.changeGridCell(tcell._x, tcell._y, GridType::None);
-////                    // _layerBorder->removeBorder(cell);
-////                }
-////            }
-////            
-////        }
-////        _layerBorder->updateBorder(0, 0, x, y);
-//            dttemp = 0;
-//        }
-//       // return ;
-//    }
     
     if (_layerPlant->getPlantTopHeightInView()>_gameManager->_visible.height*0.5) {
         float height =_layerPlant->getPlantTopHeightInView();
                moveDownGameView(height-_gameManager->_visible.height*0.5);
     }
     _layerPlant->update(dt);
-   _layerLight->update(dt);
+     _layerLight->update(dt);
     _layerMapGrid->update(dt);
-    //删除道具和多边形
-    _layerItem->update(dt);
+    
+      _layerItem->update(dt);
     _physicsHandler->update(dt);
-   // return ;
-///////////////////////////////////////////////////////////b
 
-//    Vec2 ptheade =  _plantLayer->_plant->convertToWorldSpace( _plantLayer->_plant->_headCur.getPosition());
-//    _headBody->SetTransform(b2Vec2(ptheade.x/PTM_RATIO,ptheade.y/PTM_RATIO), 0);
-//   
-//    if (_plantLayer->getPlantTopHeight()>_gameManager->_visible.height*0.6) {
-//        moveDownGameView(_plantLayer->getPlantTopHeight()-_gameManager->_visible.height*0.6);
-//    }
-/////////////////////////////////////////////////////////////////////////
-    //位置同步与道具碰撞检测
-  // _physicsHandler->update(dt);
 
 }
 //
@@ -323,7 +288,7 @@ void SceneGame::_layoutGameLayer(Node* gameLayer)
 
 void SceneGame::moveDownGameView(float yLen)
 {
-//    _layerBackground->moveDown(yLen*0.75);
+    _layerBackground->moveDown(yLen*0.75);
     _layerDirt->moveDown(yLen);
     _layerMapGrid->moveDown(yLen);
     _layerBorder->moveDown(yLen);
@@ -336,9 +301,9 @@ void SceneGame::moveDownGameView(float yLen)
     sprintf(buf,"第 %d 屏",(int)_mapHeight/1024+1);
     _labelHeight->setString(buf);
 /////////////////////add by wlg
-    //动态加载
-    _layerItem->loadItemsAndBodys(_mapHeight);
+    //_layerItem->moveDown(yLen);
 //////////////////////////////////////////
+    // _layerItem->loadItemsAndBodys(_mapHeight);
 }
 //bool  SceneGame::testMapGridCrash(Vec2 point,int type)
 //{

@@ -120,20 +120,34 @@ void ItemModel::createAnimates(std::vector<std::vector<AnimationInfo>>& animatio
     Vector<FiniteTimeAction*> eachAnimationGroup;
     ActionInterval* animationGroup = nullptr;
     Vec2 prePosition = getPosition();
-    Vec2 deltaPosition = Vec2(0,0);
     float t = 0;
     
     for (int i = 0; i< animationGroupCount; i++) {
         prePosition = getPosition();
         bool isLoop = animationControlInstructions.at(StringUtils::format("group%d",i));
         for (AnimationInfo& info : animationInfos.at(i)) {
-            ActionInterval* delay = DelayTime::create(info.waitTime);
-            ActionInterval* rotate = RotateBy::create(info.rotation/info.rotationSpeed, info.rotation);
-            deltaPosition = getPosition() + info.position - prePosition;
-            t = deltaPosition.length()/info.moveSpeed;
-            ActionInterval* moveBy = MoveBy::create(t, deltaPosition);
+            ActionInterval* delay = nullptr;
+            ActionInterval* rotate = nullptr;
+            ActionInterval* move = nullptr;
+            Sequence* singleAnimation = nullptr;
+            CCASSERT(info.waitTime>=0.0&&info.rotationSpeed>=0.0&&info.moveSpeed>=0.0, "animation information is invalid,game cannot be run!");
+            //
+            delay = DelayTime::create(info.waitTime);
+            singleAnimation  = Sequence::create(delay, NULL);
+            //
+            if (info.rotation != 0.0&& info.rotationSpeed != 0.0) {
+                rotate = RotateBy::create(info.rotation/info.rotationSpeed, info.rotation);
+                singleAnimation = Sequence::create(singleAnimation,rotate, NULL);
+            }
+            //
+            Vec2 destPosition = getPosition() + info.position;
+            if (destPosition - prePosition != Vec2(0,0) && info.moveSpeed != 0.0) {
+                t = destPosition.getDistance(prePosition)/info.moveSpeed;
+                move = MoveTo::create(t, destPosition);
+                singleAnimation = Sequence::create(singleAnimation,move, NULL);
+            }
             
-            Sequence* singleAnimation = Sequence::create(delay,rotate,moveBy,NULL);
+            //
             eachAnimationGroup.pushBack(singleAnimation);
             prePosition = getPosition() + info.position;
         }
@@ -142,13 +156,15 @@ void ItemModel::createAnimates(std::vector<std::vector<AnimationInfo>>& animatio
         animationGroup = Sequence::create(eachAnimationGroup);
         if (isLoop) {
             animationGroup = RepeatForever::create(animationGroup);
+            _allCyclicAnimations.pushBack(animationGroup);
+        }else{
+            allParallelAnimation.pushBack(animationGroup);
         }
-        allParallelAnimation.pushBack(animationGroup);
+        
         eachAnimationGroup.clear();
     }
     //并联组动画
-//    _animatesParallel = Spawn::create(allParallelAnimation);
-    _animatesParallel = animationGroup;
+    _animatesParallel = Spawn::create(allParallelAnimation);
     CC_SAFE_RETAIN(_animatesParallel);
 }
 
@@ -179,9 +195,18 @@ void ItemModel::update(float dt)
     float beginningPointY = WinSize.height-getBoundingBox().size.height/2;
     Vec2 pointInGl = getParent()->convertToWorldSpace(getPosition());
     if (pointInGl.y<beginningPointY) {
-        if (isAnimated&&_animatesParallel){
-            runAction(_animatesParallel);
+        if (isAnimated){
+            
+            if (_animatesParallel) {
+                runAction(_animatesParallel);
+            }
+            
+            for (Action* action : _allCyclicAnimations) {
+                runAction(action);
+            }
+            
         }
+        
         unscheduleUpdate();
     }
     

@@ -56,6 +56,8 @@ public:
 
     void  checkHeightSub(float len);
     
+    Vec2 getNextGrowUnitLengthPosition(FaceDirection growDir);
+    
 
     HeadCursorV2    _headCur;
     float           _growUnitHeight;

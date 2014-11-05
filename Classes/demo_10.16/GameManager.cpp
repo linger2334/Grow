@@ -2,7 +2,9 @@
 #include "LayerPlant.h"
 #include "ItemModel.h"
 #include "LayerMapGrid.h"
+
 GameManager* GameManager::_sGameManager = nullptr;
+GameManager::Recycle GameManager::garbo;
 void  GameManager::initGameInfo()
 {
     _sLineItemModel = new ItemModel();
@@ -30,5 +32,5 @@ int  GameManager::getPlantCount()
 }
 std::vector<ContorlPointV2>& GameManager::getCPListRefByIndex(int i)
 {
-    return _layerplant->_plant->_cpLineNode._cpList;
+   return ((LayerPlant_1*)_layerplant)->_plant->_cpLineNode._cpList;
 }

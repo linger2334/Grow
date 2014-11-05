@@ -124,11 +124,30 @@ float  Plant_1::grow(FaceDirection dir,float height)
         topCp=cp.getContorlPoint();
         topCp._radius =MIN_WIDTH;
     }
-//    log(str.c_str());
+    log(str.c_str());
     _cpLineNode._isDirt =true;
     return retLen;
 }
-
+Vec2 Plant_1::getNextGrowUnitLengthPosition(FaceDirection growDir)
+{
+    Vec2 ret ;
+    switch (growDir) {
+        case FaceLeft:
+            ret = _headCur.getNextHeadCursorByLeft(_growUnitHeight).getPosition();
+            break;
+        case FaceRight:
+              ret = _headCur.getNextHeadCursorByRight(_growUnitHeight).getPosition();
+            break;
+        case FaceTop:
+              ret = _headCur.getNextHeadCursor(_growUnitHeight).getPosition();
+            break;
+        default:
+            log("getNextGrowUnitLengthPosition Dir Error");
+            assert(0);
+            break;
+    }
+    return ret;
+}
  void  Plant_1::checkHeightSub(float len)
 {
     float head = _headCur._cp._height;
