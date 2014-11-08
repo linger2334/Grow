@@ -42,20 +42,17 @@ bool Flame::init(Item& item)
     if (ItemModel::init(item)) {
         
         switch (_type) {
-            case Flame_Red:
-                setTexture(IMAGE_FLAME_RED);
-                break;
-            case Flame_Green:
-                setTexture(IMAGE_FLAME_GREEN);
-                break;
             case Flame_Blue:
                 setTexture(IMAGE_FLAME_BLUE);
                 break;
-            case Flame_White:
-                setTexture(IMAGE_FLAME_WHITE);
-                break;
             case Flame_Orange:
                 setTexture(IMAGE_FLAME_ORANGE);
+                break;
+            case Flame_Violet:
+                setTexture(IMAGE_FLAME_VIOLET);
+                break;
+            case Flame_White:
+                setTexture(IMAGE_FLAME_WHITE);
                 break;
             default:
                 return false;
@@ -86,20 +83,17 @@ void Flame::createBody()
     
     GB2ShapeCache* _fixturesCache = ((LayerItem*)getParent())->_fixturesCache;
     switch (_type) {
-        case Flame_Red:
-            _fixturesCache->addFixturesToBody(_body, "Flame_Red");
-            break;
-        case Flame_Green:
-            _fixturesCache->addFixturesToBody(_body, "Flame_Green");
-            break;
         case Flame_Blue:
             _fixturesCache->addFixturesToBody(_body, "Flame_Blue");
             break;
-        case Flame_White:
-            _fixturesCache->addFixturesToBody(_body, "Flame_White");
-            break;
         case Flame_Orange:
             _fixturesCache->addFixturesToBody(_body, "Flame_Orange");
+            break;
+        case Flame_Violet:
+            _fixturesCache->addFixturesToBody(_body, "Flame_Violet");
+            break;
+        case Flame_White:
+            _fixturesCache->addFixturesToBody(_body, "Flame_White");
             break;
         default:
             break;

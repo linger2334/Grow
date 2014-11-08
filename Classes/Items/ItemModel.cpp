@@ -14,7 +14,10 @@
 #include "Dragon.h"
 #include "DoubleDragon.h"
 #include "Serpent.h"
-#include "Eye.h"
+#include "GearButton.h"
+#include "GearGate.h"
+#include "Barrier.h"
+#include "Decoration.h"
 #include "Polygon.h"
 
 ItemModel::ItemModel():_body(nullptr),_animatesParallel(nullptr),_animatesCardinalSpline(nullptr),_animatesCustomCurve(nullptr)
@@ -39,19 +42,16 @@ ItemModel* ItemModel::create(Item& item)
 {
     ItemModel *itemModel = nullptr;
     switch(item.type){
-        case Flame_Red:
-            itemModel = Flame::create(item);
-            break;
-        case Flame_Green:
-            itemModel = Flame::create(item);
-            break;
         case Flame_Blue:
             itemModel = Flame::create(item);
             break;
-        case Flame_White:
+        case Flame_Orange:
             itemModel = Flame::create(item);
             break;
-        case Flame_Orange:
+        case Flame_Violet:
+            itemModel = Flame::create(item);
+            break;
+        case Flame_White:
             itemModel = Flame::create(item);
             break;
         case Cicada:
@@ -72,8 +72,20 @@ ItemModel* ItemModel::create(Item& item)
         case Serpent_:
             itemModel = Serpent::create(item);
             break;
-        case Eye_:
-            itemModel = Eye::create(item);
+        case Gear_Button:
+            itemModel = GearButton::create(item);
+            break;
+        case Gear_Gate:
+            itemModel = GearGate::create(item);
+            break;
+        case Barrier_:
+            itemModel = Barrier::create(item);
+            break;
+        case Decoration_Bridge:
+            itemModel = Decoration::create(item);
+            break;
+        case Decoration_Pendant:
+            itemModel = Decoration::create(item);
             break;
         case Rock_Circle:
             itemModel = Rock::create(item);
@@ -81,7 +93,19 @@ ItemModel* ItemModel::create(Item& item)
         case Rock_Ellipse:
             itemModel = Rock::create(item);
             break;
-        case Rock_Gray:
+        case Rock_Mount:
+            itemModel = Rock::create(item);
+            break;
+        case Rock_MountInv:
+            itemModel = Rock::create(item);
+            break;
+        case Rock_Ovoid:
+            itemModel = Rock::create(item);
+            break;
+        case Rock_Rect:
+            itemModel = Rock::create(item);
+            break;
+        case Rock_Trape:
             itemModel = Rock::create(item);
             break;
         default:
@@ -105,6 +129,7 @@ bool ItemModel::init(Item &item)
             animationGroupCount = item.animationInfos.size();
             createAnimates(item.animationInfos,item.animationControlInstructions);
         }
+        isAniPerformed = false;
         
         result = true;
     }else{
@@ -200,14 +225,17 @@ void ItemModel::update(float dt)
             if (_animatesParallel) {
                 runAction(_animatesParallel);
             }
-            
             for (Action* action : _allCyclicAnimations) {
                 runAction(action);
             }
             
+            isAniPerformed = true;
         }
         
-        unscheduleUpdate();
+        if (_type!=Decoration_Bridge && _type!=Decoration_Pendant) {
+            unscheduleUpdate();
+        }
+    
     }
     
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="5056" systemVersion="13F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="5056" systemVersion="13E28" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment version="1536" defaultVersion="1280" identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
@@ -154,16 +154,16 @@
         </view>
     </objects>
     <resources>
-        <image name="Cicada.png" width="83" height="132"/>
+        <image name="Cicada.png" width="91" height="130"/>
         <image name="Dragon_Anti.png" width="191" height="207"/>
         <image name="Dragon_Clockwise.png" width="191" height="207"/>
         <image name="Eye.png" width="29" height="17"/>
-        <image name="Flame_Blue.png" width="120" height="120"/>
+        <image name="Flame_Blue.png" width="87" height="110"/>
         <image name="Flame_Green.png" width="120" height="120"/>
-        <image name="Flame_Orange.png" width="120" height="120"/>
+        <image name="Flame_Orange.png" width="87" height="110"/>
         <image name="Flame_Red.png" width="120" height="120"/>
-        <image name="Flame_White.png" width="60" height="73"/>
-        <image name="Rock_Circle.png" width="303" height="302"/>
+        <image name="Flame_White.png" width="87" height="110"/>
+        <image name="Rock_Circle.png" width="311" height="291"/>
         <image name="Rock_Ellipse.png" width="117" height="266"/>
         <image name="Rock_Gray.png" width="64" height="64"/>
         <image name="back_normal.png" width="456" height="256"/>

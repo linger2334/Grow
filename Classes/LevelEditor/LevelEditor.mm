@@ -489,7 +489,7 @@ void LevelEditor::drawLoadedLevel()
         }
     }
     //点刷新
-//    [_scrollView setNeedsDisplay];
+
 }
 
 -(void)popup:(id)sender
@@ -559,10 +559,6 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)reset:(id)sender
 {
-//    UIActionSheet* reSetSheet = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to reset?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Yes" otherButtonTitles:@"No,thanks",nil];
-//    reSetSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
-//    [reSetSheet showInView:self.view];
-//    [reSetSheet release];
     //道具和路径点清空
     for(ItemView* itemview : itemViews)
     {
@@ -640,7 +636,7 @@ void LevelEditor::drawLoadedLevel()
     [_scrollView.toDealWithPointView removeAllObjects];
     [_scrollView.toDealWithPointView addObjectsFromArray:newPolygonViews];
     
-    //
+    //再拷贝道具及其路径点
     std::set<ItemView*> needToAdd;
     for(std::set<ItemView*>::iterator it = _toDealWith.begin();it!=_toDealWith.end();it++)
     {
@@ -672,84 +668,7 @@ void LevelEditor::drawLoadedLevel()
             eachAnimationGroupInfos.clear();
         }
        
-        void* features = nullptr;
-        
-        switch(itemView->itemtype){
-            case Cicada:
-            {
-                Features_Cicada* oldfeatures = (Features_Cicada*)itemView->features;
-                if(oldfeatures){
-                    Features_Cicada feat(*oldfeatures);
-                    features = &feat;
-                }else{
-                    Features_Cicada feat;
-                    features = &feat;
-                }
-            }
-                break;
-            case Dragon_Anti:
-            {
-                Features_Dragon* oldfeatures = (Features_Dragon*)itemView->features;
-                if(oldfeatures){
-                    Features_Dragon feat(*oldfeatures);
-                    features = &feat;
-                }else{
-                    Features_Dragon feat;
-                    features = &feat;
-                }
-            }
-                break;
-            case Dragon_Clockwise:
-            {
-                Features_Dragon* oldfeatures = (Features_Dragon*)itemView->features;
-                if(oldfeatures){
-                    Features_Dragon feat(*oldfeatures);
-                    features = &feat;
-                }else{
-                    Features_Dragon feat;
-                    features = &feat;
-                }
-            }
-                break;
-            case DoubDragon_Anti:
-            {
-                Features_DoubleDragon* oldfeatures = (Features_DoubleDragon*)itemView->features;
-                if (oldfeatures) {
-                    Features_DoubleDragon newFeat(*oldfeatures);
-                    features = &newFeat;
-                }else{
-                    Features_DoubleDragon feat;
-                    features = &feat;
-                }
-            }
-                break;
-            case DoubDragon_Clockwise:
-            {
-                Features_DoubleDragon* oldfeatures = (Features_DoubleDragon*)itemView->features;
-                if (oldfeatures) {
-                    Features_DoubleDragon newFeat(*oldfeatures);
-                    features = &newFeat;
-                }else{
-                    Features_DoubleDragon feat;
-                    features = &feat;
-                }
-            }
-                break;
-            case Serpent_:
-            {
-                Features_Serpent* oldfeatures = (Features_Serpent*)itemView->features;
-                if(oldfeatures){
-                    Features_Serpent newFeat(*oldfeatures);
-                    features = &newFeat;
-                }else{
-                    Features_Serpent feat;
-                    features = &feat;
-                }
-            }
-                break;
-            default:
-                break;
-        }
+        void* features = itemView->features;
         
         Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
         
@@ -891,9 +810,6 @@ void LevelEditor::drawLoadedLevel()
 - (void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex
 {
     if (buttonIndex==[actionSheet destructiveButtonIndex]) {
-        //        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Result" message:@"Complete!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        //        [alert show];
-        //        [alert release];
         //先把自己的清空
         for(ItemView* itemview : itemViews)
         {
@@ -959,51 +875,9 @@ void LevelEditor::drawLoadedLevel()
     std::vector<std::vector<AnimationInfo>> animationInfos;
     void* features = nullptr;
     
-    switch(type){
-        case Cicada:
-        {
-            Features_Cicada feat;
-            features = &feat;
-        }
-            break;
-        case Dragon_Anti:
-        {
-            Features_Dragon feat;
-            features = &feat;
-        }
-            break;
-        case Dragon_Clockwise:
-        {
-            Features_Dragon feat;
-            features = &feat;
-        }
-            break;
-        case DoubDragon_Anti:
-        {
-            Features_DoubleDragon feat;
-            features = &feat;
-        }
-            break;
-        case DoubDragon_Clockwise:
-        {
-            Features_DoubleDragon feat;
-            features = &feat;
-        }
-            break;
-        case Serpent_:
-        {
-            Features_Serpent feat;
-            features = &feat;
-        }
-            break;
-        default:
-            break;
-    }
-    
     Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
     
     ItemView* newItem = [[ItemView alloc] init:item];
-    
     [newItem itemAddGestureRecognizerWithTarget:self];
     
     //添加到数组
@@ -1055,7 +929,7 @@ void LevelEditor::drawLoadedLevel()
         animationControlInstructions.clear();
     }
 
-    void* features = nullptr;
+    void* features = itemView->features;
     if(a ==0.0&&b>0.0&&c<0.0&&d==0.0)
     {
         angle = M_PI_2;
@@ -1085,11 +959,7 @@ void LevelEditor::drawLoadedLevel()
     switch (type) {
         case Cicada:
         {
-            Features_Cicada* oldfeatures = (Features_Cicada*)itemView->features;
-            if(oldfeatures){
-                Features_Cicada feat(*oldfeatures);
-                features = &feat;
-            }else{
+            if(!features){
                 Features_Cicada feat;
                 features = &feat;
             }
@@ -1097,11 +967,7 @@ void LevelEditor::drawLoadedLevel()
             break;
         case Dragon_Anti:
         {
-            Features_Dragon* oldfeatures = (Features_Dragon*)itemView->features;
-            if(oldfeatures){
-                Features_Dragon feat(*oldfeatures);
-                features = &feat;
-            }else{
+            if(!features){
                 Features_Dragon feat;
                 features = &feat;
             }
@@ -1109,11 +975,7 @@ void LevelEditor::drawLoadedLevel()
             break;
         case Dragon_Clockwise:
         {
-            Features_Dragon* oldfeatures = (Features_Dragon*)itemView->features;
-            if(oldfeatures){
-                Features_Dragon feat(*oldfeatures);
-                features = &feat;
-            }else{
+            if(!features){
                 Features_Dragon feat;
                 features = &feat;
             }
@@ -1121,11 +983,7 @@ void LevelEditor::drawLoadedLevel()
             break;
         case DoubDragon_Anti:
         {
-            Features_DoubleDragon* oldfeatures = (Features_DoubleDragon*)itemView->features;
-            if (oldfeatures) {
-                Features_DoubleDragon feat(*oldfeatures);
-                features = &feat;
-            }else{
+            if (!features) {
                 Features_DoubleDragon feat;
                 features = &feat;
             }
@@ -1133,11 +991,7 @@ void LevelEditor::drawLoadedLevel()
             break;
         case DoubDragon_Clockwise:
         {
-            Features_DoubleDragon* oldfeatures = (Features_DoubleDragon*)itemView->features;
-            if (oldfeatures) {
-                Features_DoubleDragon feat(*oldfeatures);
-                features = &feat;
-            }else{
+            if (!features) {
                 Features_DoubleDragon feat;
                 features = &feat;
             }
@@ -1145,12 +999,24 @@ void LevelEditor::drawLoadedLevel()
             break;
         case Serpent_:
         {
-            Features_Serpent* oldfeatures = (Features_Serpent*)itemView->features;
-            if (oldfeatures) {
-                Features_Serpent feat(*oldfeatures);
-                features = &feat;
-            }else{
+            if (!features) {
                 Features_Serpent feat;
+                features = &feat;
+            }
+        }
+            break;
+        case Gear_Button:
+        {
+            if (!features) {
+                Features_GearButton feat;
+                features = &feat;
+            }
+        }
+            break;
+        case Gear_Gate:
+        {
+            if (!features) {
+                Features_GearGate feat;
                 features = &feat;
             }
         }

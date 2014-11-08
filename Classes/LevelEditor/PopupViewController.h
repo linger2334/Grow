@@ -10,6 +10,8 @@
 
 @interface PopupViewController : UIViewController
 
+@property(nonatomic,strong)IBOutlet UIButton* backButton;
+@property(nonatomic,assign)IBOutlet UIScrollView* scrollview;
 -(IBAction)backEditor:(id)sender;
 
 @end

@@ -72,20 +72,17 @@ void LevelFileHandler::loadFile()
             std::vector<std::vector<AnimationInfo>> animationInfos;
             void* features = nullptr;
             
-            if (!strcmp(typestr,"Flame_Red")) {
-                type = Flame_Red;
-            }
-            else if(!strcmp(typestr, "Flame_Green")){
-                type = Flame_Green;
-            }
-            else if(!strcmp(typestr, "Flame_Blue")){
+            if (!strcmp(typestr,"Flame_Blue")) {
                 type = Flame_Blue;
-            }
-            else if(!strcmp(typestr, "Flame_White")){
-                type = Flame_White;
             }
             else if(!strcmp(typestr, "Flame_Orange")){
                 type = Flame_Orange;
+            }
+            else if(!strcmp(typestr, "Flame_Violet")){
+                type = Flame_Violet;
+            }
+            else if(!strcmp(typestr, "Flame_White")){
+                type = Flame_White;
             }
             else if(!strcmp(typestr, "Rock_Circle")){
                 type = Rock_Circle;
@@ -93,8 +90,20 @@ void LevelFileHandler::loadFile()
             else if(!strcmp(typestr, "Rock_Ellipse")){
                 type = Rock_Ellipse;
             }
-            else if(!strcmp(typestr, "Rock_Gray")){
-                type = Rock_Gray;
+            else if(!strcmp(typestr, "Rock_Mount")){
+                type = Rock_Mount;
+            }
+            else if(!strcmp(typestr, "Rock_MountInv")){
+                type = Rock_MountInv;
+            }
+            else if(!strcmp(typestr, "Rock_Ovoid")){
+                type = Rock_Ovoid;
+            }
+            else if(!strcmp(typestr, "Rock_Rect")){
+                type = Rock_Rect;
+            }
+            else if(!strcmp(typestr, "Rock_Trape")){
+                type = Rock_Trape;
             }
             else if(!strcmp(typestr, "Cicada")){
                 type = Cicada;
@@ -173,10 +182,38 @@ void LevelFileHandler::loadFile()
                 }
                 features = &feat;
             }
-            else if(!strcmp(typestr, "Eye")){
-                type = Eye_;
+            else if(!strcmp(typestr, "Gear_Button")){
+                type = Gear_Button;
+                Features_GearButton feat;
+                if (XMLElement* bindIDElement = objElement->FirstChildElement("bindID")) {
+                    bindIDElement->QueryIntText(&feat.bindID);
+                }
+                if(XMLElement* sinkSpeedElement = objElement->FirstChildElement("sinkSpeed")){
+                    sinkSpeedElement->QueryFloatText(&feat.sinkSpeed);
+                }
+                features = &feat;
             }
-            
+            else if(!strcmp(typestr, "Gear_Gate")){
+                type = Gear_Gate;
+                Features_GearGate feat;
+                if(XMLElement* gapElement = objElement->FirstChildElement("gap")){
+                gapElement->QueryIntText(&feat.gap);
+                }
+                if(XMLElement* startRateElement = objElement->FirstChildElement("startRate"))
+                {
+                    startRateElement->QueryFloatText(&feat.startRate);
+                }
+                features = &feat;
+            }
+            else if(!strcmp(typestr, "Barrier")){
+                type = Barrier_;
+            }
+            else if(!strcmp(typestr, "Decoration_Bridge")){
+                type = Decoration_Bridge;
+            }
+            else if(!strcmp(typestr, "Decoration_Pendant")){
+                type = Decoration_Pendant;
+            }
             
             id = objElement->IntAttribute("id");
             x = objElement->FloatAttribute("x");
@@ -283,20 +320,17 @@ int LevelFileHandler::saveFile()
         if(!itemElement)
             return -200;
         switch (item.type) {
-            case Flame_Red:
-                itemElement->SetName("Flame_Red");
-                break;
-            case Flame_Green:
-                itemElement->SetName("Flame_Green");
-                break;
             case Flame_Blue:
                 itemElement->SetName("Flame_Blue");
                 break;
-            case Flame_White:
-                itemElement->SetName("Flame_White");
-                break;
             case Flame_Orange:
                 itemElement->SetName("Flame_Orange");
+                break;
+            case Flame_Violet:
+                itemElement->SetName("Flame_Violet");
+                break;
+            case Flame_White:
+                itemElement->SetName("Flame_White");
                 break;
             case Rock_Circle:
                 itemElement->SetName("Rock_Circle");
@@ -304,8 +338,20 @@ int LevelFileHandler::saveFile()
             case Rock_Ellipse:
                 itemElement->SetName("Rock_Ellipse");
                 break;
-            case Rock_Gray:
-                itemElement->SetName("Rock_Gray");
+            case Rock_Mount:
+                itemElement->SetName("Rock_Mount");
+                break;
+            case Rock_MountInv:
+                itemElement->SetName("Rock_MountInv");
+                break;
+            case Rock_Ovoid:
+                itemElement->SetName("Rock_Ovoid");
+                break;
+            case Rock_Rect:
+                itemElement->SetName("Rock_Rect");
+                break;
+            case Rock_Trape:
+                itemElement->SetName("Rock_Trape");
                 break;
             case Cicada:
             {
@@ -477,10 +523,65 @@ int LevelFileHandler::saveFile()
                 }
             }
                 break;
-            case Eye_:
-                itemElement->SetName("Eye");
+            case Gear_Button:
+            {
+                itemElement->SetName("Gear_Button");
+                if(item.features){
+                    Features_GearButton* feat = (Features_GearButton*)item.features;
+                    char buf[30];
+                    
+                    if (feat->bindID != kDefaultGearButtonBindID) {
+                        XMLElement* bindIDElement = doc->NewElement("bindID");
+                        itemElement->LinkEndChild(bindIDElement);
+                        
+                        sprintf(buf, "%d",feat->bindID);
+                        XMLText* bindIDContent = doc->NewText(buf);
+                        bindIDElement->LinkEndChild(bindIDContent);
+                    }
+                    if(feat->sinkSpeed != kDefaultGearButtonSinkSpeed){
+                        XMLElement* sinkSpeedElement = doc->NewElement("sinkSpeed");
+                        itemElement->LinkEndChild(sinkSpeedElement);
+                        
+                        sprintf(buf, "%f",feat->sinkSpeed);
+                        XMLText* sinkSpeedContent = doc->NewText(buf);
+                        sinkSpeedElement->LinkEndChild(sinkSpeedContent);
+                    }
+                }
+            }
                 break;
+            case Gear_Gate:
+            {
+                itemElement->SetName("Gear_Gate");
+                Features_GearGate* feat = (Features_GearGate*)item.features;
+                char buf[30];
                 
+                if (feat->gap != kDefaultGearGateGap) {
+                    XMLElement* gapElement = doc->NewElement("gap");
+                    itemElement->LinkEndChild(gapElement);
+                    
+                    sprintf(buf, "%d",feat->gap);
+                    XMLText* gapContent = doc->NewText(buf);
+                    gapElement->LinkEndChild(gapContent);
+                }
+                if (feat->startRate != kDefaultGearGateStartRate) {
+                    XMLElement* startRateElement = doc->NewElement("startRate");
+                    itemElement->LinkEndChild(startRateElement);
+                    
+                    sprintf(buf, "%f",feat->startRate);
+                    XMLText* startRateContent = doc->NewText(buf);
+                    startRateElement->LinkEndChild(startRateContent);
+                }
+            }
+                break;
+            case Barrier_:
+                itemElement->SetName("Barrier");
+                break;
+            case Decoration_Bridge:
+                itemElement->SetName("Decoration_Bridge");
+                break;
+            case Decoration_Pendant:
+                itemElement->SetName("Decoration_Pendant");
+                break;
             default:
                 break;
         }

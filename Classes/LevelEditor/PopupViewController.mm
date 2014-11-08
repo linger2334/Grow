@@ -10,12 +10,15 @@
 
 @implementation PopupViewController
 
+@synthesize scrollview;
+
 -(void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    self.scrollview.contentSize = CGSizeMake(768, 1536);
     self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
-    
+    self.backButton.frame = CGRectMake(280, 900, 212, 110);
+    [self.view addSubview:self.backButton];
 }
 
 
@@ -24,5 +27,10 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+-(void)dealloc
+{
+    self.backButton = nil;
+    [super dealloc];
+}
 
 @end

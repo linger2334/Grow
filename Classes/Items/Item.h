@@ -46,6 +46,22 @@ struct Features_Serpent{
     Features_Serpent(const Features_Serpent& );
 };
 
+struct Features_GearButton{
+    int bindID;
+    float sinkSpeed;
+    
+    Features_GearButton(int _bindID=kDefaultGearButtonBindID,float _sinkSpeed=kDefaultGearButtonSinkSpeed);
+    Features_GearButton(const Features_GearButton&);
+};
+
+struct Features_GearGate{
+    int gap;
+    float startRate;
+    
+    Features_GearGate(int _gap=kDefaultGearGateGap,float _startRate=kDefaultGearGateStartRate);
+    Features_GearGate(const Features_GearGate& );
+};
+
 struct PolygonInfo{
     int tag;
     Vec2 position;

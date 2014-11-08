@@ -50,7 +50,7 @@ enum SceneGameChildZorder
 class LayerUI;
 class LayerUIBorder;
 class LayerMapGrid;
-class SceneGame: public Layer,public b2ContactListener
+class SceneGame: public Layer
 {
 //
 public:

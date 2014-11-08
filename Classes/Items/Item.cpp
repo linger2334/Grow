@@ -62,6 +62,30 @@ Features_Serpent::Features_Serpent(const Features_Serpent& other)
     holeTransparency = other.holeTransparency;
 }
 
+Features_GearButton::Features_GearButton(int _bindID,float _sinkSpeed)
+{
+    bindID = _bindID;
+    sinkSpeed = _sinkSpeed;
+}
+
+Features_GearButton::Features_GearButton(const Features_GearButton& other)
+{
+    bindID = kDefaultGearButtonBindID;
+    sinkSpeed = other.sinkSpeed;
+}
+
+Features_GearGate::Features_GearGate(int _gap,float _startRate)
+{
+    gap = _gap;
+    startRate = _startRate;
+}
+
+Features_GearGate::Features_GearGate(const Features_GearGate& other)
+{
+    gap = other.gap;
+    startRate = other.startRate;
+}
+
 PolygonInfo::PolygonInfo(int _tag,Vec2 _position,bool _isConvex,std::vector<Vec2>& _vertexes)
 {
     tag = _tag;
@@ -145,6 +169,16 @@ Item::Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,i
                 features = new Features_Serpent(*((Features_Serpent*)_features));
             }
                 break;
+            case Gear_Button:
+            {
+                features = new Features_GearButton(*((Features_GearButton*)_features));
+            }
+                break;
+            case Gear_Gate:
+            {
+                features = new Features_GearGate(*((Features_GearGate*)_features));
+            }
+                break;
                 
             default:
                 break;
@@ -202,6 +236,16 @@ Item::Item(const Item& other)
                 features = new Features_Serpent(*((Features_Serpent*)other.features));
             }
                 break;
+            case Gear_Button:
+            {
+                features = new Features_GearButton(*((Features_GearButton*)other.features));
+            }
+                break;
+            case Gear_Gate:
+            {
+                features = new Features_GearGate(*((Features_GearGate*)other.features));
+            }
+                break;
                 
             default:
                 break;
@@ -248,7 +292,16 @@ Item::~Item()
                 delete (Features_Serpent*)features;
             }
                 break;
-                
+            case Gear_Button:
+            {
+                delete (Features_GearButton*)features;
+            }
+                break;
+            case Gear_Gate:
+            {
+                delete (Features_GearGate*)features;
+            }
+                break;
             default:
                 break;
         }

@@ -48,8 +48,10 @@ void LayerItem::loadAllItemsAndBodys()
     for (Item& item : _itemsNeedLoaded) {
         ItemModel* newItem = ItemModel::create(item);
         addChild(newItem,item.localZorder);
-        newItem->createBody();
-        _items.push_back(newItem);
+        if(newItem->_type!=Decoration_Bridge && newItem->_type!=Decoration_Pendant){
+            newItem->createBody();
+            _items.push_back(newItem);
+        }
     }
     _fixturesCache->reset();
     
@@ -70,8 +72,10 @@ void LayerItem::loadItemsAndBodys(float height)
             if (iter->y <= integerHeight+kDefaultInitialLoadScreenCount && iter->y>= height/WinSize.height) {
                 ItemModel* newItem = ItemModel::create(*iter);
                 addChild(newItem,(*iter).localZorder);
-                newItem->createBody();
-                _items.push_back(newItem);
+                if(newItem->_type!=Decoration_Bridge && newItem->_type!=Decoration_Pendant){
+                    newItem->createBody();
+                    _items.push_back(newItem);
+                }
                 //
                 iter = _itemsNeedLoaded.erase(iter);
             }else if(iter->y < height/WinSize.height){
@@ -93,8 +97,10 @@ void LayerItem::loadItemsAndBodys(float height)
                 if (iter->y <= integerHeight + 1+ kDefaultPreLoadScreenCount) {
                     ItemModel* newItem = ItemModel::create(*iter);
                     addChild(newItem,(*iter).localZorder);
-                    newItem->createBody();
-                    _items.push_back(newItem);
+                    if(newItem->_type!=Decoration_Bridge && newItem->_type!=Decoration_Pendant){
+                        newItem->createBody();
+                        _items.push_back(newItem);
+                    }
                     //
                     iter = _itemsNeedLoaded.erase(iter);
                 }else{

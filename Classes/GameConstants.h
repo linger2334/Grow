@@ -45,6 +45,13 @@ extern const float kDefaultSerpentHoleTransparency;
 
 extern const float kDefaultFlickeringHalfCycle;
 
+extern const int kDefaultGearButtonSubjectHeight;
+extern const int kDefaultGearButtonBindID;
+extern const float kDefaultGearButtonSinkSpeed;
+
+extern const int kDefaultGearGateGap;
+extern const float kDefaultGearGateStartRate;
+
 extern const int kDefaultPolygonVexNum;
 extern const float kDefaultPolygonPointRadius;
 extern const float kDefaultPolygonBorderWidth;

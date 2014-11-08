@@ -41,6 +41,13 @@ const float kDefaultSerpentHoleTransparency = 150/255.0;
 
 const float kDefaultFlickeringHalfCycle = 2.0;
 
+const int kDefaultGearButtonSubjectHeight = 10;
+const int kDefaultGearButtonBindID = -1;
+const float kDefaultGearButtonSinkSpeed = 10.0;
+
+const int kDefaultGearGateGap = 100;
+const float kDefaultGearGateStartRate = 100.0;
+
 const int kDefaultPolygonVexNum = 4;
 const float kDefaultPolygonPointRadius = 20;
 const float kDefaultPolygonBorderWidth = 4;

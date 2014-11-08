@@ -113,7 +113,7 @@ void SceneGame::initInfo()
     addChild(_layerUIBorder,SceneGameChildZorder::MapDirt+2);
     addChild(_layerLight,SceneGameChildZorder::MapLight);
     addChild(_layerui,SceneGameChildZorder::MapUI);
-   // _layerBackground->setVisible(false);
+    _layerBackground->setVisible(false);
 //    initLevelEditorMenu();
 //    _layerItem = LayerItem::create();
 //    _layerItem->setAnchorPoint(Vec2(0.5,0));
@@ -250,7 +250,7 @@ void SceneGame::draw(Renderer *renderer, const Mat4& transform, uint32_t flags)
 void SceneGame::onDraw()
 {
   
-    return ;
+//    return ;
     Director* director = Director::getInstance();
     CCASSERT(nullptr!=director, "Director id null when seting matrix stack");
     

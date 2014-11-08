@@ -26,22 +26,29 @@ USING_NS_CC_EXT;
 #define cc_to_b2Vec(x,y) (b2Vec2((x)/PTM_RATIO,(y)/PTM_RATIO))
 
 enum Item_Type{
-    Flame_Red = 1,
-    Flame_Green,
-    Flame_Blue,
-    Flame_White,
+    Flame_Blue = 1,
     Flame_Orange,
+    Flame_Violet,
+    Flame_White,
     Cicada,
     Dragon_Anti,
     Dragon_Clockwise,
     DoubDragon_Anti,
     DoubDragon_Clockwise,
     Serpent_,
-    Eye_,
+    Gear_Button,
+    Gear_Gate,
+    Barrier_,
+    Decoration_Bridge,
+    Decoration_Pendant,
     Polygon_,
     Rock_Circle = 101,
     Rock_Ellipse,
-    Rock_Gray
+    Rock_Mount,
+    Rock_MountInv,
+    Rock_Ovoid,
+    Rock_Rect,
+    Rock_Trape
 };
 
 enum
@@ -50,22 +57,29 @@ enum
 };
 
 
-#define IMAGE_FLAME_RED "Flame_Red.png"
-#define IMAGE_FLAME_GREEN "Flame_Green.png"
 #define IMAGE_FLAME_BLUE "Flame_Blue.png"
-#define IMAGE_FLAME_WHITE "Flame_White.png"
 #define IMAGE_FLAME_ORANGE "Flame_Orange.png"
+#define IMAGE_FLAME_VIOLET "Flame_Violet.png"
+#define IMAGE_FLAME_WHITE "Flame_White.png"
 #define IMAGE_CICADA "Cicada.png"
 #define IMAGE_DRAGON_ANTI "Dragon_Anti.png"
 #define IMAGE_DRAGON_CLOCKWISE "Dragon_Clockwise.png"
 #define IMAGE_DOUBDRAGON_ANTI "DoubDragon_Anti.png"
 #define IMAGE_DOUBDRAGON_CLOCKWISE "DoubDragon_Clockwise.png"
 #define IMAGE_SERPENT "Serpent.png"
-#define IMAGE_EYE "Eye.png"
+#define IMAGE_GEARBUTTON "GearButton.png"
+#define IMAGE_GEARGATE "GearGate.png"
+#define IMAGE_BARRIER "Barrier.png"
+#define IMAGE_DECORATION_BRIDGE "Decoration_Bridge.png"
+#define IMAGE_DECORATION_PENDANT "Decoration_Pendant.png"
 #define IMAGE_POLYGON "Polygon.png"
 #define IMAGE_ROCK_CIRCLE "Rock_Circle.png"
 #define IMAGE_ROCK_ELLIPSE "Rock_Ellipse.png"
-#define IMAGE_ROCK_GRAY "Rock_Gray.png"
+#define IMAGE_ROCK_MOUNT "Rock_Mount.png"
+#define IMAGE_ROCK_MOUNTINV "Rock_MountInv.png"
+#define IMAGE_ROCK_OVOID "Rock_Ovoid.png"
+#define IMAGE_ROCK_RECT "Rock_Rect.png"
+#define IMAGE_ROCK_TRAPE "Rock_Trape.png"
 
 
 #define IMAGE_EDITOR_ADDITEM_NORMAL "addItem_normal.png"

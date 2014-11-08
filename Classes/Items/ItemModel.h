@@ -39,6 +39,7 @@ protected:
     friend class LayerItem;
     b2Body* _body;
     bool isAnimated;
+    bool isAniPerformed;
     float triggerTime;
     int animationGroupCount;
     Vector<Action*> _allCyclicAnimations;

@@ -374,7 +374,7 @@
     
     for (PolygonView* polygon in self.centerViews) {
         NSMutableArray* vertexes = [NSMutableArray arrayWithArray:[polygon getGlLocalVertexes]];
-        //
+        //转为动画坐标
         int vertexCount = vertexes.count;
         for(int i = 0;i<vertexCount;i++){
             vertexes[i] = [NSValue valueWithCGPoint:CGPointMake([vertexes[i] CGPointValue].x/currentZoomFactor, [vertexes[i] CGPointValue].y/currentZoomFactor)];
@@ -428,8 +428,8 @@
     //红虚线
     if (!isButtonHiden) {
         //
-        float lengths[] = {10*currentZoomFactor,10*currentZoomFactor};
-        CGContextSetLineDash(context, 0, lengths, 2);
+        const float lengths[] = {static_cast<float>(10.0*currentZoomFactor),static_cast<float>(10.0*currentZoomFactor)};
+        CGContextSetLineDash(context, 0.0, lengths,2);
         CGContextSetLineWidth(context, 1);
         CGContextSetRGBStrokeColor(context, 1, 0, 0, 1);
         

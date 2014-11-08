@@ -23,7 +23,9 @@ public:
     bool init();
     
     void selectLevel(Ref* sender,cocos2d::ui::ListView::EventType eventtype);
-
+protected:
+    char fileExist[1000];
+    int consecutiveNumbers;
 };
 
 

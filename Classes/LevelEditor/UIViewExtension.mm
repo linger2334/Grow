@@ -144,29 +144,38 @@
         features = NULL;
         
         switch (itemtype) {
-            case Flame_Red:
-                [self setImage:[UIImage imageNamed:@IMAGE_FLAME_RED]];
-                break;
-            case Flame_Green:
-                [self setImage:[UIImage imageNamed:@IMAGE_FLAME_GREEN]];
-                break;
             case Flame_Blue:
                 [self setImage:[UIImage imageNamed:@IMAGE_FLAME_BLUE]];
-                break;
-            case Flame_White:
-                [self setImage:[UIImage imageNamed:@IMAGE_FLAME_WHITE]];
                 break;
             case Flame_Orange:
                 [self setImage:[UIImage imageNamed:@IMAGE_FLAME_ORANGE]];
                 break;
+            case Flame_Violet:
+                [self setImage:[UIImage imageNamed:@IMAGE_FLAME_VIOLET]];
+                break;
+            case Flame_White:
+                [self setImage:[UIImage imageNamed:@IMAGE_FLAME_WHITE]];
+                break;;
             case Rock_Circle:
                 [self setImage:[UIImage imageNamed:@IMAGE_ROCK_CIRCLE]];
                 break;
             case Rock_Ellipse:
                 [self setImage:[UIImage imageNamed:@IMAGE_ROCK_ELLIPSE]];
                 break;
-            case Rock_Gray:
-                [self setImage:[UIImage imageNamed:@IMAGE_ROCK_GRAY]];
+            case Rock_Mount:
+                [self setImage:[UIImage imageNamed:@IMAGE_ROCK_MOUNT]];
+                break;
+            case Rock_MountInv:
+                [self setImage:[UIImage imageNamed:@IMAGE_ROCK_MOUNTINV]];
+                break;
+            case Rock_Ovoid:
+                [self setImage:[UIImage imageNamed:@IMAGE_ROCK_OVOID]];
+                break;
+            case Rock_Rect:
+                [self setImage:[UIImage imageNamed:@IMAGE_ROCK_RECT]];
+                break;
+            case Rock_Trape:
+                [self setImage:[UIImage imageNamed:@IMAGE_ROCK_TRAPE]];
                 break;
             case Cicada:
             {
@@ -235,8 +244,34 @@
                 }
             }
                 break;
-            case Eye_:
-                [self setImage:[UIImage imageNamed:@IMAGE_EYE]];
+            case Gear_Button:
+            {
+                [self setImage:[UIImage imageNamed:@IMAGE_GEARBUTTON]];
+                if(item.features){
+                    features = new Features_GearButton(*((Features_GearButton*)item.features));
+                }else{
+                    features = new Features_GearButton();
+                }
+            }
+                break;
+            case Gear_Gate:
+            {
+                [self setImage:[UIImage imageNamed:@IMAGE_GEARGATE]];
+                if (item.features) {
+                    features = new Features_GearGate(*((Features_GearGate*)item.features));
+                }else{
+                    features = new Features_GearGate();
+                }
+            }
+                break;
+            case Barrier_:
+                [self setImage:[UIImage imageNamed:@IMAGE_BARRIER]];
+                break;
+            case Decoration_Bridge:
+                [self setImage:[UIImage imageNamed:@IMAGE_DECORATION_BRIDGE]];
+                break;
+            case Decoration_Pendant:
+                [self setImage:[UIImage imageNamed:@IMAGE_DECORATION_PENDANT]];
                 break;
             default:
                 break;
@@ -438,20 +473,17 @@
 {
     std::string name;
     switch (self->itemtype) {
-        case Flame_Red:
-            name = "Flame_Red";
-            break;
-        case Flame_Green:
-            name = "Flame_Green";
-            break;
         case Flame_Blue:
             name = "Flame_Blue";
             break;
-        case Flame_White:
-            name = "Flame_White";
-            break;
         case Flame_Orange:
             name = "Flame_Orange";
+            break;
+        case Flame_Violet:
+            name = "Flame_Violet";
+            break;
+        case Flame_White:
+            name = "Flame_White";
             break;
         case Cicada:
             name = "Cicada";
@@ -471,8 +503,20 @@
         case Serpent_:
             name = "Serpent";
             break;
-        case Eye_:
-            name = "Eye";
+        case Gear_Button:
+            name = "Gear_Button";
+            break;
+        case Gear_Gate:
+            name = "Gear_Gate";
+            break;
+        case Barrier_:
+            name = "Barrier";
+            break;
+        case Decoration_Bridge:
+            name = "Decoration_Bridge";
+            break;
+        case Decoration_Pendant:
+            name = "Decoration_Pendant";
             break;
         case Rock_Circle:
             name = "Rock_Circle";
@@ -480,8 +524,20 @@
         case Rock_Ellipse:
             name = "Rock_Ellipse";
             break;
-        case Rock_Gray:
-            name = "Rock_Gray";
+        case Rock_Mount:
+            name = "Rock_Mount";
+            break;
+        case Rock_MountInv:
+            name = "Rock_MountInv";
+            break;
+        case Rock_Ovoid:
+            name = "Rock_Ovoid";
+            break;
+        case Rock_Rect:
+            name = "Rock_Rect";
+            break;
+        case Rock_Trape:
+            name = "Rock_Trape";
             break;
         default:
             break;
@@ -534,6 +590,19 @@
             }
         }
             break;
+        case Gear_Button:
+        {
+            if(features)
+                delete (Features_GearButton*)features;
+        }
+            break;
+        case Gear_Gate:
+        {
+            if (features)
+                delete (Features_GearGate*)features;
+        }
+            break;
+            
         default:
             break;
     }

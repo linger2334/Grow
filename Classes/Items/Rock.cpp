@@ -46,8 +46,20 @@ bool Rock::init(Item& item)
             case Rock_Ellipse:
                 setTexture(IMAGE_ROCK_ELLIPSE);
                 break;
-            case Rock_Gray:
-                setTexture(IMAGE_ROCK_GRAY);
+            case Rock_Mount:
+                setTexture(IMAGE_ROCK_MOUNT);
+                break;
+            case Rock_MountInv:
+                setTexture(IMAGE_ROCK_MOUNTINV);
+                break;
+            case Rock_Ovoid:
+                setTexture(IMAGE_ROCK_OVOID);
+                break;
+            case Rock_Rect:
+                setTexture(IMAGE_ROCK_RECT);
+                break;
+            case Rock_Trape:
+                setTexture(IMAGE_ROCK_TRAPE);
                 break;
             default:
                 return false;
@@ -83,8 +95,20 @@ void Rock::createBody()
         case Rock_Ellipse:
             _fixturesCache->addFixturesToBody(_body, "Rock_Ellipse");
             break;
-        case Rock_Gray:
-            _fixturesCache->addFixturesToBody(_body, "Rock_Gray");
+        case Rock_Mount:
+            _fixturesCache->addFixturesToBody(_body, "Rock_Mount");
+            break;
+        case Rock_MountInv:
+            _fixturesCache->addFixturesToBody(_body, "Rock_MountInv");
+            break;
+        case Rock_Ovoid:
+            _fixturesCache->addFixturesToBody(_body, "Rock_Ovoid");
+            break;
+        case Rock_Rect:
+            _fixturesCache->addFixturesToBody(_body, "Rock_Rect");
+            break;
+        case Rock_Trape:
+            _fixturesCache->addFixturesToBody(_body, "Rock_Trape");
             break;
         default:
             break;
