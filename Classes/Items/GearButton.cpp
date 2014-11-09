@@ -66,13 +66,22 @@ bool GearButton::init(Item &item)
 void GearButton::createCollisionAnimation()
 {
     ActionInterval* squint = FadeTo::create(kDefaultGearButtonSubjectHeight/sinkSpeed,0);
+    TargetedAction* lampSquint = TargetedAction::create(_lamp, squint);
+    
     ActionInterval* sink = MoveBy::create(kDefaultGearButtonSubjectHeight/sinkSpeed, Vec2(-kDefaultGearButtonSubjectHeight*sinf(CC_DEGREES_TO_RADIANS(getRotation())),-kDefaultGearButtonSubjectHeight*cosf(CC_DEGREES_TO_RADIANS(getRotation()))));
-    ActionInterval* disappear = FadeTo::create(1, 0);
+    TargetedAction* subjectSink = TargetedAction::create(_subject, sink);
+    
+    ActionInterval* disappear = FadeTo::create(0.5, 0);
+    TargetedAction* lampDisappear = TargetedAction::create(_lamp, disappear->clone());
+    TargetedAction* subjectDisappear = TargetedAction::create(_subject, disappear->clone());
+    
+    FiniteTimeAction* group1 = Spawn::create(lampSquint,subjectSink, NULL);
+    FiniteTimeAction* group2 = Spawn::create(disappear,lampDisappear,subjectDisappear, NULL);
     CallFunc* remove = CallFunc::create([&](){
         this->removeFromParent();
     });
     
-    _sink = Sequence::create(Spawn::create(squint,sink,NULL),disappear,remove,NULL);
+    _sink = Sequence::create(group1,group2,remove,NULL);
     CC_SAFE_RETAIN(_sink);
 }
 

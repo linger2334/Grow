@@ -15,6 +15,9 @@
     UITextField* triggerTextField;
     UILabel* wDoubleDragonShowLabel;
     UILabel* absorptionShowLabel;
+    UILabel* sinkSpeedShowLabel;
+    UITextField* gapTextField;
+    UILabel* startRateShowLabel;
 }
 
 @end
@@ -59,6 +62,14 @@
             break;
         case Serpent_:
             [self addAbsorptionRateSlider];
+            break;
+        case Gear_Button:
+            [self addSinkSpeedSlider];
+            [self addCheckBoxes];
+            break;
+        case Gear_Gate:
+            [self addGapTextField];
+            [self addStartRateSlider];
             break;
         default:
             break;
@@ -377,6 +388,142 @@
 {
     UISlider* slider = (UISlider*)sender;
     absorptionShowLabel.text = [NSString stringWithFormat:@"%f",slider.value];
+}
+
+#pragma gearbutton
+-(void)addSinkSpeedSlider
+{
+    CGRect sinkSpeedLabelFrame = CGRectMake(0.05*width, 0.4*height, 0.25*width, 0.1*height);
+    UILabel* sinkSpeedLabel = [[[UILabel alloc] initWithFrame:sinkSpeedLabelFrame] autorelease];
+    sinkSpeedLabel.text = @"sinkSpeed(pix/s):";
+    sinkSpeedLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    sinkSpeedLabel.textAlignment = NSTextAlignmentCenter;
+    sinkSpeedLabel.textColor = [UIColor blackColor];
+    [self.view addSubview:sinkSpeedLabel];
+    
+    CGRect sinkSpeedSliderFrame = CGRectMake(0.45*width, 0.4*height, 0.5*width, 0.1*height);
+    UISlider* sinkSpeedSlider = [[[UISlider alloc] initWithFrame:sinkSpeedSliderFrame] autorelease];
+    sinkSpeedSlider.minimumValue = 1;
+    sinkSpeedSlider.maximumValue = 100;
+    sinkSpeedSlider.value = ((Features_GearButton*)(_itemView->features))->sinkSpeed;
+    [sinkSpeedSlider addTarget:self action:@selector(sinkSpeedSliderChanged:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:sinkSpeedSlider];
+    
+    CGRect sinkSpeedShowFrame = CGRectMake(0.35*width, 0.4*height, 0.1*width, 0.1*height);
+    sinkSpeedShowLabel = [[[UILabel alloc] initWithFrame:sinkSpeedShowFrame] autorelease];
+    sinkSpeedShowLabel.text = [NSString stringWithFormat:@"%d",static_cast<int>(sinkSpeedSlider.value)];
+    sinkSpeedShowLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    sinkSpeedShowLabel.textAlignment = NSTextAlignmentLeft;
+    sinkSpeedShowLabel.textColor = [UIColor blackColor];
+    [self.view addSubview:sinkSpeedShowLabel];
+}
+
+-(void)sinkSpeedSliderChanged:(id)sender
+{
+    UISlider* slider = (UISlider*)sender;
+    sinkSpeedShowLabel.text = [NSString stringWithFormat:@"%d",static_cast<int>(slider.value)];
+}
+
+-(void)addCheckBoxes
+{
+    std::vector<ItemView*>& needBindGates = GameManager::getInstance()->_levelEditor->_myViewController->_needToBinds;
+    CGRect checkBoxFrame;
+    for(int i = 0;i<needBindGates.size();i++){
+        checkBoxFrame = CGRectMake(0.05*width, 0.5*height, 0.15*width, 0.05*height);
+        checkBoxFrame.origin.x += i%5*0.2*width;
+        checkBoxFrame.origin.y += i/5*0.1*height;
+        UIButton* checkBox = [[[UIButton alloc] initWithFrame:checkBoxFrame] autorelease];
+        checkBox.contentMode = UIViewContentModeLeft;
+        [checkBox setImage:[UIImage imageNamed:@"checkbox_off.png"] forState:UIControlStateNormal];
+        [checkBox setImage:[UIImage imageNamed:@"checkbox_on.png"] forState:UIControlStateSelected];
+        [checkBox addTarget:self action:@selector(checkBoxSelected:) forControlEvents:UIControlEventTouchUpInside];
+        
+        UILabel* gateID = [[[UILabel alloc] initWithFrame:CGRectMake(0.05*width, 0, 0.1*width, 0.05*height)] autorelease];
+        gateID.text = [NSString stringWithFormat:@"%d",needBindGates.at(i).tag];
+        gateID.textAlignment = NSTextAlignmentRight;
+        gateID.textColor = [UIColor blackColor];
+        gateID.font = [UIFont systemFontOfSize:kDefaultFontSize];
+        [checkBox addSubview:gateID];
+        
+        [self.view addSubview:checkBox];
+    }
+}
+
+-(void)checkBoxSelected:(UIButton*)sender
+{
+    sender.selected = !sender.isSelected;
+    if (sender.selected) {
+        
+    }else{
+        
+    }
+}
+
+#pragma geargate
+-(void)addGapTextField
+{
+    CGRect gapLableFrame = CGRectMake(0.05*width, 0.4*height, 0.2*width, 0.1*height);
+    UILabel* gapLable = [[[UILabel alloc] initWithFrame:gapLableFrame] autorelease];
+    gapLable.text = @"gap(pix):";
+    gapLable.textAlignment = NSTextAlignmentCenter;
+    gapLable.textColor = [UIColor blackColor];
+    gapLable.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:gapLable];
+    
+    CGRect gapTextFieldFrame = CGRectMake(0.35*width, 0.43*height, 0.3*width, 0.05*height);
+    gapTextField = [[[UITextField alloc] initWithFrame:gapTextFieldFrame] autorelease];
+    gapTextField.borderStyle = UITextBorderStyleRoundedRect;
+    gapTextField.backgroundColor = [UIColor whiteColor];
+    gapTextField.placeholder = @"gap";
+    gapTextField.text = [NSString stringWithFormat:@"%d",static_cast<Features_GearGate*>(_itemView->features)->gap];
+    gapTextField.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    gapTextField.textColor = [UIColor blackColor];
+    gapTextField.textAlignment = NSTextAlignmentLeft;
+    gapTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+    gapTextField.clearButtonMode = UITextFieldViewModeAlways;
+    gapTextField.autocorrectionType = UITextAutocorrectionTypeNo;
+    gapTextField.clearsOnBeginEditing = NO;
+    gapTextField.keyboardType = UIKeyboardTypeNumberPad;
+    gapTextField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    gapTextField.returnKeyType = UIReturnKeyDefault;
+    gapTextField.keyboardAppearance = UIKeyboardAppearanceDefault;
+    gapTextField.delegate = self;
+    
+    [self.view addSubview:gapTextField];
+    
+}
+
+-(void)addStartRateSlider
+{
+    CGRect startRateLabelFrame = CGRectMake(0.05*width, 0.5*height, 0.25*width, 0.1*height);
+    UILabel* startRateLabel = [[[UILabel alloc] initWithFrame:startRateLabelFrame] autorelease];
+    startRateLabel.text = @"startRate(pix/s):";
+    startRateLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    startRateLabel.textAlignment = NSTextAlignmentCenter;
+    startRateLabel.textColor = [UIColor blackColor];
+    [self.view addSubview:startRateLabel];
+    
+    CGRect startRateSliderFrame = CGRectMake(0.45*width, 0.5*height, 0.5*width, 0.1*height);
+    UISlider* startRateSlider = [[[UISlider alloc] initWithFrame:startRateSliderFrame] autorelease];
+    startRateSlider.minimumValue = 10;
+    startRateSlider.maximumValue = 500;
+    startRateSlider.value = (int)((Features_GearGate*)(_itemView->features))->startRate;
+    [startRateSlider addTarget:self action:@selector(startRateSliderChanged:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:startRateSlider];
+    
+    CGRect startRateShowFrame = CGRectMake(0.35*width, 0.5*height, 0.1*width, 0.1*height);
+    startRateShowLabel = [[[UILabel alloc] initWithFrame:startRateShowFrame] autorelease];
+    startRateShowLabel.text = [NSString stringWithFormat:@"%d",static_cast<int>(startRateSlider.value)];
+    startRateShowLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    startRateShowLabel.textAlignment = NSTextAlignmentLeft;
+    startRateShowLabel.textColor = [UIColor blackColor];
+    [self.view addSubview:startRateShowLabel];
+}
+
+-(void)startRateSliderChanged:(id)sender
+{
+    UISlider* slider = (UISlider*)sender;
+    startRateShowLabel.text = [NSString stringWithFormat:@"%d",static_cast<int>(slider.value)];
 }
 
 @end

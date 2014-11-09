@@ -119,6 +119,7 @@
 @implementation ItemView
 
 @synthesize animationGroupCount;
+@synthesize bindButton;
 
 -(id)init:(Item&)item
 {
@@ -126,6 +127,7 @@
     const float scrollviewWidth = GameManager::getInstance()->_levelEditor->_myViewController->_scrollView.contentSize.width;
     const float scrollviewHeight = GameManager::getInstance()->_levelEditor->_myViewController->_scrollView.contentSize.height/PAGE_COUNTS;
     const float currentZoomFactor = GameManager::getInstance()->_levelEditor->_myViewController->_scrollView.currentZoomFactor;
+    bindButton = nil;
     
     if (self) {
         
@@ -248,7 +250,12 @@
             {
                 [self setImage:[UIImage imageNamed:@IMAGE_GEARBUTTON]];
                 if(item.features){
-                    features = new Features_GearButton(*((Features_GearButton*)item.features));
+                    Features_GearButton* feat = (Features_GearButton*)item.features;
+                    features = new Features_GearButton(*feat);
+                    if(feat->bindID != kDefaultGearButtonBindID){
+                        GameManager::getInstance()->_levelEditor->_myViewController->_gearButtons.push_back(self);
+                    }
+                    
                 }else{
                     features = new Features_GearButton();
                 }
@@ -262,6 +269,7 @@
                 }else{
                     features = new Features_GearGate();
                 }
+                GameManager::getInstance()->_levelEditor->_myViewController->_needToBinds.push_back(self);
             }
                 break;
             case Barrier_:

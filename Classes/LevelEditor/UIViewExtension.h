@@ -59,6 +59,7 @@
 }
 //第一次添加路径点时使用
 @property(nonatomic,assign)int animationGroupCount;
+@property(nonatomic,assign)ItemView* bindButton;
 
 -(id)init:(Item&)item;
 

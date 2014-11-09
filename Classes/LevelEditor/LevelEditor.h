@@ -23,6 +23,8 @@
     float contentscale;
 @public    OCScrollView* _scrollView;
     std::vector<UIButton*> needHidenButtons;
+@public    std::vector<ItemView*> _gearButtons;
+@public    std::vector<ItemView*> _needToBinds;
 @public    std::vector<ItemView*> itemViews;
 @public    std::set<ItemView*> _toDealWith;
     std::list<int>ids;

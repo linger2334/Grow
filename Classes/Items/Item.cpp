@@ -70,7 +70,7 @@ Features_GearButton::Features_GearButton(int _bindID,float _sinkSpeed)
 
 Features_GearButton::Features_GearButton(const Features_GearButton& other)
 {
-    bindID = kDefaultGearButtonBindID;
+    bindID = other.bindID;
     sinkSpeed = other.sinkSpeed;
 }
 

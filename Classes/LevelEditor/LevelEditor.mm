@@ -213,6 +213,8 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)createItemFromFileHandler
 {
+    _gearButtons.clear();
+    _needToBinds.clear();
     _fileHandler->_items.sort(Itemlesser);
     
     for (Item& item : _fileHandler->_items) {
@@ -226,6 +228,25 @@ void LevelEditor::drawLoadedLevel()
         [itemView release];
     }
     _fileHandler->_items.clear();
+    
+    //
+    std::vector<ItemView*>::iterator itGate = _needToBinds.begin();
+    while (itGate != _needToBinds.end()) {
+        BOOL isbind = NO;
+        for(ItemView* gearbutton : _gearButtons){
+            if (((Features_GearButton*)gearbutton->features)->bindID == (*itGate).tag) {
+                (*itGate).bindButton = gearbutton;
+                itGate = _needToBinds.erase(itGate);
+                isbind = YES;
+                break;
+            }
+        }
+        
+        if (!isbind) {
+            itGate++;
+        }
+    }
+    
 }
 
 -(void)createPolygonsFromFileHandler
@@ -669,6 +690,11 @@ void LevelEditor::drawLoadedLevel()
         }
        
         void* features = itemView->features;
+        if(type == Gear_Button){
+            Features_GearButton feat;
+            feat.sinkSpeed = ((Features_GearButton*)itemView->features)->sinkSpeed;
+            features = &feat;
+        }
         
         Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
         
@@ -738,6 +764,26 @@ void LevelEditor::drawLoadedLevel()
         //将附加的路径点删除
         for (PolygonView* pathpoint : selectedItemview->_pathPoints) {
             [pathpoint removeFromSuperview];
+        }
+        //
+        if (selectedItemview->itemtype == Gear_Button) {
+            Features_GearButton* feat = (Features_GearButton*)selectedItemview->features;
+            if (feat->bindID != kDefaultGearButtonBindID) {
+                for(ItemView* gate : itemViews){
+                    if (gate.tag == feat->bindID) {
+                        gate.bindButton = nil;
+                        _needToBinds.push_back(gate);
+                        break;
+                    }
+                }
+            }
+        }
+        if (selectedItemview->itemtype == Gear_Gate) {
+            if (selectedItemview.bindButton) {
+                ((Features_GearButton*)selectedItemview.bindButton->features)->bindID = kDefaultGearButtonBindID;
+            }else{
+                _needToBinds.erase(find(_needToBinds.begin(),_needToBinds.end(),selectedItemview));
+            }
         }
         
         //从视图中移除
