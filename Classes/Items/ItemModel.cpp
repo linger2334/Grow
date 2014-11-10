@@ -121,7 +121,7 @@ bool ItemModel::init(Item &item)
     if (Sprite::init()) {
         _type = item.type;
         setTag(item.id);
-        setPosition(item.x*WinSize.width, item.y*WinSize.height);
+        setPosition(item.x*DefiniteSize.width, item.y*DefiniteSize.height);
         setAnimatedOn(item.isAnimated);
         setTriggerTime(item.triggerTime);
         
@@ -217,7 +217,7 @@ void ItemModel::createCustomCurveAnimates(std::vector<AnimationInfo> &animationI
 
 void ItemModel::update(float dt)
 {
-    float beginningPointY = WinSize.height-getBoundingBox().size.height/2;
+    float beginningPointY = VisibleSize.height-getBoundingBox().size.height/2;
     Vec2 pointInGl = getParent()->convertToWorldSpace(getPosition());
     if (pointInGl.y<beginningPointY) {
         if (isAnimated){

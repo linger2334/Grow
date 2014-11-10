@@ -28,9 +28,9 @@ bool LayerUI::init()
         btnSubSpeed->setScale(0.5);
     
         btnAddSpeed->setAnchorPoint(Vec2(1,0));
-        btnAddSpeed->setPosition(Vec2(WinSize.width-10,10));
+        btnAddSpeed->setPosition(Vec2(VisibleSize.width-10,10));
         btnSubSpeed->setAnchorPoint(Vec2(1,0));
-        btnSubSpeed->setPosition(Vec2(WinSize.width-70,10));
+        btnSubSpeed->setPosition(Vec2(VisibleSize.width-70,10));
         addChild(btnAddSpeed,999);
         addChild(btnSubSpeed,999);
         //_plantLayer->setGrowSpeed(60);
@@ -38,7 +38,7 @@ bool LayerUI::init()
     
         addChild(lable,999);
         lable->setAnchorPoint(Vec2(1,0));
-        lable->setPosition(Vec2(WinSize.width-90,100));
+        lable->setPosition(Vec2(VisibleSize.width-90,100));
 #define EDIT_SPEED_SPED 5
         btnAddSpeed->addTouchEventListener([=](Ref* pSender, Widget::TouchEventType type)
                                            {

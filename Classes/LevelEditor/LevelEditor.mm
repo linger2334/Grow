@@ -47,7 +47,7 @@ bool LevelEditor::init()
     GameManager::getInstance()->_fileHandler->retain();
     //添加背景
     _background = Sprite::create("background2.jpg");
-    _background->setPosition(Vec2(WinSize.width/2,WinSize.height/2));
+    _background->setPosition(Vec2(VisibleSize.width/2,VisibleSize.height/2));
     this->addChild(_background);
     
     this->drawLoadedLevel();
@@ -213,8 +213,8 @@ void LevelEditor::drawLoadedLevel()
 
 -(void)createItemFromFileHandler
 {
-    _gearButtons.clear();
-    _needToBinds.clear();
+    _boundButtons.clear();
+    _gates.clear();
     _fileHandler->_items.sort(Itemlesser);
     
     for (Item& item : _fileHandler->_items) {
@@ -229,21 +229,13 @@ void LevelEditor::drawLoadedLevel()
     }
     _fileHandler->_items.clear();
     
-    //
-    std::vector<ItemView*>::iterator itGate = _needToBinds.begin();
-    while (itGate != _needToBinds.end()) {
-        BOOL isbind = NO;
-        for(ItemView* gearbutton : _gearButtons){
-            if (((Features_GearButton*)gearbutton->features)->bindID == (*itGate).tag) {
-                (*itGate).bindButton = gearbutton;
-                itGate = _needToBinds.erase(itGate);
-                isbind = YES;
-                break;
+    //建立绑定关系
+    for (ItemView* gearbutton : _boundButtons) {
+        for (ItemView* gate : _gates) {
+            if(((Features_GearButton*)gearbutton->features)->bindID == gate.tag)
+            {
+                gate.bindButton = gearbutton;
             }
-        }
-        
-        if (!isbind) {
-            itGate++;
         }
     }
     
@@ -765,14 +757,13 @@ void LevelEditor::drawLoadedLevel()
         for (PolygonView* pathpoint : selectedItemview->_pathPoints) {
             [pathpoint removeFromSuperview];
         }
-        //
+        //取消按钮与门的绑定关系
         if (selectedItemview->itemtype == Gear_Button) {
             Features_GearButton* feat = (Features_GearButton*)selectedItemview->features;
             if (feat->bindID != kDefaultGearButtonBindID) {
-                for(ItemView* gate : itemViews){
+                for(ItemView* gate : _gates){
                     if (gate.tag == feat->bindID) {
                         gate.bindButton = nil;
-                        _needToBinds.push_back(gate);
                         break;
                     }
                 }
@@ -781,9 +772,8 @@ void LevelEditor::drawLoadedLevel()
         if (selectedItemview->itemtype == Gear_Gate) {
             if (selectedItemview.bindButton) {
                 ((Features_GearButton*)selectedItemview.bindButton->features)->bindID = kDefaultGearButtonBindID;
-            }else{
-                _needToBinds.erase(find(_needToBinds.begin(),_needToBinds.end(),selectedItemview));
             }
+            _gates.erase(find(_gates.begin(),_gates.end(),selectedItemview));
         }
         
         //从视图中移除

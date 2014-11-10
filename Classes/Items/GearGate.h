@@ -23,8 +23,12 @@ public:
     bool init(Item& item);
     
     void createBody();
+    inline Sprite* getLeftHalf() { return _left;}
+    inline Sprite* getRightHalf() { return _right;}
     void openGate();
     void collisionWithPlant(ItemModel* plantHead);
+    
+    void update(float dt);
 protected:
     Sprite* _left;
     Sprite* _right;

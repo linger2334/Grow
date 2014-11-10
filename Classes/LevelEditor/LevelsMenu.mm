@@ -92,7 +92,7 @@ bool LevelsMenu::init()
         newlabel_layout->addChild(newLevelLabel);
         listView->addChild(newlabel_layout);
         
-        listView->setContentSize(cocos2d::Size(WinSize.width,WinSize.height));
+        listView->setContentSize(cocos2d::Size(VisibleSize.width,VisibleSize.height));
         listView->setGravity(cocos2d::ui::ListView::Gravity::CENTER_HORIZONTAL);
         listView->setItemsMargin(50.0);
         listView->addEventListener(CC_CALLBACK_2(LevelsMenu::selectLevel, this));

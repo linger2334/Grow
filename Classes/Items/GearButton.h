@@ -25,6 +25,8 @@ public:
     void createCollisionAnimation();
     void createBody();
     void collisionWithPlant(ItemModel* plantHead);
+    
+    void update(float dt);
 protected:
     Sprite* _subject;
     Sprite* _lamp;

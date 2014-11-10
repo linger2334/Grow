@@ -9,8 +9,8 @@
 #include <stdlib.h>
 #include "LayerItem.h"
 #include "GameManager.h"
-#include "SceneGame.h"
 #include "Polygon.h"
+#include "GearGate.h"
 
 
 LayerItem::LayerItem():_fixturesCache(nullptr),firstload(true),integerHeight(0)
@@ -26,7 +26,7 @@ LayerItem::~LayerItem()
 bool LayerItem::init()
 {
     if (GameLayerRollY::init()) {
-        setContentSize(cocos2d::Size(WinSize.width,WinSize.height*PAGE_COUNTS));
+        setContentSize(cocos2d::Size(DefiniteSize.width,DefiniteSize.height*PAGE_COUNTS));
         _itemsNeedLoaded = GameManager::getInstance()->_fileHandler->_items;
         _fixturesCache = GB2ShapeCache::getInstance();
         
@@ -64,12 +64,12 @@ void LayerItem::loadItemsAndBodys(float height)
     std::list<Item>:: iterator iter;
     //第一次加载
     if (firstload) {
-        integerHeight = static_cast<int>(height/WinSize.height);
+        integerHeight = static_cast<int>(height/DefiniteSize.height);
         
         _fixturesCache->addShapesWithFile("Item_fixtures.plist");
         for (iter = _itemsNeedLoaded.begin(); iter!= _itemsNeedLoaded.end();) {
             
-            if (iter->y <= integerHeight+kDefaultInitialLoadScreenCount && iter->y>= height/WinSize.height) {
+            if (iter->y <= integerHeight+kDefaultInitialLoadScreenCount && iter->y>= height/DefiniteSize.height) {
                 ItemModel* newItem = ItemModel::create(*iter);
                 addChild(newItem,(*iter).localZorder);
                 if(newItem->_type!=Decoration_Bridge && newItem->_type!=Decoration_Pendant){
@@ -78,7 +78,7 @@ void LayerItem::loadItemsAndBodys(float height)
                 }
                 //
                 iter = _itemsNeedLoaded.erase(iter);
-            }else if(iter->y < height/WinSize.height){
+            }else if(iter->y < height/DefiniteSize.height){
                 iter = _itemsNeedLoaded.erase(iter);
             }else{
                 iter++;
@@ -87,7 +87,7 @@ void LayerItem::loadItemsAndBodys(float height)
         _fixturesCache->reset();
     //运行时
     }else{
-        int newIntegerHeight = static_cast<int>(height/WinSize.height);
+        int newIntegerHeight = static_cast<int>(height/DefiniteSize.height);
         if (newIntegerHeight - integerHeight >=1) {
             integerHeight = newIntegerHeight;
             screenNumIncreased = true;
@@ -179,7 +179,7 @@ void LayerItem::loadPolygons(bool needload,float height)
             position = PointFromString((static_cast<__String*>(property->objectForKey("position")))->getCString());
             isConvex = (static_cast<__Bool*>(property->objectForKey("isConvex")))->getValue();
             
-            if (position.y<=integerHeight+kDefaultInitialLoadScreenCount && position.y>=height/WinSize.height) {
+            if (position.y<=integerHeight+kDefaultInitialLoadScreenCount && position.y>=height/DefiniteSize.height) {
                 vertexArray = static_cast<__Array*>(property->objectForKey("vertexes"));
                 CCARRAY_FOREACH(vertexArray, vertex){
                     Vec2 singleVertex = PointFromString(((__String*)vertex)->getCString());
@@ -242,14 +242,20 @@ void LayerItem::update(float dt)
     for(itemIter=_items.begin();itemIter!=_items.end();){
         ItemModel* item = *itemIter;
         Vec2 pointInGl = convertToWorldSpace(item->getPosition());
-        if (pointInGl.y<-0.3*WinSize.height) {
+        if (pointInGl.y<-0.3*VisibleSize.height) {
+            if(item->_type == Gear_Gate){
+                ((GearGate*)item)->getLeftHalf()->removeFromParent();
+                ((GearGate*)item)->getRightHalf()->removeFromParent();
+            }
             itemIter = _items.erase(itemIter);
             item->removeFromParent();
         }else{
-            b2Vec2 bodyPosition = cc_to_b2Vec(pointInGl.x, pointInGl.y);
-            float bodyAngle = -CC_DEGREES_TO_RADIANS(item->getRotation());
-            item->getBody()->SetTransform(bodyPosition, bodyAngle);
-            
+            if(item->getBody()){
+                b2Vec2 bodyPosition = cc_to_b2Vec(pointInGl.x, pointInGl.y);
+                float bodyAngle = -CC_DEGREES_TO_RADIANS(item->getRotation());
+                item->getBody()->SetTransform(bodyPosition, bodyAngle);
+            }
+
             itemIter++;
         }
     }
@@ -258,7 +264,7 @@ void LayerItem::update(float dt)
     for (polyIter = _polygons.begin(); polyIter!=_polygons.end(); ) {
         class::Polygon* poly = *polyIter;
         Vec2 positionInGl = convertToWorldSpace(poly->getPosition());
-        if (positionInGl.y<-0.3*WinSize.height) {
+        if (positionInGl.y<-0.3*VisibleSize.height) {
             polyIter = _polygons.erase(polyIter);
             poly->removeFromParent();
         }else{

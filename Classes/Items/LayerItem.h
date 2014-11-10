@@ -43,7 +43,7 @@ protected:
     bool firstload;
     int integerHeight;
     std::list<Item> _itemsNeedLoaded;
-    std::list<ItemModel*> _items;
+    std::list<ItemModel*> _items;//所有拥有碰撞区域的道具均放在这里
     std::map<int,float>_polygonsNeedLoaded;
     std::list<class::Polygon*> _polygons;
 };

@@ -10,7 +10,7 @@
 #include "GameManager.h"
 #include "LayerItem.h"
 
-GearGate::GearGate()
+GearGate::GearGate():_left(nullptr),_leftEye(nullptr),_right(nullptr),_rightEye(nullptr)
 {
     
 }
@@ -35,24 +35,24 @@ GearGate* GearGate::create(Item& item)
 bool GearGate::init(Item &item)
 {
     if (ItemModel::init(item)) {
+        setRotation(CC_RADIANS_TO_DEGREES(item.angle));
+        setScale(item.scale);
+        
         _left = Sprite::create("GearGate_Subject_L.png");
         _leftEye = Sprite::create("GearGate_RedEye_L.png");
-        _leftEye->setPosition(77.0/121.0*_left->getBoundingBox().size.width,_left->getBoundingBox().size.height/2);
+        _leftEye->setPosition(77.0/121.0*_left->getBoundingBox().size.width,91.0/198.0*_left->getBoundingBox().size.height);
         _left->addChild(_leftEye);
         
         _right = Sprite::create("GearGate_Subject_R.png");
         _rightEye = Sprite::create("GearGate_RedEye_R.png");
-        _rightEye->setPosition(44.0/121.0*_right->getBoundingBox().size.width,_right->getBoundingBox().size.height/2);
+        _rightEye->setPosition(44.0/121.0*_right->getBoundingBox().size.width,91.0/198.0*_right->getBoundingBox().size.height);
         _right->addChild(_rightEye);
         
-        setContentSize(_left->getContentSize()+_right->getContentSize());
-        _left->setPosition(1.0/4.0*getContentSize().width,0.5*getContentSize().height);
-        _right->setPosition(3.0/4.0*getContentSize().width,0.5*getContentSize().height);
-        addChild(_left);
-        addChild(_right);
+        _left->setPosition(getPositionX()-_left->getContentSize().width/2*cosf(CC_DEGREES_TO_RADIANS(getRotation())),getPositionY()+_left->getContentSize().width/2*sinf(CC_DEGREES_TO_RADIANS(getRotation())));
+        _left->setRotation(getRotation());
         
-        setRotation(CC_RADIANS_TO_DEGREES(item.angle));
-        setScale(item.scale);
+        _right->setPosition(getPositionX()+_right->getContentSize().width/2*cosf(CC_DEGREES_TO_RADIANS(getRotation())),getPositionY()-_right->getContentSize().width/2*sinf(CC_DEGREES_TO_RADIANS(getRotation())));
+        _right->setRotation(getRotation());
         
         gap = kDefaultGearGateGap;
         startRate = kDefaultGearGateStartRate;
@@ -78,10 +78,18 @@ void GearGate::createBody()
     _body = GameManager::getInstance()->getBox2dWorld()->CreateBody(&bodyDef);
     
     ((LayerItem*)getParent())->_fixturesCache->addFixturesToBody(_body, "GearGate");
+    
+    //
+    getParent()->addChild(_left);
+    getParent()->addChild(_right);
 }
 
 void GearGate::openGate()
 {
+    GameManager::getInstance()->getBox2dWorld()->DestroyBody(_body);
+    _body = nullptr;
+    ((LayerItem*)getParent())->getItems().remove(this);
+    //
     FadeOut* elapse = FadeOut::create(0.2);
     CallFunc* changeTexture_L = CallFunc::create([&](){
         _leftEye->setTexture("GearGate_BlueEye_L.png");
@@ -93,13 +101,16 @@ void GearGate::openGate()
     TargetedAction* turnColor_L = TargetedAction::create(_leftEye,Sequence::create(elapse,changeTexture_L,show, NULL));
     TargetedAction* turnColor_R = TargetedAction::create(_rightEye, Sequence::create(elapse->clone(),changeTexture_R,show->clone(), NULL));
     
-    TargetedAction* openLeftGate = TargetedAction::create(_left, MoveBy::create(gap/2/startRate, Vec2(gap/2*cosf(CC_DEGREES_TO_RADIANS(getRotation())),-gap/2*sinf(CC_DEGREES_TO_RADIANS(getRotation())))));
-    TargetedAction* openRightGate = TargetedAction::create(_right,MoveBy::create(gap/2/startRate, Vec2(-gap/2*cosf(CC_DEGREES_TO_RADIANS(getRotation())),gap/2*sinf(CC_DEGREES_TO_RADIANS(getRotation())))));
+    TargetedAction* openLeftGate = TargetedAction::create(_left, MoveBy::create(gap/2/startRate, Vec2(-gap/2*cosf(CC_DEGREES_TO_RADIANS(getRotation())),gap/2*sinf(CC_DEGREES_TO_RADIANS(getRotation())))));
+    TargetedAction* openRightGate = TargetedAction::create(_right,MoveBy::create(gap/2/startRate, Vec2(gap/2*cosf(CC_DEGREES_TO_RADIANS(getRotation())),-gap/2*sinf(CC_DEGREES_TO_RADIANS(getRotation())))));
     
     FiniteTimeAction* group1 = Spawn::create(turnColor_L,turnColor_R, NULL);
     FiniteTimeAction* group2 = Spawn::create(openLeftGate, openRightGate,NULL);
+    CallFunc* enableUpdate = CallFunc::create([&](){
+        this->scheduleUpdate();
+    });
     
-    runAction(Sequence::create(group1,group2, NULL));
+    runAction(Sequence::create(group1,group2, enableUpdate,NULL));
 }
 
 void GearGate::collisionWithPlant(ItemModel *plantHead)
@@ -108,11 +119,29 @@ void GearGate::collisionWithPlant(ItemModel *plantHead)
     _body = nullptr;
     ((LayerItem*)getParent())->getItems().remove(this);
     
-    FadeTo* disappear = FadeTo::create(1, 0);
+    FadeTo* disappear = FadeTo::create(0.5, 0);
+    TargetedAction* leftDisappear = TargetedAction::create(_left, disappear);
+    TargetedAction* leftEyeDisappear = TargetedAction::create(_leftEye, disappear->clone());
+    TargetedAction* rightDisappear = TargetedAction::create(_right, disappear->clone());
+    TargetedAction* rightEyeDisappear = TargetedAction::create(_rightEye, disappear->clone());
     CallFunc* remove = CallFunc::create([&](){
+        _left->removeFromParent();
+        _left = nullptr;
+        _right->removeFromParent();
+        _right = nullptr;
         this->removeFromParent();
     });
-    runAction(Sequence::create(disappear,remove, NULL));
+    runAction(Sequence::create(Spawn::create(leftDisappear,leftEyeDisappear,rightDisappear,rightEyeDisappear,NULL),remove, NULL));
     //other effect
     
+    
+}
+
+void GearGate::update(float dt)
+{
+    Vec2 positionInWorld = getParent()->convertToWorldSpace(getPosition());
+    if(positionInWorld.y < -getBoundingBox().size.height/2)
+    {
+        removeFromParent();
+    }
 }

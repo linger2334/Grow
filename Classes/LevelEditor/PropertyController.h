@@ -23,5 +23,6 @@ class GameManager;
 
 @property(nonatomic,readonly)ItemView* _itemView;
 @property(nonatomic,readonly) UIPickerView* _hierarchyPickerView;
+@property(nonatomic,assign)std::set<int> _selectedIDs;
 
 @end

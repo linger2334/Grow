@@ -347,7 +347,7 @@ void   SceneGame::addUIBorderBody()
 {
     float xvec[2]={
         40,
-        WinSize.width-40
+        DefiniteSize.width-40
     };
     static TypeBase dirtLine(111);
     for (int i = 0 ; i<2; i++) {
@@ -361,7 +361,7 @@ void   SceneGame::addUIBorderBody()
         b2Vec2 verts[2]=
         {
             b2Vec2(xvec[i]/PTM_RATIO,0),
-            b2Vec2(xvec[i]/PTM_RATIO,WinSize.height/PTM_RATIO)
+            b2Vec2(xvec[i]/PTM_RATIO,DefiniteSize.height/PTM_RATIO)
         };
         b2line.CreateChain(verts,2);
         fixtureDef.shape = &b2line;

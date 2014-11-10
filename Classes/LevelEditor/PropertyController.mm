@@ -28,6 +28,7 @@
 
 @synthesize _itemView;
 @synthesize _hierarchyPickerView;
+@synthesize _selectedIDs;
 
 -(id)init:(ItemView*)itemview
 {
@@ -229,6 +230,76 @@
             float absorptionRate = static_cast<float>(atof([absorptionShowLabel.text UTF8String]));
             ((Features_Serpent*)_itemView->features)->absorptionRate = absorptionRate;
         }
+            break;
+        case Gear_Button:
+        {
+            int sinkSpeed = atoi([sinkSpeedShowLabel.text UTF8String]);
+            ((Features_GearButton*)_itemView->features)->sinkSpeed = sinkSpeed;
+            if(_selectedIDs.size()>1){
+                UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"非法选择！" message:@"不能绑定多个门ID!" delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
+                [alert show];
+                [alert release];
+                return;
+            }else if (_selectedIDs.size()<1){
+                Features_GearButton* feat = (Features_GearButton*)_itemView->features;
+                if (feat->bindID != kDefaultGearButtonBindID) {
+                    //解除绑定
+                    for(ItemView* gate : gameManager->_levelEditor->_myViewController->_gates){
+                        if (gate.tag == feat->bindID) {
+                            gate.bindButton = nil;
+                            feat->bindID = kDefaultGearButtonBindID;
+                            break;
+                        }
+                    }
+                }
+            }else{
+                Features_GearButton* feat = (Features_GearButton*)_itemView->features;
+                //是否需要重新绑定
+                if (feat->bindID != *_selectedIDs.begin()) {
+                    //按钮解绑
+                    if (feat->bindID != kDefaultGearButtonBindID) {
+                        for (ItemView* gate : gameManager->_levelEditor->_myViewController->_gates) {
+                            if (gate.tag == feat->bindID) {
+                                gate.bindButton = nil;
+                                feat->bindID = kDefaultGearButtonBindID;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    //重新绑定
+                    for (ItemView* gate : gameManager->_levelEditor->_myViewController->_gates) {
+                        if (gate.tag == *_selectedIDs.begin()) {
+                            //门解绑
+                            if (gate.bindButton) {
+                                ((Features_GearButton*)gate.bindButton->features)->bindID = kDefaultGearButtonBindID;
+                                gate.bindButton = nil;
+                            }
+                            //重新绑定
+                            gate.bindButton = _itemView;
+                            feat->bindID = gate.tag;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+            break;
+        case Gear_Gate:
+        {
+            int gap = atoi([gapTextField.text UTF8String]);
+            if (gap < 0) {
+                UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"非法输入！" message:@"间隙不能为负,请返回重新修改！" delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
+                [alert show];
+                [alert release];
+                return;
+            }
+            ((Features_GearGate*)_itemView->features)->gap = gap;
+            
+            int startRate = atoi([startRateShowLabel.text UTF8String]);
+            ((Features_GearGate*)_itemView->features)->startRate = startRate;
+        }
+            break;
         default:
             break;
     }
@@ -426,22 +497,39 @@
 
 -(void)addCheckBoxes
 {
-    std::vector<ItemView*>& needBindGates = GameManager::getInstance()->_levelEditor->_myViewController->_needToBinds;
+    UILabel* prompt = [[[UILabel alloc] initWithFrame:CGRectMake(0.05*width, 0.5*height, 0.8*width, 0.05*height)] autorelease];
+    prompt.text = @"请选择您想绑定的ID号(绿色为未绑定，红色为已绑定）:";
+    prompt.textAlignment = NSTextAlignmentLeft;
+    prompt.textColor = [UIColor blackColor];
+    prompt.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:prompt];
+    
+    std::vector<ItemView*>& Gates = GameManager::getInstance()->_levelEditor->_myViewController->_gates;
     CGRect checkBoxFrame;
-    for(int i = 0;i<needBindGates.size();i++){
-        checkBoxFrame = CGRectMake(0.05*width, 0.5*height, 0.15*width, 0.05*height);
+    for(int i = 0;i<Gates.size();i++){
+        checkBoxFrame = CGRectMake(0, 0.55*height, 0.15*width, 0.05*height);
         checkBoxFrame.origin.x += i%5*0.2*width;
         checkBoxFrame.origin.y += i/5*0.1*height;
         UIButton* checkBox = [[[UIButton alloc] initWithFrame:checkBoxFrame] autorelease];
         checkBox.contentMode = UIViewContentModeLeft;
         [checkBox setImage:[UIImage imageNamed:@"checkbox_off.png"] forState:UIControlStateNormal];
         [checkBox setImage:[UIImage imageNamed:@"checkbox_on.png"] forState:UIControlStateSelected];
+        [checkBox setTag:Gates.at(i).tag];
         [checkBox addTarget:self action:@selector(checkBoxSelected:) forControlEvents:UIControlEventTouchUpInside];
         
         UILabel* gateID = [[[UILabel alloc] initWithFrame:CGRectMake(0.05*width, 0, 0.1*width, 0.05*height)] autorelease];
-        gateID.text = [NSString stringWithFormat:@"%d",needBindGates.at(i).tag];
+        gateID.text = [NSString stringWithFormat:@"%d",Gates.at(i).tag];
         gateID.textAlignment = NSTextAlignmentRight;
-        gateID.textColor = [UIColor blackColor];
+        if (Gates.at(i).bindButton) {
+            gateID.textColor = [UIColor redColor];
+            if (Gates.at(i).bindButton == _itemView) {
+                [checkBox setSelected:YES];
+                _selectedIDs.insert(Gates.at(i).tag);
+            }
+            
+        }else{
+            gateID.textColor = [UIColor greenColor];
+        }
         gateID.font = [UIFont systemFontOfSize:kDefaultFontSize];
         [checkBox addSubview:gateID];
         
@@ -453,9 +541,9 @@
 {
     sender.selected = !sender.isSelected;
     if (sender.selected) {
-        
+        _selectedIDs.insert(sender.tag);
     }else{
-        
+        _selectedIDs.erase(sender.tag);
     }
 }
 

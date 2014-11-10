@@ -51,7 +51,7 @@ void Decoration::update(float dt)
         ItemModel::update(dt);
     }
     
-    if(this->getParent()->convertToWorldSpace(getPosition()).y < -WinSize.height/3){
+    if(this->getParent()->convertToWorldSpace(getPosition()).y < -getBoundingBox().size.height/2){
         this->removeFromParent();
     }
     

@@ -41,7 +41,7 @@ const float kDefaultSerpentHoleTransparency = 150/255.0;
 
 const float kDefaultFlickeringHalfCycle = 2.0;
 
-const int kDefaultGearButtonSubjectHeight = 10;
+const int kDefaultGearButtonSubjectHeight = 5;
 const int kDefaultGearButtonBindID = -1;
 const float kDefaultGearButtonSinkSpeed = 10.0;
 

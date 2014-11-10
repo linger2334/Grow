@@ -16,7 +16,7 @@
 USING_NS_CC;
 USING_NS_CC_EXT;
 
-#define WinSize cocos2d::Size(768,1024) //设计分辨率，绘制区，可能包含空白
+#define DefiniteSize cocos2d::Size(768,1024) //设计分辨率，绘制区，可能包含空白
 #define VisibleSize Director::getInstance()->getVisibleSize()  //设计分辨率可视区域大小，绘制区的可见部分
 #define VisibleOrigin Director::getInstance()->getVisibleOrigin()  //可见区 原点
 

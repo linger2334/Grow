@@ -45,7 +45,7 @@ bool Polygon::init(PolygonInfo& polygonInfo)
 {
     if (Node::init()) {
         
-        setPosition(polygonInfo.position.x*WinSize.width, polygonInfo.position.y*WinSize.height);
+        setPosition(polygonInfo.position.x*DefiniteSize.width, polygonInfo.position.y*DefiniteSize.height);
         
         GameManager* gameManager = GameManager::getInstance();
         _type = 10;

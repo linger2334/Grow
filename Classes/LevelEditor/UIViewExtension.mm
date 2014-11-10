@@ -253,7 +253,7 @@
                     Features_GearButton* feat = (Features_GearButton*)item.features;
                     features = new Features_GearButton(*feat);
                     if(feat->bindID != kDefaultGearButtonBindID){
-                        GameManager::getInstance()->_levelEditor->_myViewController->_gearButtons.push_back(self);
+                        GameManager::getInstance()->_levelEditor->_myViewController->_boundButtons.push_back(self);
                     }
                     
                 }else{
@@ -269,7 +269,7 @@
                 }else{
                     features = new Features_GearGate();
                 }
-                GameManager::getInstance()->_levelEditor->_myViewController->_needToBinds.push_back(self);
+                GameManager::getInstance()->_levelEditor->_myViewController->_gates.push_back(self);
             }
                 break;
             case Barrier_:

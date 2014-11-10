@@ -105,7 +105,7 @@ void Serpent::collisionWithPlant(ItemModel *plantHead)
 
 void Serpent::update(float delta)
 {
-    float beginningPointY = WinSize.height-getBoundingBox().size.height/2;
+    float beginningPointY = VisibleSize.height-getBoundingBox().size.height/2;
     Vec2 pointInGl = getParent()->convertToWorldSpace(getPosition());
     if (pointInGl.y<beginningPointY) {
         DelayTime* delay = DelayTime::create(triggerTime);
