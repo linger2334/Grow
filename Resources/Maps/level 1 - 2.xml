@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level>
+    <Gear_Button id="2" x="0.525391" y="0.342285" localZorder="0">
+        <bindID>1</bindID>
+        <animations/>
+    </Gear_Button>
+    <Flame_Orange id="3" x="0.255859" y="0.489746" localZorder="1">
+        <animations/>
+    </Flame_Orange>
+    <Decoration_Pendant id="4" x="0.255208" y="0.531738" localZorder="2">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Ellipse id="7" x="0.475911" y="0.678223" localZorder="3">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Mount id="6" x="0.929688" y="0.65625" localZorder="4">
+        <animations/>
+    </Rock_Mount>
+    <Gear_Gate id="1" x="0.63737" y="0.607422" localZorder="5">
+        <startRate>10.000000</startRate>
+        <animations/>
+    </Gear_Gate>
+    <Decoration_Bridge id="5" x="0.634766" y="0.74707" localZorder="6">
+        <animations/>
+    </Decoration_Bridge>
+    <Barrier id="8" x="0.551432" y="0.848633" angle="0.869647" localZorder="7">
+        <animations/>
+    </Barrier>
+    <Rock_Ellipse id="9" x="0.474349" y="1.10312" localZorder="8">
+        <animations/>
+    </Rock_Ellipse>
+    <Barrier id="10" x="0.600199" y="1.1128" angle="1.59367" localZorder="9">
+        <animations/>
+    </Barrier>
+</level>

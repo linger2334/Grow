@@ -1,0 +1,27 @@
+#ifndef GAME_SETTING_H
+#define GAME_SETTING_H
+
+#define GAME_MOVEDOWN_RATIO_BACKGROUND (1.0f)
+#define GAME_MOVEDOWN_RATIO_MAP  (1.0f)
+#define GAME_MOVEDOWN_RATIO_PLANT (1.0f)
+#define GAME_MOVEDOWN_RATIO_STONEBORDER (1.0f)
+
+///GameLayerMap.cpp
+#define MAX_CRASH_LENGTH 50
+
+
+///GameLayerBorderLine.cpp
+
+#define BORDER_WIDTH 32
+#define BORDER_HEIGHT 8.0f
+
+
+#define SHADER_NAME_PLANT_1_LEVEL_1 ""
+#define SHADER_NAME_PLANT_1_LEVEL_2 ""
+#define SHADER_NAME_PLANT_2_LEVEL_2 ""
+#define SHADER_NAME_PLANT_1_LEVEL_3 ""
+#define SHADER_NAME_PLANT_2_LEVEL_3 ""
+
+
+
+#endif

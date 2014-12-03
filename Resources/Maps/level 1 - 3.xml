@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level>
+    <DoubDragon_Anti id="80" x="0.428516" y="7.73018" localZorder="0">
+        <animations/>
+    </DoubDragon_Anti>
+    <Rock_Ellipse id="72" x="0.897917" y="8.37422" localZorder="1">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Ellipse id="61" x="0.494141" y="7.01611" localZorder="2">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Mount id="19" x="0.722005" y="4.14844" localZorder="3">
+        <animations/>
+    </Rock_Mount>
+    <Rock_Trape id="20" x="0.488932" y="3.84863" localZorder="4">
+        <animations/>
+    </Rock_Trape>
+    <Flame_White id="1" x="0.419271" y="0.522461" localZorder="5">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="2" x="0.711328" y="0.775879" localZorder="6">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="3" x="0.485156" y="1.15088" localZorder="7">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="4" x="0.507682" y="1.8252" localZorder="8">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="5" x="0.727474" y="1.31396" localZorder="9">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="6" x="0.16888" y="1.69531" localZorder="10">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="7" x="0.325521" y="2.09766" localZorder="11">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="8" x="0.678125" y="2.10449" localZorder="12">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="9" x="0.714323" y="2.08643" localZorder="13">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="10" x="0.232292" y="2.39453" localZorder="14">
+        <animations/>
+    </Flame_White>
+    <Rock_Rect id="11" x="0.693359" y="2.58057" localZorder="15">
+        <animations/>
+    </Rock_Rect>
+    <Flame_White id="12" x="0.551042" y="2.646" localZorder="16">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="13" x="0.299479" y="2.92334" localZorder="17">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="14" x="0.490885" y="1.47852" localZorder="18">
+        <animations/>
+    </Flame_White>
+    <Rock_Ellipse id="15" x="0.341146" y="3.21289" localZorder="19">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Ellipse id="16" x="0.675521" y="3.21592" localZorder="20">
+        <animations/>
+    </Rock_Ellipse>
+    <Flame_White id="17" x="0.50625" y="3.21631" localZorder="21">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="18" x="0.675911" y="3.44531" localZorder="22">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="21" x="0.480339" y="3.64111" localZorder="23">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="22" x="0.697786" y="3.87304" localZorder="24">
+        <animations/>
+    </Flame_White>
+    <Rock_Ellipse id="23" x="0.302083" y="4.30811" localZorder="25">
+        <animations/>
+    </Rock_Ellipse>
+    <Flame_White id="24" x="0.168229" y="4.36182" localZorder="26">
+        <animations/>
+    </Flame_White>
+    <Flame_Blue id="25" x="0.796875" y="4.39258" localZorder="27">
+        <animations/>
+    </Flame_Blue>
+    <Rock_Ovoid id="26" x="0.641276" y="4.70996" localZorder="28">
+        <animations/>
+    </Rock_Ovoid>
+    <Flame_White id="27" x="0.330729" y="4.70117" localZorder="29">
+        <animations/>
+    </Flame_White>
+    <Cicada id="28" x="0.79362" y="4.2373" localZorder="30">
+        <animations/>
+    </Cicada>
+    <Flame_White id="29" x="0.742578" y="4.88037" localZorder="31">
+        <animations/>
+    </Flame_White>
+    <Rock_Rect id="31" x="0.454427" y="0.720215" localZorder="32">
+        <animations/>
+    </Rock_Rect>
+    <Rock_Ellipse id="32" x="0.552734" y="0.775879" localZorder="33">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Trape id="33" x="0.953125" y="0.805664" localZorder="34">
+        <animations/>
+    </Rock_Trape>
+    <Flame_White id="34" x="0.29375" y="0.92041" localZorder="35">
+        <animations/>
+    </Flame_White>
+    <Rock_Ellipse id="35" x="0.291406" y="1.20811" localZorder="36">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Trape id="36" x="0.410156" y="1.6377" localZorder="37">
+        <animations/>
+    </Rock_Trape>
+    <Flame_White id="37" x="0.433724" y="5.146" localZorder="38">
+        <animations/>
+    </Flame_White>
+    <Cicada id="38" x="0.578776" y="4.9707" angle="-0.000987708" localZorder="39" triggerTime="3">
+        <animations>
+            <group0 loop="0">
+                <animation1 waitTime="0" rotation="0" rotationSpeed="90" moveSpeed="100" position="{-7.500000,233.000000}"/>
+            </group0>
+        </animations>
+    </Cicada>
+    <Cicada id="39" x="0.238151" y="3.81689" localZorder="40">
+        <animations/>
+    </Cicada>
+    <Rock_Trape id="41" x="0.927083" y="5.85303" localZorder="41">
+        <animations/>
+    </Rock_Trape>
+    <Rock_Rect id="40" x="0.772135" y="5.96484" localZorder="42">
+        <animations/>
+    </Rock_Rect>
+    <Rock_Ovoid id="42" x="0.610677" y="5.42021" localZorder="43">
+        <animations/>
+    </Rock_Ovoid>
+    <Cicada id="43" x="0.813672" y="5.25439" angle="-0.000987708" localZorder="44" triggerTime="4">
+        <animations>
+            <group0 loop="0">
+                <animation1 waitTime="0" rotation="0" rotationSpeed="90" moveSpeed="100" position="{3.500000,214.500000}"/>
+            </group0>
+        </animations>
+    </Cicada>
+    <Flame_White id="44" x="0.68086" y="5.21631" localZorder="45">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="45" x="0.398698" y="5.33203" localZorder="46">
+        <animations/>
+    </Flame_White>
+    <Rock_Circle id="46" x="0.235677" y="5.67725" localZorder="47">
+        <animations/>
+    </Rock_Circle>
+    <Rock_Ovoid id="47" x="0.110026" y="5.56494" localZorder="48">
+        <animations/>
+    </Rock_Ovoid>
+    <Rock_Rect id="48" x="0.111849" y="5.36748" localZorder="49">
+        <animations/>
+    </Rock_Rect>
+    <Rock_Ovoid id="30" x="0.204427" y="5.19375" localZorder="50">
+        <animations/>
+    </Rock_Ovoid>
+    <Cicada id="49" x="0.331771" y="5.43994" angle="0.791949" localZorder="51" triggerTime="5">
+        <animations>
+            <group0 loop="0">
+                <animation1 waitTime="0" rotation="0" rotationSpeed="90" moveSpeed="100" position="{305.000000,308.000000}"/>
+            </group0>
+        </animations>
+    </Cicada>
+    <Flame_White id="50" x="0.603516" y="5.66797" localZorder="52">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="51" x="0.607162" y="6.03369" localZorder="53">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="52" x="0.234505" y="6.10547" localZorder="54">
+        <animations/>
+    </Flame_White>
+    <Rock_Ellipse id="53" x="0.494792" y="6.18359" localZorder="55">
+        <animations/>
+    </Rock_Ellipse>
+    <Cicada id="54" x="0.652344" y="6.12964" angle="0.360988" localZorder="56">
+        <animations/>
+    </Cicada>
+    <Cicada id="55" x="0.322653" y="6.50241" angle="1.56265" localZorder="57">
+        <animations/>
+    </Cicada>
+    <Cicada id="56" x="0.636325" y="6.50778" angle="-1.56505" localZorder="58">
+        <animations/>
+    </Cicada>
+    <Flame_White id="57" x="0.481641" y="6.50488" localZorder="59">
+        <animations/>
+    </Flame_White>
+    <Rock_Mount id="58" x="0.942057" y="6.47461" localZorder="60">
+        <animations/>
+    </Rock_Mount>
+    <Rock_Rect id="59" x="0.134766" y="6.49365" localZorder="61">
+        <animations/>
+    </Rock_Rect>
+    <DoubDragon_Anti id="60" x="0.496094" y="6.78369" localZorder="62">
+        <animations/>
+    </DoubDragon_Anti>
+    <Flame_Blue id="62" x="0.495443" y="6.78027" localZorder="63">
+        <animations/>
+    </Flame_Blue>
+    <Rock_Ellipse id="63" x="0.747787" y="6.89951" localZorder="64">
+        <animations/>
+    </Rock_Ellipse>
+    <Flame_White id="64" x="0.630469" y="7.03174" localZorder="65">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="65" x="0.861979" y="6.9502" localZorder="66">
+        <animations/>
+    </Flame_White>
+    <Cicada id="66" x="0.327601" y="7.01339" angle="0.00143941" localZorder="67">
+        <animations/>
+    </Cicada>
+    <Rock_Mount id="67" x="0.000195344" y="7.04702" angle="3.09941" localZorder="68">
+        <animations/>
+    </Rock_Mount>
+    <DoubDragon_Anti id="68" x="0.410872" y="8.52109" angle="-0.043463" localZorder="69">
+        <w>40.597179</w>
+        <animations/>
+    </DoubDragon_Anti>
+    <DoubDragon_Clockwise id="69" x="0.612305" y="8.52197" angle="0.078872" localZorder="70">
+        <w>46.875084</w>
+        <animations/>
+    </DoubDragon_Clockwise>
+    <Flame_White id="70" x="0.404948" y="8.33398" localZorder="71">
+        <animations/>
+    </Flame_White>
+    <Rock_Mount id="71" x="0.948903" y="8.48709" angle="-0.00046246" localZorder="72">
+        <animations/>
+    </Rock_Mount>
+    <Rock_Ovoid id="73" x="0.151042" y="8.50342" angle="0.181507" localZorder="73">
+        <animations/>
+    </Rock_Ovoid>
+    <Rock_Rect id="74" x="0.0703125" y="8.40576" localZorder="74">
+        <animations/>
+    </Rock_Rect>
+    <DoubDragon_Anti id="75" x="0.400781" y="7.35898" localZorder="75">
+        <animations/>
+    </DoubDragon_Anti>
+    <Flame_White id="76" x="0.427084" y="7.72705" localZorder="76">
+        <animations/>
+    </Flame_White>
+    <Rock_Mount id="77" x="1.07103" y="7.43511" angle="0.00436602" localZorder="77">
+        <animations/>
+    </Rock_Mount>
+    <Flame_White id="78" x="0.258854" y="7.53906" localZorder="78">
+        <animations/>
+    </Flame_White>
+    <Rock_Ellipse id="79" x="0.620182" y="7.61338" localZorder="79">
+        <animations/>
+    </Rock_Ellipse>
+    <Flame_White id="81" x="0.511459" y="8.23193" localZorder="80">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="82" x="0.604297" y="8.34033" localZorder="81">
+        <animations/>
+    </Flame_White>
+    <Cicada id="83" x="0.274086" y="7.90255" angle="0.00143941" localZorder="82">
+        <animations/>
+    </Cicada>
+    <Rock_Ellipse id="84" x="0.121224" y="7.96211" localZorder="83">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Ellipse id="85" x="0.43151" y="7.95439" localZorder="84">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Ellipse id="86" x="0.564583" y="7.50801" localZorder="85">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Ovoid id="87" x="0.519531" y="8.88076" angle="0.181507" localZorder="86">
+        <animations/>
+    </Rock_Ovoid>
+    <Flame_Orange id="88" x="0.714193" y="8.82227" localZorder="87">
+        <animations/>
+    </Flame_Orange>
+    <Flame_White id="90" x="0.247396" y="9.71338" localZorder="88">
+        <animations/>
+    </Flame_White>
+    <Rock_Circle id="91" x="0.158854" y="9.43555" localZorder="89">
+        <animations/>
+    </Rock_Circle>
+    <Serpent id="89" x="0.572916" y="9.60547" localZorder="90">
+        <animations/>
+    </Serpent>
+    <Rock_Rect id="92" x="0.124349" y="9.2998" localZorder="91">
+        <animations/>
+    </Rock_Rect>
+    <Rock_Ellipse id="93" x="0.216146" y="9.37061" localZorder="92">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Rect id="95" x="0.540365" y="9.27686" localZorder="93">
+        <animations/>
+    </Rock_Rect>
+    <Flame_White id="94" x="0.547526" y="9.07568" localZorder="94">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="96" x="0.319401" y="9.87061" localZorder="95">
+        <animations/>
+    </Flame_White>
+    <Rock_Mount id="98" x="0.837891" y="9.7207" localZorder="96">
+        <animations/>
+    </Rock_Mount>
+    <Rock_Trape id="97" x="0.636719" y="9.38281" localZorder="97">
+        <animations/>
+    </Rock_Trape>
+    <DoubDragon_Clockwise id="99" x="0.751954" y="9.18457" localZorder="98">
+        <w>168.247864</w>
+        <animations/>
+    </DoubDragon_Clockwise>
+    <Cicada id="100" x="0.340495" y="9.12256" angle="0.106523" localZorder="99" triggerTime="4">
+        <animations>
+            <group0 loop="0">
+                <animation1 waitTime="0" rotation="0" rotationSpeed="90" moveSpeed="100" position="{99.000000,749.000000}"/>
+            </group0>
+        </animations>
+    </Cicada>
+</level>

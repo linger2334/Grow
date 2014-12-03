@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>polygon1</key>
+	<dict>
+		<key>isConvex</key>
+		<true/>
+		<key>position</key>
+		<string>{0.524089,0.082520}</string>
+		<key>vertexes</key>
+		<array>
+			<string>{-100.500000,81.500000}</string>
+			<string>{-123.000000,-27.000000}</string>
+			<string>{-116.500000,-100.500000}</string>
+			<string>{-13.500000,-122.500000}</string>
+			<string>{70.500000,-131.500000}</string>
+			<string>{118.500031,-84.000000}</string>
+			<string>{130.500031,-10.500000}</string>
+			<string>{112.500031,77.000000}</string>
+			<string>{52.000000,131.000000}</string>
+			<string>{-33.000000,135.000000}</string>
+		</array>
+	</dict>
+</dict>
+</plist>

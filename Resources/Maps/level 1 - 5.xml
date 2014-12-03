@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level>
+    <Rock_Mount id="86" x="0.000976572" y="2.30493" angle="4.69203" localZorder="0">
+        <animations/>
+    </Rock_Mount>
+    <Barrier id="85" x="0.356107" y="9.2827" angle="-1.55566" localZorder="1">
+        <animations/>
+    </Barrier>
+    <Flame_White id="83" x="0.815016" y="9.53061" localZorder="2">
+        <animations/>
+    </Flame_White>
+    <Decoration_Pendant id="84" x="0.793872" y="9.56672" angle="-1.12079" localZorder="3">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Trape id="79" x="0.617141" y="9.08083" localZorder="4">
+        <animations/>
+    </Rock_Trape>
+    <Flame_White id="76" x="0.367262" y="8.87066" localZorder="5">
+        <animations/>
+    </Flame_White>
+    <Rock_Ellipse id="72" x="0.922526" y="8.46191" localZorder="6">
+        <animations/>
+    </Rock_Ellipse>
+    <Flame_White id="24" x="0.503646" y="7.08789" localZorder="7">
+        <animations/>
+    </Flame_White>
+    <Barrier id="62" x="0.791328" y="8.56822" angle="4.70892" localZorder="8">
+        <animations/>
+    </Barrier>
+    <Barrier id="61" x="0.279024" y="8.63529" angle="1.58741" localZorder="9">
+        <animations/>
+    </Barrier>
+    <Barrier id="60" x="0.706595" y="8.63394" angle="4.70892" localZorder="10">
+        <animations/>
+    </Barrier>
+    <Barrier id="59" x="0.888724" y="6.89249" angle="4.70892" localZorder="11">
+        <animations/>
+    </Barrier>
+    <Barrier id="58" x="0.838985" y="6.95821" angle="4.70892" localZorder="12">
+        <animations/>
+    </Barrier>
+    <Flame_White id="6" x="0.66836" y="1.40967" localZorder="13">
+        <animations/>
+    </Flame_White>
+    <Decoration_Pendant id="48" x="0.686198" y="1.44775" angle="0.926558" localZorder="14">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Circle id="47" x="0.978516" y="1.30322" localZorder="15">
+        <animations/>
+    </Rock_Circle>
+    <Barrier id="31" x="0.323099" y="5.72071" angle="-1.38392" localZorder="16">
+        <animations/>
+    </Barrier>
+    <Barrier id="38" x="0.272578" y="6.36251" angle="1.58741" localZorder="17">
+        <animations/>
+    </Barrier>
+    <Barrier id="37" x="0.345886" y="6.31397" angle="4.70892" localZorder="18">
+        <animations/>
+    </Barrier>
+    <Barrier id="30" x="0.477396" y="5.16261" angle="0.0133535" localZorder="19">
+        <animations/>
+    </Barrier>
+    <Barrier id="29" x="0.257735" y="5.81329" angle="-1.38392" localZorder="20">
+        <animations/>
+    </Barrier>
+    <Rock_MountInv id="11" x="0.210286" y="2.56689" localZorder="21">
+        <animations/>
+    </Rock_MountInv>
+    <Rock_Circle id="1" x="0.996094" y="0.617188" localZorder="22">
+        <animations/>
+    </Rock_Circle>
+    <Flame_White id="2" x="0.383464" y="0.423829" localZorder="23">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="3" x="0.379948" y="0.875489" localZorder="24">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="4" x="0.381641" y="0.644043" localZorder="25">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="5" x="0.370443" y="1.19189" localZorder="26">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="7" x="0.377734" y="1.63477" localZorder="27">
+        <animations/>
+    </Flame_White>
+    <Rock_Trape id="8" x="0.863932" y="1.43848" localZorder="28">
+        <animations/>
+    </Rock_Trape>
+    <Rock_Ellipse id="9" x="0.0826823" y="1.84912" localZorder="29">
+        <animations/>
+    </Rock_Ellipse>
+    <Flame_White id="10" x="0.572787" y="1.92188" localZorder="30">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="14" x="0.247005" y="2.23438" localZorder="31">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="15" x="0.519531" y="2.63769" localZorder="32">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="16" x="0.616927" y="2.92236" localZorder="33">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="17" x="0.272266" y="3.18848" localZorder="34">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="18" x="0.521354" y="3.47266" localZorder="35">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="19" x="0.696875" y="3.66308" localZorder="36">
+        <animations/>
+    </Flame_White>
+    <Rock_Rect id="20" x="0.514323" y="3.80566" localZorder="37">
+        <animations/>
+    </Rock_Rect>
+    <Rock_Ellipse id="21" x="0.528776" y="3.20478" localZorder="38">
+        <animations/>
+    </Rock_Ellipse>
+    <Flame_White id="23" x="0.263672" y="4.30859" localZorder="39">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="25" x="0.63099" y="4.82861" localZorder="40">
+        <animations/>
+    </Flame_White>
+    <Rock_Rect id="27" x="0.429427" y="5.72617" localZorder="41">
+        <animations/>
+    </Rock_Rect>
+    <Flame_White id="28" x="0.172396" y="5.98584" localZorder="42">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="32" x="0.471615" y="5.34375" localZorder="43">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="33" x="0.746744" y="5.67187" localZorder="44">
+        <animations/>
+    </Flame_White>
+    <Rock_Ellipse id="34" x="0.101563" y="6.35791" localZorder="45">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Ellipse id="35" x="0.511458" y="6.3668" localZorder="46">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Ellipse id="36" x="0.886198" y="6.36934" localZorder="47">
+        <animations/>
+    </Rock_Ellipse>
+    <Flame_White id="39" x="0.491146" y="6.61914" localZorder="48">
+        <animations/>
+    </Flame_White>
+    <Flame_White id="40" x="0.296484" y="6.18115" localZorder="49">
+        <animations/>
+    </Flame_White>
+    <DoubDragon_Clockwise id="41" x="0.493327" y="8.58325" angle="0.166456" localZorder="50">
+        <w>0.000000</w>
+        <animations/>
+    </DoubDragon_Clockwise>
+    <Rock_Mount id="42" x="0.991374" y="8.6012" localZorder="51">
+        <animations/>
+    </Rock_Mount>
+    <Rock_MountInv id="43" x="-0.00130209" y="8.57263" localZorder="52">
+        <animations/>
+    </Rock_MountInv>
+    <Flame_White id="45" x="0.630208" y="6.85449" localZorder="53">
+        <animations/>
+    </Flame_White>
+    <Decoration_Pendant id="46" x="0.607748" y="6.88623" angle="-1.33862" localZorder="54">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Rect id="44" x="0.488932" y="6.87207" localZorder="55">
+        <animations/>
+    </Rock_Rect>
+    <Decoration_Pendant id="49" x="0.26888" y="2.26367" angle="1.53808" localZorder="56">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Trape id="12" x="0.450521" y="2.25879" localZorder="57">
+        <animations/>
+    </Rock_Trape>
+    <Decoration_Pendant id="50" x="0.541146" y="2.66729" angle="1.53808" localZorder="58">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Ellipse id="13" x="0.642318" y="2.59336" localZorder="59">
+        <animations/>
+    </Rock_Ellipse>
+    <Decoration_Pendant id="51" x="0.285156" y="4.34082" angle="1.36075" localZorder="60">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Rect id="22" x="0.413932" y="4.33916" localZorder="61">
+        <animations/>
+    </Rock_Rect>
+    <Decoration_Pendant id="52" x="0.617513" y="4.87036" angle="-0.565459" localZorder="62">
+        <animations/>
+    </Decoration_Pendant>
+    <Flame_White id="53" x="0.673698" y="4.88818" localZorder="63">
+        <animations/>
+    </Flame_White>
+    <Decoration_Pendant id="54" x="0.651497" y="4.91484" angle="4.66135" localZorder="64">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Ovoid id="26" x="0.466797" y="4.94336" localZorder="65">
+        <animations/>
+    </Rock_Ovoid>
+    <Decoration_Pendant id="56" x="0.157552" y="6.02686" angle="-0.673601" localZorder="66">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Ellipse id="55" x="-0.0132813" y="6.05967" angle="4.70514" localZorder="67">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Ellipse id="57" x="0.912891" y="6.8918" localZorder="68">
+        <animations/>
+    </Rock_Ellipse>
+    <DoubDragon_Clockwise id="63" x="0.220215" y="7.65735" angle="1.63563" localZorder="69">
+        <w>0.000000</w>
+        <animations/>
+    </DoubDragon_Clockwise>
+    <DoubDragon_Clockwise id="65" x="0.766504" y="7.70212" angle="-1.33988" localZorder="70">
+        <w>0.000000</w>
+        <animations/>
+    </DoubDragon_Clockwise>
+    <Rock_Trape id="66" x="0.5" y="7.71973" localZorder="71">
+        <animations/>
+    </Rock_Trape>
+    <Rock_Rect id="67" x="0.983399" y="7.6532" angle="0.217455" localZorder="72">
+        <animations/>
+    </Rock_Rect>
+    <Rock_MountInv id="68" x="-0.0664063" y="7.46643" localZorder="73">
+        <animations/>
+    </Rock_MountInv>
+    <Flame_White id="69" x="0.825651" y="8.11853" localZorder="74">
+        <animations/>
+    </Flame_White>
+    <Decoration_Pendant id="70" x="0.847787" y="8.14922" angle="1.51244" localZorder="75">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Rect id="64" x="0.972819" y="8.14758" localZorder="76">
+        <animations/>
+    </Rock_Rect>
+    <Barrier id="71" x="0.0710157" y="5.78067" angle="1.58741" localZorder="77">
+        <animations/>
+    </Barrier>
+    <Flame_White id="73" x="0.63038" y="9.29135" localZorder="78">
+        <animations/>
+    </Flame_White>
+    <Decoration_Pendant id="74" x="0.606242" y="9.31887" angle="-1.56186" localZorder="79">
+        <animations/>
+    </Decoration_Pendant>
+    <Rock_Rect id="75" x="0.48791" y="9.24736" angle="-0.0102011" localZorder="80">
+        <animations/>
+    </Rock_Rect>
+    <Decoration_Pendant id="77" x="0.410482" y="9.1272" angle="0.319413" localZorder="81">
+        <animations/>
+    </Decoration_Pendant>
+    <DoubDragon_Clockwise id="78" x="0.409154" y="9.82236" angle="0.166456" localZorder="82">
+        <w>61.523521</w>
+        <animations/>
+    </DoubDragon_Clockwise>
+    <Rock_Mount id="80" x="0.775391" y="9.90088" localZorder="83">
+        <animations/>
+    </Rock_Mount>
+    <Rock_Ellipse id="81" x="0.703311" y="9.59766" localZorder="84">
+        <animations/>
+    </Rock_Ellipse>
+    <Rock_Circle id="82" x="0.0989583" y="9.93066" localZorder="85">
+        <animations/>
+    </Rock_Circle>
+</level>
