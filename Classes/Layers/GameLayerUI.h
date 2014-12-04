@@ -1,12 +1,13 @@
 #ifndef __Grow_Demo_test__GameLayerUI__
 #define __Grow_Demo_test__GameLayerUI__
 #include "GameLayerBase.h"
-class GameLayerUI : public GameLayerBase
+class GameLayerUI : public GameLayerBase ,public  GameLayerHelper<GameLayerUI>
 {
 public:
     CREATE_FUNC(GameLayerUI);
 
     virtual bool init();
+    virtual bool initGameInfo();
     virtual void onEnter();
     virtual void onExit();
     //
@@ -14,9 +15,14 @@ public:
     virtual void onTouchMoved(Touch*,Event*);
     virtual void onTouchEnded(Touch*,Event*);
     //virtual void onTouchCancelled(Touch*,Event*);
-    
+    void  showLinght();
     virtual void update(float dt);
     virtual void moveDown(float yLen){}
+    
+    void  updateLightShow();
+    
+    void  pauseGame();
+    void  reStartGame();
     
     Sprite*                     _pause_btn;
     Sprite*                     _lightCountShow_left;
@@ -25,6 +31,9 @@ public:
     Label*                      _lightCountShowNumber_right;
     Sprite*                     _pause;
     LayerColor*                 _layerColor;
+    
+    Label*                      _lengthShow_left;
+    Label*                      _lengthShow_right;
     bool                        _isTouch;
     
     cocos2d::Rect                        _pauseRect;

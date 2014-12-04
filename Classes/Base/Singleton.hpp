@@ -7,7 +7,7 @@ private:
     Singleton(){}
     ~Singleton()
     {
-        
+        DestorySingletonObject();
     }
 public:
     friend  _Type;
@@ -23,7 +23,7 @@ public:
     {
         return _sOneObject != nullptr;
     }
-    void DestorySingletonObject()
+    static void DestorySingletonObject()
     {
         if(_sOneObject)
         {   delete _sOneObject;

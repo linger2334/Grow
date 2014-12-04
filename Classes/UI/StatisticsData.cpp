@@ -30,7 +30,7 @@ bool StatisticsData::init()
 {
     if(GameLayerBase::init()){
         _userDefault = UserDefault::getInstance();
-        levelid = LevelManager::getInstance()->_levelId;
+        levelid = LevelManager::getInstance()->_levelId - 1;
         
         initData();
         moveDownDistance = 0;
@@ -57,6 +57,14 @@ void StatisticsData::initData()
     
     std::string fullPath = FileUtils::getInstance()->getWritablePath() + "StatisticsData.plist";
     if(_userDefault->getBoolForKey("isBeginner", true)){
+        _userDefault->setIntegerForKey("collectedWhite", 0);
+        _userDefault->setIntegerForKey("collectedBlue", 0);
+        _userDefault->setIntegerForKey("collectedViolet", 0);
+        _userDefault->setIntegerForKey("collectedOrange", 0);
+        _userDefault->setIntegerForKey("growHeight", 0);
+        _userDefault->setIntegerForKey("seedlingIndex", 0);
+        _userDefault->setIntegerForKey("accumulativeTime_Natural", 0);
+        
         __Dictionary* root = __Dictionary::create();
         for (int i = 0; i<LEVEL_COUNT; i++) {
             __Dictionary* leveldata = __Dictionary::create();
@@ -77,7 +85,6 @@ void StatisticsData::initData()
             
             root->setObject(leveldata, StringUtils::format("level%d",i+1));
         }
-        
         root->writeToFile(fullPath.c_str());
         
         _userDefault->setBoolForKey("isBeginner", false);

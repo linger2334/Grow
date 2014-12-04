@@ -11,8 +11,9 @@
 
 #include <stdio.h>
 #include "Macro.h"
+#include "GuideManager.h"
 
-class ScreenGuide : public Layer
+class ScreenGuide : public Layer,public GuideComponentDelegate
 {
 public:
     CREATE_FUNC(ScreenGuide)
@@ -20,6 +21,9 @@ public:
     
     virtual void onEnter();
     virtual void onExit();
+    
+    void guideProcess(GuideInfo& guidePhase);
+    void onNextStep();
 };
 
 #endif /* defined(__Grow_UI__ScreenGuide__) */

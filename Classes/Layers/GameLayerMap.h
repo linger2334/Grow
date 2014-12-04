@@ -51,6 +51,9 @@ public:
     void  onChangeCellCalls(const GridCell& cell);
 //    int clearGridCellBorderByRange(GridCell cell, int Radius);
     
+    void startListener();
+    void stopListener();
+    
 public:
     GameLayerMapBorder*   _layerBorder;
     Texture2D*            _textureAlphaMask;
@@ -63,6 +66,7 @@ public:
     std::set<GridCell>   _updateBorderList;
     Vec2                 _touchPrePoint;
     bool                 _isFirstMoveTouch;
+    EventListenerTouchOneByOne* _listener;
 };
 
 #endif /* defined(__Grow_Demo_test__GameLayerMap__) */

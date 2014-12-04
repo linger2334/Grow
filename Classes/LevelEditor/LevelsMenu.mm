@@ -103,6 +103,7 @@ bool LevelsMenu::init()
     
     return false;
 }
+#include "LevelManager.h"
 
 void LevelsMenu::selectLevel(cocos2d::Ref *sender, cocos2d::ui::ListView::EventType eventtype)
 {
@@ -123,7 +124,7 @@ void LevelsMenu::selectLevel(cocos2d::Ref *sender, cocos2d::ui::ListView::EventT
     //否则就是查表位
         fileIndex = i;
     }
-    
+//       GameManager::getInstance()->safeReleaseFileHandler();
     std::string fileName = StringUtils::format("levels/level %d - %d",fileIndex/4 + 1,fileIndex%4 + 1);
     LevelFileHandler* fileHandler = LevelFileHandler::createWithFileName(fileName.c_str());
     GameManager* gameManager = GameManager::getInstance();
@@ -135,7 +136,11 @@ void LevelsMenu::selectLevel(cocos2d::Ref *sender, cocos2d::ui::ListView::EventT
             if(selectedIndex == 1){
                 Director::getInstance()->replaceScene(LevelEditor::createScene());
             }else{
-                GameManager::getInstance()->navigationToGameScene();
+                LevelManager::getInstance()->selectLevel(5);
+                auto manager = GameManager::getInstance();
+//                manager->releaseGameScene();
+                manager->_levelFileName = fileName;
+                manager->navigationToGameScene();
             }
             
             break;

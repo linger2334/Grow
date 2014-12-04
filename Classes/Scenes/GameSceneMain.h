@@ -16,7 +16,8 @@ public:
     virtual  void onEnterTransitionDidFinish();
     virtual  void onExit();
     virtual  void onExitTransitionDidFinish();
-
+    void   initLevelEditorMenu();
+    void    updateFirstGrowPlant(float dt);
     void onDraw(const Mat4 &transform, uint32_t flags);
     
     //调试绘图

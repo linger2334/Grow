@@ -14,7 +14,7 @@
 #include "Macro.h"
 #include "ItemModel.h"
 
-class PhysicsHandler : public Ref,public b2ContactListener
+class PhysicsHandler : public Ref,public b2ContactListener,public b2QueryCallback
 {
 public:
     PhysicsHandler();
@@ -33,6 +33,8 @@ public:
     virtual void EndContact(b2Contact* contact);
     virtual void PreSolve(b2Contact* contact,const b2Manifold* oldManifold);
     virtual void PostSolve(b2Contact* contact,const b2ContactImpulse* impulse);
+    
+    virtual bool ReportFixture(b2Fixture* fixture);
     
     void CollideWithFlame(ItemModel* item,ItemModel* plantHead);
     void CollideWithCicada(ItemModel* item,ItemModel* plantHead);

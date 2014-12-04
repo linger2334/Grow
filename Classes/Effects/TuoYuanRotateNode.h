@@ -44,6 +44,8 @@ public:
     float  getOneCycleTime(){return _config.a;}
     void   setOneCycleTime(float value){_config.a = value;}
     
+    Vec2   getContorlPosition(){return  _config.centerPosition;}
+    void   setContorlPosition(Vec2 pt){_config.centerPosition = pt;}
     void   changeClockwise(){_config.moveInAnticlockwise = _config.moveInAnticlockwise == true ? false : true;}
     
     void   setClockwise(bool isclockwise)
@@ -54,6 +56,13 @@ public:
     Vec2   getNowTimeTargetPosition()
     {
         return getTargetPositionByTime(_timeNow/_timeByOneCycle);
+    }
+    Vec2   getNowTimeTargetPositionInWorld()
+    {
+        Vec2 pt = getTargetPositionByTime(_timeNow/_timeByOneCycle);
+        auto p = this->getParent();
+        if(p)pt = p->convertToWorldSpace(pt);
+        return pt;
     }
     inline Vec2 getTargetPositionByTime(float t)
     {

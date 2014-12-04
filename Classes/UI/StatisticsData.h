@@ -24,6 +24,7 @@ public:
     
     void initData();
     void saveData();
+    void saveBothFiles();
     void checkNewFlowerUnlock();
     void moveDown(float y);
     void update(float dt);
@@ -41,8 +42,6 @@ public:
     int collectionVolume;
     
 protected:
-    void saveBothFiles();
-    
     time_t startTime;
     int levelid;
     float moveDownDistance;

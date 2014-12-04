@@ -18,9 +18,11 @@ public:
     static ScreenLoading* createScene(int levelNum);
     bool init(int levelNum);
     
+    virtual  void onEnterTransitionDidFinish();
     void loadingCallback(Texture2D* texture);
 protected:
     ProgressTimer* _progressBar;
+    int _levelNum;
 };
 
 #endif /* defined(__Grow_UI__ScreenLoading__) */

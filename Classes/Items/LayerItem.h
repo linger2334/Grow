@@ -26,6 +26,7 @@ public:
     
     void loadAllItemsAndBodys();
     void loadItemsAndBodys(float height);
+    void invertStatusInCurrentScreen();
     
     inline std::list<ItemModel*>& getRocks(){ return _rocks;}
     inline std::list<ItemModel*>& getPolygons() { return _polygons;}

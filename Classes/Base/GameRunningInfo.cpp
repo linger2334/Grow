@@ -23,7 +23,7 @@ void GameRunningInfo::resetGameRunningInfo()
 {
     _isGameStart = false;
     _isGamePause = false;
-    _gamePassHeight = 0;
+   // _gamePassHeight = 0;
     _isGameEnd = false;
 }
 

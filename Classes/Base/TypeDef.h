@@ -157,9 +157,7 @@ public:
 };
 enum
 {
-    TypeBorderLine = 111,
-    TypeStone   = 101,
-    
+    TypeBorderLine = 120,
 };
 
 enum SceneGameChildZorder

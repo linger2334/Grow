@@ -4,6 +4,7 @@
 #include "GameRuntime.h"
 #include "GameManager.h"
 #include "LevelsMenu.h"
+#include "StatisticsData.h"
 USING_NS_CC;
 
 
@@ -27,11 +28,15 @@ bool AppDelegate::applicationDidFinishLaunching() {
         glview->setDesignResolutionSize(768, 1024, ResolutionPolicy::FIXED_HEIGHT);
     }
     
+    GameRuntime::getInstance()->initGameRuntimeInfo();
     GameManager::getInstance()->initGameManagerInfo();
+    GameRunningInfo::getInstance()->initGameRunningInfo();
+    
     director->setDisplayStats(false);
 
     director->setAnimationInterval(1.0 / 60);
     auto menu = LevelsMenu::createScene();
+    
     director->runWithScene(menu);
 
     return true;
@@ -40,7 +45,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
 // This function will be called when the app is inactive. When comes a phone call,it's be invoked too
 void AppDelegate::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
-
+    if (StatisticsData::isHasRunningLayer()) {
+        StatisticsData::getRunningLayer()->saveData();
+        StatisticsData::getRunningLayer()->saveBothFiles();
+    }
 }
 
 // this function will be called when the app is active again

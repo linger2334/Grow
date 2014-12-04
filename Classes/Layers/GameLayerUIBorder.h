@@ -7,13 +7,7 @@ class GameLayerRollImage;
 class GameLayerUIBorder : public GameLayerBase ,public GameLayerHelper<GameLayerUIBorder>
 {
 public:
-    virtual ~GameLayerUIBorder()
-    {
-//        for(auto i: bodys)
-//        {
-//            if(i) GamePhysicalWorld::getInstance()->getBox2dWorld()->DestroyBody(i);
-//        }
-    }
+
     CREATE_FUNC(GameLayerUIBorder);
     
     virtual bool init();
@@ -21,10 +15,11 @@ public:
     virtual bool releaseGameInfo();
     virtual void moveDown(float yLen);
     virtual void addUIBorderBody();
-    
+    virtual void update(float dt);
     GameLayerRollImage*             _borderLeftLayer;
     GameLayerRollImage*             _borderRightLayer;
     b2Body* bodys[2];
+    b2Body* _testBody;
 };
 
 #endif /* defined(__Grow_Beta_01__GameLayerUIBorder__) */

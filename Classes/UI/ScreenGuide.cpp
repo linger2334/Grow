@@ -59,3 +59,13 @@ void ScreenGuide::onExit()
     Layer::onExit();
     
 }
+
+void ScreenGuide::guideProcess(GuideInfo &guidePhase)
+{
+    
+}
+
+void ScreenGuide::onNextStep()
+{
+    
+}

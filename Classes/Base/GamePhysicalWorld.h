@@ -10,12 +10,12 @@ class GamePhysicalWorld :public Singleton<GamePhysicalWorld>
 {
 public:
     GamePhysicalWorld();
-    ~GamePhysicalWorld();
     void  initBox2dWorld();
     void  DestoryBox2dWorld();
     
     virtual void update(float dt);
-    float rayCastTest(Vec2 start,Vec2 end,std::function<bool(ItemModel*)> testCall);
+    float rayCastTest(Vec2 start,Vec2 end,std::function<bool(ItemModel*)> testCall,ItemModel** out = nullptr);
+
     float rayCastTestByType(Vec2 start,Vec2 end,unsigned char ctype);
     bool isInStone(Vec2);
     bool isInExcavatePolygon(Vec2 point);
@@ -44,6 +44,7 @@ public:
     Vec2 _orign;
     bool _crash;
     std::function<bool(ItemModel*)> _testCall;
+    ItemModel* _outItem;
 };
 
 #endif /* defined(__Grow_Demo_test__GamePhysicalWorld__) */

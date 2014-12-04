@@ -10,6 +10,12 @@ bool  GameLayerRollImage::init()
     _itemIsFlippedx = false;
     return true;
 }
+bool  GameLayerRollImage::releaseGameInfo()
+{
+    _clearImages();
+    CC_SAFE_RELEASE_NULL(_imageTexture);
+    return true;
+}
 void  GameLayerRollImage::moveDown(float yLen)
 {
     for (auto i : _imageList) {
@@ -45,7 +51,7 @@ void   GameLayerRollImage::setImage(const std::string& imageName)
 void   GameLayerRollImage::setImage(Texture2D* imageTexture)
 {
     if (!imageTexture) return;
-    CC_SAFE_RELEASE(_imageTexture);
+    CC_SAFE_RELEASE_NULL(_imageTexture);
     _imageTexture = imageTexture;
     _imageTexture->retain();
 }
@@ -70,9 +76,10 @@ void GameLayerRollImage::_LayoutImage(Sprite* sprite,float y)
 void  GameLayerRollImage::_clearImages()
 {
     for (auto i : _imageList) {
-        _imageList.remove(i);
         i->removeFromParent();
+       // _imageList.remove(i);
     }
+    _imageList.clear();
 }
 
 void   GameLayerRollImage::autoAddImage()

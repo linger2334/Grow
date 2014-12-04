@@ -57,12 +57,6 @@ enum Item_Type{
     Rock_Trape
 };
 
-enum
-{
-    TypeDirtLine = 111,
-};
-
-
 #define IMAGE_FLAME_BLUE "Flame_Blue.png"
 #define IMAGE_FLAME_ORANGE "Flame_Orange.png"
 #define IMAGE_FLAME_VIOLET "Flame_Violet.png"
@@ -89,7 +83,6 @@ enum
 #define IMAGE_ROCK_OVOID "Rock_Ovoid"
 #define IMAGE_ROCK_RECT "Rock_Rect"
 #define IMAGE_ROCK_TRAPE "Rock_Trape"
-
 
 #define IMAGE_EDITOR_ADDITEM_NORMAL "addItem_normal.png"
 #define IMAGE_EDITOR_ADDITEM_SELECTED "addItem_addItem_selected.png"

@@ -44,7 +44,7 @@ public:
     };
     virtual ~GameLayerPlant()
     {
-//        removeHeadBodys();
+
     }
     virtual bool    init();
 //    virtual const   std::type_info& getType();
@@ -81,6 +81,8 @@ public:
     virtual int     getPlantAdormsInHeightRangeByIndex(int index,float start, float end,PlantAdormList* list = nullptr);
     virtual void    createHeadB2Body(int index);
     virtual void    updateHeadB2Body(int index);
+    
+    virtual int     getPlantIndexByPlantHeadBodyType(unsigned char type);
     
     virtual void    removeHeadBodys();
     std::vector<PlantInfo> _plants;

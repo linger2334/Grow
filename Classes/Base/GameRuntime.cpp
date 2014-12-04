@@ -12,7 +12,7 @@ void  GameRuntime::initGameRuntimeInfo()
     this->setMapDirtMaskGridSize(Size(size.width/8,(size.height/8)+1));
     this->setTouchClearGridRadius(6);
     this->setPlantCPListUnitHeight(4);
-    this->setPlantVerticesUnitHeight(2);
+    this->setPlantVerticesUnitHeight(1);
     this->setPlantRayCrashMinLength(4);
     
     Vec2 left(0,0);

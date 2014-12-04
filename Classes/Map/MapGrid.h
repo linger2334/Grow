@@ -47,16 +47,16 @@ public:
         }
     }
  //////////////////////////////////////////////////////////////////
-    const unsigned char&   getValueForGridCell(const GridCell& gridCell)const
+    const unsigned char   getValueForGridCell(const GridCell& gridCell)const
     {
         return getValue(gridCell._x,gridCell._y);
     }
     
-    const unsigned char&   getValue(int x,int y)const
+    const unsigned char   getValue(int x,int y)const
     {
         return _gridData[x + y*_gridWidth];
     }
-    const unsigned char&   getValueCheckRange(int x,int y)const
+    const unsigned char   getValueCheckRange(int x,int y)const
     {
         if(isOutMapGrid(x,y))return 0;
         

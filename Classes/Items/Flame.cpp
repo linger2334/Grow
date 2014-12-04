@@ -10,7 +10,6 @@
 #include "GameManager.h"
 #include "GB2ShapeCache-x.h"
 #include "LayerItem.h"
-#include "LayerLight.h"
 #include "GameRunningInfo.h"
 #include "StatisticsData.h"
 

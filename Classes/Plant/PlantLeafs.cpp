@@ -12,8 +12,8 @@ void PlantLeafListBase::addLeafNodeToEnd(Sprite* node,float height,bool isLeft)
 void PlantLeafListBase::updateLeafsHeight(float height)
 {
     auto ip = _leafList.begin();
-    auto end = _leafList.end();
-    while (ip!=end) {
+  //  auto end = _leafList.end();
+    while (ip!=_leafList.end()) {
         ip->_heightInPlant += height;
         ip++;
     }

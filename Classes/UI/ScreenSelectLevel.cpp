@@ -12,6 +12,7 @@
 #include "AchievementUi.h"
 #include "GameManager.h"
 #include "GameShaders.h"
+#include "LevelManager.h"
 using namespace cocos2d::ui;
 
 void MyPageView::handleReleaseLogic(Touch *touch)
@@ -125,17 +126,10 @@ void ScreenSelectLevel::addPageView()
                     }
                     auto manager =  GameManager::getInstance();
                     int id = manager->getPauseGameSceneLevel();
-                    if (id != index+1) {
-                        if(manager->isHasRunningGame())
-                        {
-                            manager->resetGameContext();
-                            manager->releaseGameScene();
-                        }
-                        manager->navigationToGameScene(index+1);
-                    }
-                    if (id == index + 1) {
-                        manager->navigationToPasueGameScene();
-                    }
+                    LevelManager::getInstance()->selectLevel(index+1);
+                    manager->releaseGameScene();
+                    auto scene = ScreenLoading::createScene(index+1);
+                    manager->navigationTo(scene);
                     break;
                 }
                     default:

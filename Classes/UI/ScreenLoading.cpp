@@ -44,11 +44,7 @@ bool ScreenLoading::init(int levelNum)
         _progressBar->setPosition(VisibleSize.width/2, VisibleSize.height/4);
         addChild(_progressBar);
 
-        ActionInterval* progressTo = ProgressTo::create(1, 100);
-        CallFunc* callBack = CallFunc::create([&](){
-            GameManager::getInstance()->navigationToGameScene();
-        });
-        _progressBar->runAction(Sequence::create(progressTo,callBack, NULL));
+        _levelNum = levelNum;
         
         return true;
     }
@@ -56,16 +52,32 @@ bool ScreenLoading::init(int levelNum)
     return false;
 }
 
+void ScreenLoading::onEnterTransitionDidFinish()
+{
+    Scene::onEnterTransitionDidFinish();
+    int levelNum = _levelNum;
+    ActionInterval* progressTo = ProgressTo::create(1, 100);
+    CallFunc* callBack = CallFunc::create([=](){
+        auto manager =  GameManager::getInstance();
+        manager->navigationToGameScene();
+        //        int id = manager->getPauseGameSceneLevel();
+        //        if (id != levelNum) {
+        //            if(manager->isHasRunningGame())
+        //            {
+        //                manager->releaseGameScene();
+        //            }
+        //            manager->navigationToGameScene(levelNum);
+        //        }
+        //        if (id == levelNum) {
+        //            manager->navigationToPasueGameScene();
+        //        }
+    });
+    _progressBar->runAction(Sequence::create(progressTo,callBack, NULL));
+}
+
 void ScreenLoading::loadingCallback(cocos2d::Texture2D *texture)
 {
-    static int loadNum = 0;
-    loadNum++;
-    
-    _progressBar->setPercentage(loadNum/50.0*100);
-    if(_progressBar->getPercentage() == 100.0){
-        loadNum = 0;
-        GameManager::getInstance()->navigationToGameScene();
-    }
+
 }
 
 

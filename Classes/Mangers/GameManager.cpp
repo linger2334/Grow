@@ -1,5 +1,4 @@
 #include "GameManager.h"
-#include "GameRuntime.h"
 #include "GameSceneMain.h"
 #include "GameRunningInfo.h"
 #include "LevelManager.h"
@@ -11,37 +10,13 @@
 #include "ScreenSelectLevel.h"
 #include "ScreenStart.h"
 #include "AchievementUi.h"
-
-GameManager::Recycle GameManager::garbo;
-
-GameManager::GameManager():_world(nullptr),_levelEditor(nullptr)
+void  GameManager::clearRunningInfo()
 {
-    GameRuntime::getInstance()->initGameRuntimeInfo();
-    GameRunningInfo::getInstance()->initGameRunningInfo();
+    GameRunningInfo::getInstance()->removeAllGameLayer();
+    GameRunningConfig::getInstance()->clearInfo();
+    safeReleaseFileHandler();
 }
 
-GameManager::~GameManager()
-{
-    GameRuntime::getInstance()->DestorySingletonObject();
-    GameRunningInfo::getInstance()->DestorySingletonObject();
-}
-
-void GameManager::resetGameContext()
-{
-    LevelManager::getInstance()->releaseLevelInfo();
-    if(_gameScne)
-    {
-//    _gameScne->unscheduleUpdate();
-//    _gameScne->removeAllChildren();
-    }
-    GameRunningInfo::getInstance()->resetGameRunningInfo();
-    GameRunningManager::getInstance()->_passHeight = 0;
-}
-
-LayerItem* GameManager::getLayerLight()
-{
-    return LayerItem::getRunningLayer();
-}
 void  GameManager::navigationTo(int id)
 {
     Scene* scene = nullptr;
@@ -80,35 +55,37 @@ void   GameManager::releaseGameScene()
         _gameScne = nullptr;
     }
 }
-void  GameManager::releaseRunningGameInfo()
-{
-    LevelManager::getInstance()->releaseLevelInfo();
-    if(_gameScne)
-        _gameScne->removeAllChildren();
-}
 void  GameManager::navigationToGameScene()
 {
     if (!_gameScne) {
         _gameScne = GameSceneMain::createScene();
-        LevelManager::getInstance()->initGameScene();
+//        _gameScne->retain();
     }
     navigationTo(_gameScne);
 }
 void  GameManager::navigationToGameScene(int level)
 {
     if (!_gameScne) {
-        LevelManager::getInstance()->selectLevel(level);
         _gameLevel = level;
     }
     navigationToGameScene();
 }
-
+void  GameManager::createNewGameScene()
+{
+    releaseGameScene();
+     _gameLevel = 0;
+}
 void  GameManager::navigationTo(Scene* scene)
 {
-    Director::getInstance()->replaceScene(scene);
+    Director::getInstance()->replaceScene(TransitionFade::create(0.2, scene, Color3B(0,0,0)));
 }
-
-void  GameManager::initGameRunningInfo()
+void GameManager::pauseGame()
 {
-    GameRunningManager::getInstance()->_passHeight = 0;
+    GameRunningInfo::getInstance()->pauseGame();
+    CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+}
+void GameManager::reStartGame()
+{
+    GameRunningInfo::getInstance()->reStartGame();
+    CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
 }

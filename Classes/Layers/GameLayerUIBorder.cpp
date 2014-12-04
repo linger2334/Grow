@@ -4,17 +4,29 @@
 bool GameLayerUIBorder::init()
 {
     GameLayerBase::init();
+    setContentSize(GameRuntime::getInstance()->getVisibleSize());
+    UIHelper::layout(this, UIHelper::ViwePoistionType::BottomCenter);
     _borderLeftLayer = nullptr;
     _borderRightLayer = nullptr;
+    _testBody = nullptr;
+    for (auto& i: bodys) {
+        i = nullptr;
+    }
     return true;
 }
 bool GameLayerUIBorder::releaseGameInfo()
 {
-    removeAllChildren();
+    //removeAllChildren();
 
     _borderLeftLayer = nullptr;
     _borderRightLayer = nullptr;
-    
+    for(auto& i: bodys)
+    {
+        if(i) GamePhysicalWorld::getInstance()->getBox2dWorld()->DestroyBody(i);
+        i = nullptr;
+    }
+    if(_testBody)GamePhysicalWorld::getInstance()->getBox2dWorld()->DestroyBody(_testBody);
+    _testBody = nullptr;
     return true;
 }
 bool GameLayerUIBorder::initGameInfo()
@@ -86,6 +98,35 @@ void   GameLayerUIBorder::addUIBorderBody()
         fixtureDef.filter.groupIndex = -1;
         bodys[i]->CreateFixture(&fixtureDef);
     }
+    
+//    {
+//        b2BodyDef bodyDef;
+//        bodyDef.type = b2_staticBody;
+//        bodyDef.position = b2Vec2(0,0);
+//        bodyDef.userData =&_sUIBorderBody;
+//        _testBody= GamePhysicalWorld::getInstance()->getBox2dWorld()->CreateBody(&bodyDef);
+//        b2FixtureDef fixtureDef;
+//        b2ChainShape b2line;
+//        b2Vec2 verts[2]=
+//        {
+//            b2Vec2(0,0),
+//            b2Vec2( win.width /PTM_RATIO,0)
+//        };
+//        b2line.CreateChain(verts,2);
+//        fixtureDef.shape = &b2line;
+//        fixtureDef.filter.groupIndex = -1;
+//        _testBody->CreateFixture(&fixtureDef);
+//    }
+}
+#include "GameLayerPlant.h"
+void  GameLayerUIBorder::update(float dt)
+{
+   float y = GameLayerPlant::getRunningLayer()->getPlantMinTopHeightInView();
+    
+//    b2Vec2 pt = _testBody->GetPosition();
+//    b2Vec2 ptnew = b2Vec2(pt.x,(y-30)/PTM_RATIO);
+//    _testBody->SetTransform(ptnew, 0);
+    
 }
 void GameLayerUIBorder::moveDown(float yLen)
 {

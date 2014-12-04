@@ -5,16 +5,8 @@
 #include "GameLayerMap.h"
 GamePhysicalWorld::GamePhysicalWorld()
 {
-    
     initBox2dWorld();
 }
-
-GamePhysicalWorld::~GamePhysicalWorld()
-{
-    DestoryBox2dWorld();
-    CC_SAFE_RELEASE(_physicsHandler);
-}
-
 void GamePhysicalWorld::update(float dt)
 {
     _physicsHandler->update(dt);
@@ -32,10 +24,10 @@ void  GamePhysicalWorld::initBox2dWorld()
     b2Vec2 gravity = b2Vec2(0.0,-0.0);
     auto _b2World = new b2World(gravity);
     _physicsHandler = PhysicsHandler::create(_b2World);
-    CC_SAFE_RETAIN(_physicsHandler);
+    _physicsHandler->retain();
 
     _b2World->SetAllowSleeping(false);
-    _b2World->SetContinuousPhysics(true);
+    //_b2World->SetContinuousPhysics(true);
    // _b2World->SetContactListener(nullptr);
     _b2World->SetContactListener(_physicsHandler);
     setBox2dWorld(_b2World);
@@ -88,11 +80,12 @@ void  GamePhysicalWorld::DestoryBox2dWorld()
     {
         delete _debugDraw;
         _debugDraw = nullptr;
-    }
-
+    }  
+    CC_SAFE_RELEASE(_physicsHandler);
+  //  CC_SAFE_RELEASE(GameManager::getInstance()->_fileHandler);
 }
 
-float GamePhysicalWorld::rayCastTest(Vec2 start,Vec2 end,std::function<bool(ItemModel*)> testCall)
+float GamePhysicalWorld::rayCastTest(Vec2 start,Vec2 end,std::function<bool(ItemModel*)> testCall,ItemModel** out)
 {
     
     float ret = -1;
@@ -102,6 +95,7 @@ float GamePhysicalWorld::rayCastTest(Vec2 start,Vec2 end,std::function<bool(Item
     _b2World->RayCast(&call, b2Vec2(start.x/PTM_RATIO,start.y/PTM_RATIO), b2Vec2(end.x/PTM_RATIO,end.y/PTM_RATIO));
     if (call._crash) {
         ret = call._crashLen;
+        if(out)*out = call._outItem;
     }
     return ret;
 }
@@ -178,8 +172,8 @@ float32 RayCastCallback::ReportFixture(b2Fixture* fixture, const b2Vec2& point, 
         float len  = _orign.getDistance(Vec2(crashPoint.x*PTM_RATIO,crashPoint.y*PTM_RATIO));
         if (len < _crashLen ||_crashLen < 0) {
             _crashLen = len;
+            _outItem = type;
         }
-      
         _crash = true;
     }
     return  -1;

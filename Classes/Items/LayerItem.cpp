@@ -260,6 +260,14 @@ void LayerItem::loadPolygons(bool needload,float height)
     
 }
 
+void LayerItem::invertStatusInCurrentScreen()
+{
+    b2AABB currentScreen;
+    currentScreen.lowerBound = cc_to_b2Vec(0,0);
+    currentScreen.upperBound = cc_to_b2Vec(VisibleSize.width, VisibleSize.height);
+    GameManager::getInstance()->getBox2dWorld()->QueryAABB(GameManager::getInstance()->getPhysicsHandler(), currentScreen);
+}
+
 void LayerItem::update(float dt)
 {
     //所有的道具（除了特殊道具）

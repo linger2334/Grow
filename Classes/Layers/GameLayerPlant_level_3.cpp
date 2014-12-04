@@ -49,12 +49,14 @@ bool  GameLayerPlant_Level_3::initGameInfo()
     GameLayerPlant::initGameInfo();
     std::vector<GamePlantConfig>& config = GameRunningConfig::getInstance()->_plantConfigs;
     int id = addOnePlant();
+      createHeadB2Body(id);
     auto* list = &(config[0]._radiusList);
     list->addOneContext(0, 0);
     list->addOneContext(60, 25);
     list->addOneContext(400, 80);
     
     int id1 = addOnePlant();
+      createHeadB2Body(id1);
     auto* list1 = &(config[1]._radiusList);
     list1->addOneContext(0, 0);
     list1->addOneContext(60, 25);
@@ -101,6 +103,12 @@ PlantGrowContext  GameLayerPlant_Level_3::getPlantGrowContextAngle(PlantNode* pl
     auto rayCall = [](ItemModel* item)->bool
     {
         return item->isStone();
+        //       int type = item->getType();
+        
+        //        if (type >= 101 && type<= 107) {
+        //            return true;
+        //        }
+        //        return  false;
     };
     float lenLeft = physicalWorld->rayCastTest(cpo,cpo + Vec2(-100,0),rayCall);
     float lenRight = physicalWorld->rayCastTest(cpo,cpo + Vec2(100,0),rayCall);
@@ -118,7 +126,13 @@ PlantGrowContext  GameLayerPlant_Level_3::getPlantGrowContextAngle(PlantNode* pl
             angleRight =  GROW_MIN_ANGLE_CRASH_STONE_RIGHT;
         }
     }
-    
+    Size size= GameRuntime::getInstance()->getVisibleSize();
+    auto vhead = plant->getHeadPositionInWorld();
+    if (vhead.y < size.height * 0.4||
+        vhead.y > size.height * 0.8) {
+        angleLeft = -70 ;
+        angleRight = 70 ;
+    }
     if( angle < angleLeft)
     {
         grow._left = false;
@@ -128,8 +142,8 @@ PlantGrowContext  GameLayerPlant_Level_3::getPlantGrowContextAngle(PlantNode* pl
         grow._right = false;
     }
     
-    float  x = plant->getHeadPositionInWorld().x;
-    Size size= GameRuntime::getInstance()->getVisibleSize();
+    float x = vhead.x;
+    
     float len =140;
     if (size.width<768) {
         len = 100;
@@ -150,18 +164,26 @@ PlantGrowContext  GameLayerPlant_Level_3::getPlantGrowContextAngle(PlantNode* pl
 
 float  GameLayerPlant_Level_3::growByIndex(float length,int index)
 {
-    
+
+    PlantNode* node = getPlantNodeByIndex(index);
+    int extIndex = index == 0 ?1 : 0;
     float retLen = -1;
+    
+    PlantNode* node2 = getPlantNodeByIndex(extIndex);
+    Vec2 pt = node->getHeadPositionInWorld();
+    Vec2 pt2 = node2->getHeadPositionInWorld();
+    if (pt.y - pt2.y > 300) {
+        return  0;
+    }
     
     FaceDirection turnDir;
     bool isGrow = false;
     
-    //    std::list<unsigned char> types ={101,102,103,104,105,106,107,111};
     auto call = [](ItemModel* item)
     {
         return item->isStone()||item->isDirtLine();
     };
-    PlantNode* node = getPlantNodeByIndex(index);
+
     
     std::vector<FaceDirection> growDirList;
     PlantHelper::getGroeDirList(node,growDirList);
@@ -169,24 +191,32 @@ float  GameLayerPlant_Level_3::growByIndex(float length,int index)
     
     auto minGrow = PlantHelper::getGrowContextGrowNextUnitLengthTestMap(node);
     auto minGrowStone = PlantHelper::getGrowContextGrowNextUnitLengthTestStone(node);
-    minGrowStone = PlantGrowContext(true);
     auto  growAngle = getPlantGrowContextAngle(node);
     PlantHelper::PlantGrowContext min;
     min._left = minGrow._left && minGrowStone._left && growAngle._left;
     min._right = minGrow._right && minGrowStone._right && growAngle._right;
     // min  = growAngle;
     float angle = node->getHeadAnalge();
-    auto con = PlantHelper::getPlantRayCastContext(node,80                                                            ,angle, 10,8,call);
+    auto con = PlantHelper::getPlantRayCastContext(node,80,angle, 10,6,call);
+   // bool isnearBorder = isNeadBorder(node);
     
-    for (int i = 0 ; i < 5; i++)
+    PlantHelper::PlantGrowContext  grow(true);
+    float al = con.getLeftCrashLengthAve();
+    float ar = con.getRightCrashLengthAve();
+    if (al < 30)  grow._left = false;
+    if (ar < 30)  grow._right = false;
+    
+    //  if (!isnearBorder) {
+    for (int i = 0 ; i < 2 ; i++)
     {
-        PlantHelper::PlantGrowContext  grow(true);
-        
-        float ml = con.getMinCrashLengthLeft();
-        float mr = con.getMinCrashLenghtRight();
-        float len = 80-(i+1)*10;
-        if (ml > 0&& ml < len)grow._left = false;
-        if (mr > 0&& mr < len)grow._right = false;
+        if (i<1&&min.allIsValue(true)) {
+            if((fabs(angle)<90&& grow.allIsValue(true))||
+               (fabs(angle)>=90&&al<80&& ar<80))
+            {
+                grow._left = (ar - al) > 5  ? false : true;
+                grow._right = (al - ar) > 5? false : true;
+            }
+        }
         for(auto& ip : growDirList)
         {
             if(min.isCanGrowByDir(ip)&& grow.isCanGrowByDir(ip))
@@ -198,39 +228,13 @@ float  GameLayerPlant_Level_3::growByIndex(float length,int index)
         }
         if (isGrow )break;
     }
-    if(!isGrow)//&&
-        //con._leftCrashLen.front()>30&&
-        // con._rightCrashLen.front()>30)
-    {
-        PlantHelper::PlantGrowContext  grow(true);
-        float al = con.getLeftCrashLengthAve();
-        float ar = con.getRightCrashLengthAve();
-        if (al < 30)  grow._left = false;
-        if (ar < 30)  grow._right = false;
-        if(grow.allIsValue(true))
-        {
-            grow._left = al < ar ? false : true;
-            grow._right = ar < al ? false : true;
-            
-        }
-        for(auto& ip : growDirList)
-        {
-            if(min.isCanGrowByDir(ip)&& grow.isCanGrowByDir(ip))
-            {
-                isGrow = true;
-                turnDir = ip;
-                break ;
-            }
-        }
-    }
     
     if (isGrow)
     {
-        
         retLen =node->grow(turnDir, length);
-        
     }
     return retLen;
+
 }
 float   GameLayerPlant_Level_3::reGrowByIndex(float length,int index)
 {

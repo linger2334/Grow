@@ -6,17 +6,9 @@ class GameLayerRollImage : public GameLayerBase
 {
 public:
     CREATE_FUNC(GameLayerRollImage);
-    virtual ~GameLayerRollImage()
-    {
-        CC_SAFE_RELEASE_NULL(_imageTexture);
-    }
     virtual  bool  init();
     virtual  void  moveDown(float yLen) override;
-    virtual  bool  releaseGameInfo()
-    {
-        _clearImages();
-        return true;
-    }
+    virtual  bool  releaseGameInfo();
     void  setImage(const std::string& imageName);
     void  setImage(Texture2D* imageTexture);
     

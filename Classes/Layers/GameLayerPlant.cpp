@@ -16,6 +16,7 @@ bool GameLayerPlant::init()
 
 bool    GameLayerPlant::releaseGameInfo()
 {
+     removeHeadBodys();
     for (auto& i: _plants) {
         i._plant->removeFromParent();
     }
@@ -71,26 +72,25 @@ void GameLayerPlant::moveDown(float yLen)
     }
     
 }
-#include "LayerLight.h"
 void GameLayerPlant::update(float dt)
 {
-    if(GameManager::getInstance()->isPause()|| GameRunningInfo::getInstance()->getIsGameEnd())return;
+    if(!GameRunningInfo::getInstance()->isPlantNeedGrow())return;
     int count = this->getPlantCount();
-
     for(int i = 0; i < count;i++)
     {
-//        if(isReGrowByIndex(i))
-//        {
-//            if(getPlantInfoByIndex(i)._reGrowNeedLength<=0)
-//                setPlantStateByIndex(PlantStateGrowIng,i);
-//        }
-        float growLenZ = 0;
+        PlantNode* node = getPlantNodeByIndex(i);
+        float topHeight = node->getTopCpHeight();
         float growLen;
+        float growSpeed = 0;
         if(!isReGrowByIndex(i))
-        growLen= getGrowSpeedByIndex(i) * dt;
-        else  growLen= getReGrowSpeedByIndex(i)*dt;
-        
+        growSpeed= getGrowSpeedByIndex(i) ;
+        else  growSpeed= getReGrowSpeedByIndex(i);
+        if (growSpeed <= 0) {
+            continue;
+        }
+        growLen = growSpeed *dt;
         bool isGrow = false;
+        
         while (growLen > 0) {
             if(!isReGrowByIndex(i))
                 growLen = growByIndex(growLen,i);
@@ -98,12 +98,13 @@ void GameLayerPlant::update(float dt)
             {
                 growLen = reGrowByIndex( growLen,i);
             }
-            if (growLen >=0) {
-                isGrow = true;
-            }
-            growLenZ += growLen;
         }
-        
+        float nowTopHeight = node->getTopCpHeight();
+        float step = nowTopHeight - topHeight;
+        if(fabs(step) > 0)
+        {
+            isGrow = true;
+        }
         if(isGrow)
         {
             updateHeadB2Body(i);
@@ -113,22 +114,14 @@ void GameLayerPlant::update(float dt)
                 if (effectLayer) {
                     effectLayer->removeBorderLight();
                 }
-                
             }
-            
-            if (isReGrowByIndex(i)) {
-                    // changePlantHeightByIndex(-growLenZ, i);
-                    getPlantInfoByIndex(i)._reGrowNeedLength -= growLenZ;
-                }
-                else
-                {
-             // changePlantHeightByIndex(growLenZ, i);
-              PlantNode* node = getPlantNodeByIndex(i);
-              float height = node->getTopContorlPoint()._height;
-              if (height > 512) {
-                node->subTextureHeight(512);
-                changePlantHeightByIndex(-512,i);
-               // LayerLight::getRunningLayer()->subLightHeight(512);
+            changePlantHeightByIndex(step, i);
+            if (step > 0) {
+                    PlantNode* node = getPlantNodeByIndex(i);
+                    float height = node->getTopContorlPoint()._height;
+                    if (height > 512) {
+                    node->subTextureHeight(512);
+                    changePlantHeightByIndex(-512,i);
                 }
             }
         }
@@ -145,7 +138,6 @@ void GameLayerPlant::update(float dt)
               
             }
         }
-        
     }
 }
 float   GameLayerPlant::getGrowSpeedByIndex(int index)
@@ -264,7 +256,7 @@ int GameLayerPlant::addOnePlant()
     info._reGrowSpeed = treGrowSpeed;
     info._state = first._state;
     _plants.push_back(info);
-    createHeadB2Body(id);
+  
     return id;
 }
 
@@ -289,11 +281,13 @@ int GameLayerPlant::getPlantAdormsInHeightRangeByIndex(int index,float start, fl
 }
 void  GameLayerPlant::updateHeadB2Body(int index)
 {
+    auto& info =getPlantInfoByIndex(index);
+    if (!info._headBody)return;
     auto node = getPlantNodeByIndex(index);
     Vec2 cp = node->getHeadPositionInWorld();
     b2Vec2 newpt(cp.x/PTM_RATIO,cp.y/PTM_RATIO);
     float angle = node->getHeadAnalge();
-    auto& info =getPlantInfoByIndex(index);
+ 
     info._headBody->SetTransform(newpt, -CC_DEGREES_TO_RADIANS( angle));
 }
  void   GameLayerPlant::removeHeadBodys()
@@ -314,6 +308,9 @@ void  GameLayerPlant::createHeadB2Body(int index)
     info._headItem = new ItemModel();
     info._headItem->setType(99-index);
     bodyDef.userData = info._headItem;
+   // bodyDef.linearDamping = 0.3;
+    bodyDef.angle = 0;
+    //bodyDef.linearVelocity = b2Vec2()
     b2Body* body = GamePhysicalWorld::getInstance()->getBox2dWorld()->CreateBody(&bodyDef);
     b2FixtureDef fixtureDef;
     b2PolygonShape shape;
@@ -323,14 +320,26 @@ void  GameLayerPlant::createHeadB2Body(int index)
         b2Vec2(-len,-len),
         b2Vec2(len ,-len)
     };
+    b2Vec2 vec1[16];
+    float step = 360.0f / 16.0f;
+    for (int i = 0; i < 16; i++) {
+        Vec2 pt =  MathHelper::getRotatePosition(Vec2(0,0), Vec2(0,len), i * step);
+        vec1[i] = b2Vec2(pt.x,pt.y);
+    }
     //b2CircleShape circleShape;
     //circleShape.m_radius = 70/PTM_RATIO;
-    shape.Set(vec, 3);
+    
+    shape.Set(vec1, 16);
     fixtureDef.shape = &shape;
     fixtureDef.density = 10.0;
     fixtureDef.filter.categoryBits = 0x01;
     fixtureDef.filter.maskBits = 0x02;
     fixtureDef.restitution = 0.1;
     body->CreateFixture(&fixtureDef);
+
     info._headBody = body;
+}
+int  GameLayerPlant::getPlantIndexByPlantHeadBodyType(unsigned char type)
+{
+    return  99 - type;
 }

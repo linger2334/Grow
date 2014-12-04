@@ -2,7 +2,7 @@
 #include "TypeBase.h"
 #include "GameHeaders.h"
 #include "PathListHelper.hpp"
-//#define OUT_GROW_DIR 1
+#define OUT_GROW_DIR 1
 
 
 static float PathGetLength(const ContorlPointV2& p1,const ContorlPointV2& p2)
@@ -170,23 +170,66 @@ float  PlantNode::grow(FaceDirection dir,float height)
 
 float  PlantNode::reGrow(float height)
 {
+  
     auto ip = _cpList.rbegin();
-    auto end =_cpList.rend();
-    if (ip == end) return -1;
+  //  auto end =_cpList.rend();
+    if (ip == _cpList.rend()) return -1;
     float topHeight = ip->_height;
-    while (ip!=end) {
-        ip++;
+    float tlen = 0;
+    float angle = 0;
+    while (ip!=_cpList.rend()) {
+        angle = ip->_angle;
         float theight =ip->_height ;
         if (topHeight - theight < height) {
             _cpList.pop_back();
         }
         else break;
+        ip++;
     }
-    auto back =_cpList.back();
-    _preContorlPoint._point = back._point;
-    _preContorlPoint._height = back._height;
-    _preContorlPoint._angle = back._angle;
-    _preContorlPoint._zPosition = back._zPosition;
+
+   
+    float heighttemp = 0;
+    if (ip !=_cpList.rend() ) {
+        heighttemp = (topHeight - ip->_height)-height;
+        angle = ip->_angle;
+    }
+    ContorlPointV2 cp;
+    
+    if (ip != _cpList.rend()) {
+        float heightStep = heighttemp;
+        float nextangle = angle -  ip->_angle;
+        FaceDirection dir;
+        if (nextangle < -0.0003) {
+            dir = FaceLeft;
+        }
+        else if (nextangle > 0.0003)
+        {
+            dir = FaceRight;
+        }
+        else dir = FaceTop;
+        ContorlPointV2 tempcp;
+        switch (dir) {
+            case FaceTop:
+                tempcp =   ip->getNextContorlPointV2(heightStep);
+                break;
+            case FaceLeft:
+                tempcp =   ip->getNextContorlPointV2ByRotateLeft(heightStep);
+                break;
+            case FaceRight:
+                tempcp =   ip->getNextContorlPointV2ByRotateRight(heightStep);
+                break;
+            default:
+                break;
+        }
+        _cpList.push_back(tempcp);
+        cp = *ip;
+    }
+    else cp = _cpList.back();
+    
+    _preContorlPoint._point = cp._point;
+    _preContorlPoint._height = cp._height;
+    _preContorlPoint._angle = cp._angle;
+    _preContorlPoint._zPosition = cp._zPosition;
     _isDirt = true;
     return 0;
 //    auto cp =*_cpList.rbegin();
@@ -249,10 +292,39 @@ ContorlPointV2 PlantNode::getNextContorlPointInWorld(float len,FaceDirection dir
     cp._point =convertToWorldSpace(cp._point);
     return  cp;
 }
-
+ContorlPointV2 PlantNode::getNextContorlPointByTopCp(float len,FaceDirection dir)
+{
+    ContorlPointV2 cp;
+    auto topCp  = getTopCP();
+    switch (dir) {
+        case  FaceDirection::FaceLeft:
+            cp = topCp.getNextContorlPointV2ByRotateLeft(len);
+            break;
+        case  FaceDirection::FaceRight:
+            cp = topCp.getNextContorlPointV2ByRotateRight(len);
+            break;
+        case  FaceDirection::FaceTop:
+            cp = topCp.getNextContorlPointV2(len);
+            break;
+        default:
+            assert(0);
+            break;
+    }
+    return cp;
+}
+ContorlPointV2 PlantNode::getNextContorlPointByTopCpInWorld(float len,FaceDirection dir)
+{
+    ContorlPointV2 cp =getNextContorlPointByTopCp(len,dir);
+    cp._point =convertToWorldSpace(cp._point);
+    return  cp;
+}
 Vec2 PlantNode::getHeadNextPosition(float len,FaceDirection dir)
 {
     return getNextContorlPoint(len,dir)._point;
+}
+Vec2 PlantNode::getHeadNextPositionByTopCP(float len,FaceDirection dir)
+{
+    return getNextContorlPointByTopCp(len, dir)._point;
 }
 
 
@@ -444,5 +516,24 @@ void PlantNode::updateVertices()
         //pre = &_cpList[i];
     }
     
+}
+
+float PlantNode::getLengthByCP(ContorlPointV2& cp,bool isTop )
+{
+    auto ip = _cpList.rbegin();
+    auto end = _cpList.rend();
+    
+    auto pre =ip;
+    float len = 0;
+    while (ip!=end) {
+        if (ip->_height < cp._height) {
+            break;
+        }
+        len += pre->_point.distance(ip->_point);
+        pre = ip;
+        ip++;
+    }
+    len += pre->_point.distance(cp._point);
+    return len;
 }
 

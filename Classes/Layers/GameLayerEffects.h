@@ -11,14 +11,29 @@ public:
     virtual bool initGameInfo();
     virtual bool releaseGameInfo();
     virtual void moveDown(float yLen);
-    void removeBorderLight();
+   // void removeBorderLight();
     void removeLightBorderByCell(int tag);
-    void showCrashBorderLight();
+ //   void showCrashBorderLight();
     
+    void showCrashBorderLight(int plantIndex = 0);
+    void removeBorderLight(int plantIndex = 0);
     void onChangeCellCall(const GridCell& cell);
     bool   _islightRuningAction;
     SpriteBatchNode*    _crashBorderBatch;
-    std::map<GridCell,Sprite*> _crashBorderLightMap;
+    std::vector<SpriteBatchNode*>  _crashBorderBatchs;
+    std::vector<bool>           _islightRuningActions;
+  //  std::map<GridCell,Sprite*> _crashBorderLightMap;
     int     _gridWidth;
+};
+
+class GameLayerShowLandmark: public GameLayerBase,public GameLayerHelper<GameLayerShowLandmark>
+{
+public:
+    CREATE_FUNC(GameLayerShowLandmark);
+    virtual bool initGameInfo();
+    virtual void moveDown(float yLen);
+    void addLandmark(int n,Vec2 pt);
+    void autoAddLandmark();
+    std::map<int,Label*> _landmarks;
 };
 #endif /* defined(__Grow_Beta_01__GameLayerEffects__) */

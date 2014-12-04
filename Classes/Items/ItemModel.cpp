@@ -134,6 +134,7 @@ bool ItemModel::init(Item &item)
         setAnimatedOn(item.isAnimated);
         setTriggerTime(item.triggerTime);
         setCascadeOpacityEnabled(true);
+        setStatus(ItemStatus::NormalStatus);
         
         if (isAnimated) {
             animationGroupCount = item.animationInfos.size();

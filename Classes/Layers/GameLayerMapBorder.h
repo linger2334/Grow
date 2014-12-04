@@ -11,11 +11,7 @@ class GameLayerMapBorder : public GameLayerBase,public GameLayerHelper<GameLayer
 {
 public:
     CREATE_FUNC(GameLayerMapBorder);
-    virtual ~GameLayerMapBorder()
-    {
-        if(_quads)_quads->release();
-//        removeAllBorderLineInBox2dWorld();
-    }
+
     virtual void  moveDown(float y);
     
     virtual bool init();

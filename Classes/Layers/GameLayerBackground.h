@@ -10,6 +10,10 @@ class GameLayerBackground : public GameLayerRollImage,public GameLayerHelper<Gam
 public:
     CREATE_FUNC(GameLayerBackground);
     virtual bool init(){return GameLayerRollImage::init();}
+    virtual bool releaseGameInfo()
+    {
+       return  GameLayerRollImage::releaseGameInfo();
+    }
     virtual void moveDown(float yLen)
     {
         GameLayerRollImage::moveDown(yLen);

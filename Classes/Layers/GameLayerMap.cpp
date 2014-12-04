@@ -12,6 +12,11 @@ class GameLayerMapDirt: public GameLayerRollImage,public GameLayerHelper<GameLay
 public:
     CREATE_FUNC(GameLayerMapDirt);
     virtual bool init(){return GameLayerRollImage::init();}
+    virtual bool releaseGameInfo()
+    {
+        GameLayerRollImage::releaseGameInfo();
+        return true;
+    }
     virtual void moveDown(float yLen)
     {
         GameLayerRollImage::moveDown(yLen);
@@ -67,7 +72,7 @@ bool GameLayerMap::initGameInfo()
     _layerdirt = GameLayerMapDirt::create();
 
     _layerdirt->initGameInfo();
-
+  //  _layerdirt->retain();
 
     _layerBorder = GameLayerMapBorder::create();
     _layerBorder->_mapGrid = &_mapGrid;
@@ -78,17 +83,33 @@ bool GameLayerMap::initGameInfo()
     addChild(maskOnlyColor);
     addChild(_layerdirt);
     addChild(_layerBorder,-1);
-    auto listener = EventListenerTouchOneByOne::create();  //创建一个单点触摸事件 :EventListenerTouchAllAtOnce 为多点
-    //设置这些事件的的回调方法
-    listener->onTouchBegan = CC_CALLBACK_2(GameLayerMap::onTouchBegan, this);
-    listener->onTouchEnded = CC_CALLBACK_2(GameLayerMap::onTouchEnded, this);
-    listener->onTouchMoved = CC_CALLBACK_2(GameLayerMap::onTouchMoved, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this); //事件调度器
+    _listener = nullptr;
+
+    //事件调度器
 
     _isFirstMoveTouch = false;
     updateConfigs();
 
     return true;
+}
+void GameLayerMap::startListener()
+{
+    if(!_listener)
+    {
+       _listener = EventListenerTouchOneByOne::create();
+       _listener->onTouchBegan = CC_CALLBACK_2(GameLayerMap::onTouchBegan, this);
+       _listener->onTouchEnded = CC_CALLBACK_2(GameLayerMap::onTouchEnded, this);
+       _listener->onTouchMoved = CC_CALLBACK_2(GameLayerMap::onTouchMoved, this);
+      _eventDispatcher->addEventListenerWithSceneGraphPriority(_listener, this);
+    }
+}
+void GameLayerMap::stopListener()
+{
+    if(_listener)
+    {
+        _eventDispatcher->removeEventListener(_listener);
+        _listener = nullptr;
+    }
 }
 void GameLayerMap::updateConfigs()
 {

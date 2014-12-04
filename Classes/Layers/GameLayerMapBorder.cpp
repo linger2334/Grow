@@ -3,6 +3,8 @@
 #include "common.h"
 #include "GameHeaders.h"
 #include "ItemModel.h"
+#include "GameLayerPlant.h"
+#include "GameLayerMap.h"
 #define TABLE(T) _sQuadVecMap.insert(std::make_pair(T,quad))
 
 std::map<BorderMaskType,QuadVec> GameLayerMapBorder::_sQuadVecMap;
@@ -279,7 +281,7 @@ bool GameLayerMapBorder::init()
     GameLayerMapBorder::initQuadMap();
    // if(!_itemBorderLine) = new ItemModel();
     static ItemModel itemline;
-    itemline.setType(111);
+    itemline.setType(TypeBorderLine);
     _itemBorderLine =&itemline;
    // _itemBorderLine->setType(111);
     return true;
@@ -295,6 +297,8 @@ bool GameLayerMapBorder::initGameInfo()
 }
 bool GameLayerMapBorder::releaseGameInfo()
 {
+    if(_quads)_quads->release();
+    _quads = nullptr;
     this->removeAllBorderLineInBox2dWorld();
     _borderMap.clear();
     CC_SAFE_RELEASE_NULL(_quads);
@@ -309,9 +313,13 @@ void GameLayerMapBorder::updateBox2dBorderLine()
     {
         _isBox2DBorderLineDirt = false;
         removeAllBorderLineInBox2dWorld();
-        std::set<BorderCell> oldSet;;
+        std::set<BorderCell> oldSet;
+        float y = GameLayerPlant::getRunningLayer()->getPlantMinTopHeightInView()-70;
+        auto cellmin= _mapGrid->getMapGridCellByPosition(0, y);
+        int minY =cellmin._y;
         for(auto& i:_borderMap)
         {
+            if(i.first._y < minY)continue;
             oldSet.insert(BorderCell(i.first,i.second._maskType));
         }
         
@@ -466,7 +474,7 @@ void GameLayerMapBorder::linkBorderLines(std::list<GameBorderLine>& lineList)
     if(lineList.size()<2)return;
     GameBorderLine line;
     auto ip = lineList.begin();
-    auto end = lineList.end();
+   // auto end = lineList.end();
     while (ip!=lineList.end()) {
         auto now = ip;
         ip++;
@@ -624,6 +632,7 @@ b2Vec2 GameLayerMapBorder::getB2Vec2ByCell(const BorderCell& cell)
     auto pt =Vec2(vec.rb.x,vec.rb.y)+ p;
     return  b2Vec2(pt.x / PTM_RATIO, pt.y / PTM_RATIO);
 }
+
 void GameLayerMapBorder::addBorderLineToBox2dWorld( GameBorderLine& line)
 {
     
@@ -641,11 +650,12 @@ void GameLayerMapBorder::addBorderLineToBox2dWorld( GameBorderLine& line)
     b2Vec2* verts = new b2Vec2[line._borderList.size()];
     int index =0 ;
     float count = 0;
-    
+ 
     memset(verts,0,sizeof(line._borderList.size()*sizeof(b2Vec2)));
     BorderDirection oldDir = BorderDirection::RightBottom_In;
     float index2 = -1;
     for (auto i : line._borderList ) {
+      //  if(i._cell._y <minY)continue;
         auto dir = i.getNextBorderDirection();
         if ((index2+1 < size-1)&&oldDir==dir){count++; continue;}
         index2++;
@@ -653,15 +663,22 @@ void GameLayerMapBorder::addBorderLineToBox2dWorld( GameBorderLine& line)
         auto v = getB2Vec2ByCell(i);
         if(index > 0 && ((int)v.x == (int)verts[index-1].x)&&
            ((int)v.y == (int)verts[index-1].y)){count++;continue;}
+        count = 0;
         verts[index] =v;
         index++;
-        count = 0;
+       
     }
-//    if (count > 0) {
-//        verts[index-1] =  getB2Vec2ByCell(line._borderList.back());
-//    }
+    if (count > 1) {
+        auto v=  getB2Vec2ByCell(line._borderList.back());
+        if(index > 0 && ((int)v.x != (int)verts[index-1].x)&&
+           ((int)v.y != (int)verts[index-1].y))
+        {
+            verts[index] = v;
+            index++;
+        }
+    }
 //    else
-      //  index -= 1;
+//        index -= 1;
     if(index > 2)
     {
         b2ChainShape b2line;

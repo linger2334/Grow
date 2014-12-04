@@ -41,7 +41,7 @@ namespace PathListHelper
         float     _preReverseLength;
         typename _ListType::iterator _preIterator;
         typename _ListType::reverse_iterator _preReverseIterator;
-        PathGetLengthCall PathGetLength;
+        PathGetLengthCall  PathGetLength;
         PathGetPointCall   PathGetPoint;
         
     };
@@ -56,10 +56,10 @@ namespace PathListHelper
         float tempLength = 0.0f;
         if (isBeginToEnd) {
             auto ip = _list->begin();
-            if (_preIterator!=_list->end() && _preLength < length )
-            {
-                ip = _preIterator;
-            }
+//            if (_preIterator!=_list->end() && _preLength < length )
+//            {
+//                ip = _preIterator;
+//            }
             auto end = _list->end();
             _Type* old = &(*ip);
             ip++;
@@ -86,10 +86,10 @@ namespace PathListHelper
        else
        {
            auto ip = _list->rbegin();
-           if (_preReverseIterator!=_list->rend() && _preLength < length )
-           {
-               ip = _preReverseIterator;
-           }
+//           if (_preReverseIterator!=_list->rend() && _preReverseLength < length )
+//           {
+//               ip = _preReverseIterator;
+//           }
            auto end = _list->rend();
            _Type* old = &(*ip);
            ip++;

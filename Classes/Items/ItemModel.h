@@ -16,6 +16,12 @@
 #include "TypeBase.h"
 #include "GameRunningManager.h"
 
+enum class ItemStatus{
+    InvertStatus = -1,
+    NormalStatus = 1
+    
+};
+
 class ItemModel :public TypeBase, public Sprite
 {
 public:
@@ -37,8 +43,18 @@ public:
         return (_type==Flame_Blue || _type==Flame_Orange || _type==Flame_Violet || _type==Flame_White || _type==Gear_Button || _type==Decoration_Pendant);
     }
     std::function<void(ItemModel*)> _collisionCallBack;
+    CC_SYNTHESIZE(ItemStatus, status, Status)
     
     virtual void update(float dt);
+    /////add by wzf
+    virtual Vec2 getRemovePositionInWorld()
+    {
+        auto parent = this->getParent();
+        Vec2  pt = this->getPosition();
+        if(parent)pt = parent->convertToWorldSpace(pt);
+        return pt;
+    }
+    
 protected:
     friend class LayerItem;
     b2Body* _body;

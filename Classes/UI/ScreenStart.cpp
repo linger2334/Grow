@@ -146,16 +146,5 @@ bool ScreenStart::init()
 
 void ScreenStart::initBeginnerInfo()
 {
-    UserDefault* userDefault = UserDefault::getInstance();
-    if (userDefault->getBoolForKey("isBeginner", true)) {
-        userDefault->setIntegerForKey("collectedWhite", 0);
-        userDefault->setIntegerForKey("collectedBlue", 0);
-        userDefault->setIntegerForKey("collectedViolet", 0);
-        userDefault->setIntegerForKey("collectedOrange", 0);
-        userDefault->setIntegerForKey("growHeight", 0);
-        userDefault->setIntegerForKey("seedlingIndex", 0);
-        userDefault->setIntegerForKey("accumulativeTime_Natural", 0);
-        
-    }
     
 }

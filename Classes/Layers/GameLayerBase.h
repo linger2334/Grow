@@ -8,7 +8,6 @@ class GameLayerBase : public  Node
 public:
     virtual ~GameLayerBase()
     {
-       // GameRunningInfo::getInstance()->removeGameLayer(getType().name());
     }
     virtual bool  init();
     virtual bool  initGameInfo(){return true;}

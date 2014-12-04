@@ -6,6 +6,27 @@
 #include "GameLayerMap.h"
 namespace PlantHelper
 {
+    float checkDetFromPointAToPointBWithPointC(Vec2 pointA,Vec2 pointB,Vec2 pointC)
+    {
+        float result = pointA.x*pointB.y + pointB.x*pointC.y + pointC.x*pointA.y - pointA.y*pointB.x -pointB.y*pointC.x - pointC.y*pointA.x;
+        return result;
+    }
+    bool PlantRayCastContext::isHasAnyCrashLenght(float lenght)
+    {
+        auto call = [=](const float& var)
+        {
+            return var > 0 && var <= lenght;
+        };
+        auto ip = std::find_if(_leftCrashLen.begin(), _leftCrashLen.end(), call);
+        if (ip!=_leftCrashLen.end()) {
+            return true;
+        }
+        auto ip2 = std::find_if(_rightCrashLen.begin(), _rightCrashLen.end(), call);
+        if (ip2!=_rightCrashLen.end()) {
+            return true;
+        }
+        return false;
+    }
     float PlantRayCastContext::getLeftCrashLengthAve()
     {
         float ave= 0.0f;
@@ -67,7 +88,89 @@ namespace PlantHelper
         }
         return n;
     }
+    //////
     
+    int PlantRayCastContext1::getCrashLengthCountByAngleRange(float length,int startAngle,int endAngle)
+    {
+        return std::count_if(_crashLengths.begin(),_crashLengths.end(),[=](PlantRayCastContext1::Context& value)->bool
+                             {
+                                 return value._angle>=startAngle &&
+                                        value._angle<=endAngle &&
+                                        value._length <= length;
+                             });
+    }
+    float PlantRayCastContext1::getMinCrashLengthByAngleRange(int startAngle,int endAngle)
+    {
+        float n =-1;
+        for (auto i:_crashLengths) {
+            if (i._angle< startAngle || i._angle > endAngle)continue;
+            if(n>=0)
+            {
+                n = std::min(n, i._length);
+            }
+            else n = i._length;
+        }
+        return n;
+    }
+    float PlantRayCastContext1::getCrashLengthAveByAngleRange(int startAngle,int endAngle)
+    {
+        float ave = 0.0f;
+        int count = 0;
+        for (auto i: _crashLengths ) {
+            if (i._angle< startAngle || i._angle > endAngle)continue;
+            ave += i._length;
+            count ++;
+        }
+        if (count == 0) {
+            return 0.0f;
+        }
+        ave /= count;
+        return ave;
+    }
+    bool PlantRayCastContext1::isHasAnyCrashLenght(float lenght)
+    {
+        auto call = [=](const PlantRayCastContext1::Context& var)
+        {
+            return var._length > 0 && var._length <= lenght;
+        };
+        auto ip = std::find_if(_crashLengths.begin(), _crashLengths.end(), call);
+        if (ip!=_crashLengths.end()) {
+            return true;
+        }
+        return false;
+    }
+    //////
+    
+    
+    
+    
+    PlantRayCastContext getPlantRayCastContext(Vec2 pt,float testLength,float startAnalg,float stepAngle,int count,std::function<bool(ItemModel*)> call)
+    {
+        PlantRayCastContext retContext;
+        auto physicalWorld = GamePhysicalWorld::getInstance();
+        
+        Vec2 pto = pt;
+        // Vec2 pto = plant->getHeadUnitPositionInWorld();
+        Vec2 ptTop = pto + Vec2(0,testLength);
+        
+        for (int i = 1; i <= count; i++) {
+            float angle =  i*stepAngle;
+            Vec2 ptLeft = MathHelper::getRotatePosition(pto, ptTop,startAnalg+ -angle);
+            Vec2 ptRight = MathHelper::getRotatePosition(pto, ptTop,startAnalg+ angle);
+            float left = physicalWorld->rayCastTest(pto, ptLeft,call);
+            if (left < 0) {
+                left = testLength +3;
+            }
+            float right = physicalWorld->rayCastTest(pto, ptRight,call);
+            if (right < 0) {
+                right = testLength +3;
+            }
+            retContext._leftCrashLen.push_back(left);
+            retContext._rightCrashLen.push_back(right);
+        }
+        
+        return retContext;
+    }
 
         PlantRayCastContext getPlantRayCastContext(PlantNode* plant,float testLength,float startAnalg,float stepAngle,int count,std::function<bool(ItemModel*)> call)
     {
@@ -96,6 +199,30 @@ namespace PlantHelper
         
         return retContext;
     }
+    
+    PlantRayCastContext1 getPlantRayCastContext1(Vec2 pt,float testLength,float startAnalg,float stepAngle,int count,std::function<bool(ItemModel*)> call)
+    {
+        PlantRayCastContext1 retContext;
+        //retContext._crashLengths.resize(count);
+        
+        auto physicalWorld = GamePhysicalWorld::getInstance();
+        
+        Vec2 pto = pt;
+        Vec2 ptTop = pto + Vec2(0,testLength);
+        for (int i = 1; i <= count; i++) {
+            int angle =  startAnalg+i*stepAngle;
+            Vec2 ptTest = MathHelper::getRotatePosition(pto, ptTop,angle);
+            float lenght = physicalWorld->rayCastTest(pto, ptTest,call);
+            if (lenght < 0) {
+                lenght = testLength;
+            }
+            PlantRayCastContext1::Context context;
+            context._angle = angle;
+            context._length =lenght;
+            retContext._crashLengths.push_back(context);
+        }
+        return std::move(retContext);
+    }
     PlantRayCastContext getPlantRayCastContext(PlantNode* plant,float testLength, const std::list<unsigned char>& _typeList,float startAnalg,float stepAngle,int count)
     {
          auto call = [&](ItemModel* item)->bool
@@ -112,30 +239,38 @@ namespace PlantHelper
     }
     PlantGrowContext getGrowContextGrowNextUnitLength(PlantNode* plant)
     {
-        
+        return PlantGrowContext(true);
     }
     PlantGrowContext getGrowContextMap(PlantNode* plant)
     {
-        
+        return PlantGrowContext(true);
     }
     PlantGrowContext getGrowContextStone(PlantNode* plant)
     {
-        
+        return PlantGrowContext(true);
     }
     PlantGrowContext getGrowContextAngle(PlantNode* plant)
     {
-        
+        return PlantGrowContext(true);
     }
     PlantGrowContext getRayCastGrowContext(PlantNode* plant)
     {
-        
+        return PlantGrowContext(true);
     }
     void getGroeDirList(PlantNode* plant, std::vector<FaceDirection>& dirList)
     {
      //   int listtype = 0;
         float angle =plant->getHeadAnalge();
 //        listtype = angle                                                                                                                                                                                                       <= 0 ? 1:2;
-        if (angle <= 0) {
+        //中心优先
+//        Vec2 pt0 = plant->getHeadUnitPositionInWorld();
+//        Vec2 pt1 = plant->getNextContorlPointInWorld(40, FaceTop)._point;
+//        Size vsize = GameRuntime::getInstance()->getVisibleSize();
+//        Vec2 pt2 = Vec2(vsize.width*0.5,vsize.height);
+//        float  ret = checkDetFromPointAToPointBWithPointC(pt0,pt1,pt2);
+
+        
+        if (angle<=0) {
             dirList.push_back(FaceDirection::FaceRight);
             dirList.push_back(FaceDirection::FaceLeft);
         }
@@ -144,107 +279,50 @@ namespace PlantHelper
             dirList.push_back(FaceDirection::FaceLeft);
             dirList.push_back(FaceDirection::FaceRight);
         }
+        dirList.push_back(FaceDirection::FaceTop);
     }
     PlantGrowContext getGrowContextGrowNextUnitLengthTestMap(PlantNode* plant)
     {
         PlantGrowContext grow(true);
-        Vec2 pto = plant->getHeadUnitPositionInWorld();
-        
-   
-        Vec2 left = plant->getHeadNextPositionInWorld(4, FaceLeft);
-        Vec2 right =  plant->getHeadNextPositionInWorld(4, FaceRight);
-//        auto  mapLayer = GameLayerMap::getRunningLayer();
-//      //  auto physicalWorld = GamePhysicalWorld::getInstance();
-//        if (mapLayer->PointIsInDirtOrOutMapGrid(left))grow._left = false;
-//        if (mapLayer->PointIsInDirtOrOutMapGrid(right))grow._right
-//            = false;
-//        return grow;
-        
+        Vec2 pto = plant->getHeadPositionInWorld();
 
+        Vec2 left = plant->getHeadNextPositionByTopCPInWorld(4, FaceLeft);
+        Vec2 right =  plant->getHeadNextPositionByTopCPInWorld(4, FaceRight);
+        Vec2 top = plant->getHeadNextPositionByTopCPInWorld(4, FaceTop);
+    
         auto physicalWorld = GamePhysicalWorld::getInstance();
-        
-        auto callGrid = [](ItemModel* item)->bool
+
+        auto callGrid = [=](ItemModel* item)->bool
         {
-            return item->getType() == TypeBorderLine||
-                   item->isStone();
+            return item->getType() == TypeBorderLine;
         };
         float leftLen = physicalWorld->rayCastTest(pto, left,callGrid);
         if (leftLen >= 0)grow._left = false;
         float rightLen = physicalWorld->rayCastTest(pto, right,callGrid);
         if (rightLen >= 0)grow._right = false;
+        
+        float topLen = physicalWorld->rayCastTest(pto, top,callGrid);
+        if (topLen >= 0)grow._top  = false;
         return grow;
     }
     PlantGrowContext getGrowContextGrowNextUnitLengthTestStone(PlantNode* plant)
     {
         PlantGrowContext grow(true);
         Vec2 pto = plant->getHeadPositionInWorld();
-        float len = GameRuntime::getInstance()->getPlantRayCrashMinLength();
-        auto cpHead = plant->getTopContorlPoint();
-        float angle = cpHead._angle ;
-        cpHead._angle -= 40;
-        Vec2 left =cpHead.getPositionTopByLength(30);//   plant->getHeadNextPosition(16, FaceLeft);
-        cpHead._angle = angle +40;
-        Vec2 right =cpHead.getPositionTopByLength(30);/// plant->getHeadNextPosition(16, FaceRight);
-        //        Vec2 left = plant->getNextGrowUnitLengthPositionInWorld(FaceLeft);
-        //        Vec2 right = plant->getNextGrowUnitLengthPositionInWorld(FaceRight);
-        auto physicalWorld = GamePhysicalWorld::getInstance();
-        if (pto == left || pto ==right) {
-            int n=0;
-        }
-        auto callGrid = [](ItemModel* item)->bool
+        
+        Vec2 left = plant->getHeadNextPositionByTopCPInWorld(4, FaceLeft);
+        Vec2 right =  plant->getHeadNextPositionByTopCPInWorld(4, FaceRight);
+        
+        auto callGrid = [=](ItemModel* item)->bool
         {
             return item->isStone();
-            //            unsigned char type = item->getType();
-            //            return type >=101 && type<=105;
         };
-        float leftLen = physicalWorld->rayCastTest(pto, left,callGrid);
-        if (leftLen >= 0)grow._left = true;
-        float rightLen = physicalWorld->rayCastTest(pto, right,callGrid);
-        if (rightLen >= 0)grow._right = true;
-        if(!grow._left&&!grow._right)
-        {
-            if (angle < 0) {
-                grow._right = true;
-            }
-            else
-            {
-                grow._left = true;
-            }
-        }
-        return grow;
 
-        
-//        PlantGrowContext grow(true);
-////        float angle = plant->getHeadAnalge();
-////        Vec2 cpo = plant->getHeadPositionInWorld();
-////        auto physicalWorld = GamePhysicalWorld::getInstance();
-////        auto rayCall = [](ItemModel* item)->bool
-////        {
-////            return item->isStone();
-////        };
-////        bool isInStone = PlantHelper::isPlantHeadInStone(plant);
-////        Vec2 testLeft =cpo + Vec2(-40,0);
-////        Vec2 testRight = cpo + Vec2(40,0);
-////        if (!isInStone) {
-////            float lenLeft = physicalWorld->rayCastTest(cpo,testLeft,rayCall);
-////            float lenRight = physicalWorld->rayCastTest(cpo,testRight,rayCall);
-////            if (lenLeft >= 0 && angle <= 0) {
-////                grow._left = false;
-////            }
-////            if (lenRight >= 0 && angle > 0) {
-////                grow._right = false;
-////            }
-////        }
-////        else{
-////            if (angle <= 0 && physicalWorld->isInStone(testLeft) ) {
-////                grow._left = false;
-////            }
-////            if ( angle > 0  && physicalWorld->isInStone(testRight)) {
-////                grow._right = false;
-////            }
-////        }
-////    
-//        return grow;
+        auto conLeft = PlantHelper::getPlantRayCastContext(left,100,0, 10,18,callGrid);
+        auto conRight = PlantHelper::getPlantRayCastContext(right,100,0, 10,18,callGrid);
+        if (conLeft.isHasAnyCrashLenght(30))grow._left = false;
+        if (conRight.isHasAnyCrashLenght(30))grow._right = false;
+        return grow;
     }
     bool isPlantHeadInStone(PlantNode* plant)
     {

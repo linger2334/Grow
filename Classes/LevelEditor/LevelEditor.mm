@@ -12,6 +12,7 @@
 #include "Item.h"
 #include "GameManager.h"
 #include <Box2D/Common/b2Settings.h>
+#include "LevelManager.h"
 #import "CCEAGLView.h"
 #import "AppController.h"
 #import "PopupViewController.h"
@@ -53,7 +54,12 @@ bool LevelEditor::init()
 
 void LevelEditor::playLevel()
 {
-    GameManager::getInstance()->navigationToGameScene();
+    
+    LevelManager::getInstance()->selectLevel(5);
+    auto manager = GameManager::getInstance();
+//    manager->releaseGameScene();
+    manager->_fileHandler->_items.sort(OrderByHeight);
+    manager->navigationToGameScene();
 }
 
 void LevelEditor::drawLoadedLevel()
@@ -803,7 +809,7 @@ void LevelEditor::drawLoadedLevel()
     {
         [self saveItemInformationInMemory:itemView];
     }
-    _fileHandler->_items.sort(OrderByHeight);
+   // _fileHandler->_items.sort(OrderByHeight);
     
     int result = [_scrollView savePolygonsInfoInMemory];
     if (result!=0) {

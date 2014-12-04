@@ -8,7 +8,7 @@ static const char* _sPathBackground_level_1_3 = "background_4.jpg";
 static const char* _sPathBackground_level_1_4 = "background_bw_1.jpg";
 static const char* _sPathBackground_level_1_5 = "";
 
-static const char* _sPathBackground_level_2_1 = "";
+static const char* _sPathBackground_level_2_1 = "background_2_1.jpg";
 static const char* _sPathBackground_level_2_2 = "";
 static const char* _sPathBackground_level_2_3 = "";
 static const char* _sPathBackground_level_2_4 = "";
@@ -29,12 +29,12 @@ static const char* _sPathBackground_level_4_5 = "";
 
 
 static const char* _sPathMapDirt_level_1_1 = "dirt_1.jpg";
-static const char* _sPathMapDirt_level_1_2 = "dirt512_3.png";
+static const char* _sPathMapDirt_level_1_2 = "dirt_2.png";
 static const char* _sPathMapDirt_level_1_3 = "dirt_bw_1.jpg";
 static const char* _sPathMapDirt_level_1_4 = "dirt_4.jpg";
 static const char* _sPathMapDirt_level_1_5 = "dirt512_3.png";
 
-static const char* _sPathMapDirt_level_2_1 = "dirt512_3.png";
+static const char* _sPathMapDirt_level_2_1 = "dirt_2.jpg";
 static const char* _sPathMapDirt_level_2_2 = "dirt512_3.png";
 static const char* _sPathMapDirt_level_2_3 = "dirt512_3.png";
 static const char* _sPathMapDirt_level_2_4 = "dirt512_3.png";
@@ -59,7 +59,7 @@ static const char* _sPathMapBorder_level_1_3 = "border_bw_3.png";
 static const char* _sPathMapBorder_level_1_4 = "border_bw_4.png";
 static const char* _sPathMapBorder_level_1_5 = "border_2.png";
 
-static const char* _sPathMapBorder_level_2_1 = "border_2.png";
+static const char* _sPathMapBorder_level_2_1 = "border_2_1.png";
 static const char* _sPathMapBorder_level_2_2 = "border_2.png";
 static const char* _sPathMapBorder_level_2_3 = "border_2.png";
 static const char* _sPathMapBorder_level_2_4 = "border_2.png";

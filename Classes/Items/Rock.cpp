@@ -73,7 +73,8 @@ bool Rock::init(Item& item)
             default:
                 return false;
         }
-        filename += StringUtils::format("%d.png",LevelManager::getInstance()->_levelId);
+//        filename += StringUtils::format("%d.png",LevelManager::getInstance()->_levelId);
+        filename += "1.png";
         setTexture(filename);
         if (_type == Rock_MountInv) {
             setRotation3D(Vec3(0, 180, 0));

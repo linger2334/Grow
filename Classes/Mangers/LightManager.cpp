@@ -1,16 +1,5 @@
 #include "LightManager.h"
-#include "common.h"
-
-struct  LightContext
+int GameLightManager::getLightCountByPlantIndex()
 {
-public:
-
-};
-
-class GameLightManager : public Singleton<GameLightManager>
-{
-public:
-    GameLightManager()
-    {
-    }
-};
+    return 0;
+}

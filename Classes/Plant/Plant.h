@@ -49,10 +49,20 @@ public:
     }
     
     ContorlPointV2& getTopContorlPoint(){return *(_cpList.rbegin());}
+    ContorlPointV2& getTopUintContorlPoint(){return _preContorlPoint;}
+    ContorlPointV2& getTopUintContorlPointInWorld()
+    {
+        auto cp = getTopUintContorlPoint();
+        cp._point = this->convertToWorldSpace(cp._point);
+        return cp;
+    }
     float getHeadAnalge(){return  _cpList.rbegin()->_angle;}
 
     Vec2 getHeadNextPosition(float len,FaceDirection dir);
     Vec2 getHeadNextPositionInWorld(float len,FaceDirection dir){return this->convertToWorldSpace(getHeadNextPosition(len,dir));}
+    
+    Vec2 getHeadNextPositionByTopCP(float len,FaceDirection dir);
+    Vec2 getHeadNextPositionByTopCPInWorld(float len,FaceDirection dir){return this->convertToWorldSpace(getHeadNextPositionByTopCP(len,dir));}
     
   //      Vec2 getHeadPosition(){return _preContorlPoint._point;}
     Vec2 getHeadUnitPosition(){return _preContorlPoint._point;}
@@ -67,13 +77,18 @@ public:
     
     ContorlPointV2 getNextContorlPoint(float len,FaceDirection dir);
     ContorlPointV2 getNextContorlPointInWorld(float len,FaceDirection dir);
-
+    
+    ContorlPointV2 getNextContorlPointByTopCp(float len,FaceDirection dir);
+    ContorlPointV2 getNextContorlPointByTopCpInWorld(float len,FaceDirection dir);
     
     ContorlPointV2 getContorlPointByHeight(float height,bool isTop=true);
     ContorlPointV2 getContorlPointByHeightInWorld(float height,bool isTop=true);
     
     Vec2  getPositionByHeight(float,bool isTop=true);
     Vec2  getPositionByHeightInWorld(float,bool isTop=true);
+    
+    float getLengthByCP(ContorlPointV2& cp,bool isTop = true);
+    
     
     float getDefaultRadius(){return _preContorlPoint._radius;}
     void setDefaultRadius(float value){_preContorlPoint._radius = value;}

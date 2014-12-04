@@ -7,7 +7,6 @@
 #include "LevelFileHandler.h"
 #include "PhysicsHandler.h"
 #include "GameRunningInfo.h"
-#include "Box2d/Box2d.h"
 
 class GameSceneMain;
 class LayerItem;
@@ -25,12 +24,9 @@ enum
 class GameManager :public Singleton<GameManager>
 {
 public:
-    GameManager();
-    ~GameManager();
-    
     b2World* getBox2dWorld()
     {
-        return _world;
+        return GamePhysicalWorld::getInstance()->getBox2dWorld();
     }
     PhysicsHandler* getPhysicsHandler()
     {
@@ -43,7 +39,6 @@ public:
         _gameScne = nullptr;
         _gameLevel = 0;
     }
-
     void  navigationTo(int id);
     void  navigationToGameScene(int level);
     void  navigationToGameScene();
@@ -55,24 +50,17 @@ public:
         return _gameScne != nullptr;
     }
     
-    void  releaseRunningGameInfo();
     void  releaseGameScene();
     
-    void resetGameContext();
+    void  createNewGameScene();
     
     int   getPauseGameSceneLevel()
     {
         return _gameLevel;
     }
-    
-    LayerItem* getLayerLight();
-
-    
-    void  initGameRunningInfo();
-    
     bool    isPause(){ return GameRunningInfo::getInstance()->isPause(); }
-    void    pauseGame(){GameRunningInfo::getInstance()->pauseGame();}
-    void    reStartGame(){GameRunningInfo::getInstance()->reStartGame();}
+    void    pauseGame();
+    void    reStartGame();
     
     bool    isGameStop()
     {
@@ -87,31 +75,23 @@ public:
         GameRunningInfo::getInstance()->setIsGameStart(true);
         GameRunningInfo::getInstance()->getGameSceneNode()->scheduleUpdate();
     }
-    LevelFileHandler* _fileHandler;
     
-    Scene* _gameScne;
-    int    _gameLevel;
+    void  safeReleaseFileHandler()
+    {
+        CC_SAFE_RELEASE_NULL(_fileHandler);
+    }
     
-////////////add for leveleditor
+    void  clearRunningInfo();
+    
     LevelEditor* _levelEditor;
     float editor_width;
     float editor_height;
     float editor_contentscale;
-    b2World* _world;
     
-private:
-    class Recycle{
-    public:
-        ~Recycle()
-        {
-            if(_sOneObject){
-                delete _sOneObject;
-                _sOneObject = nullptr;
-            }
-        }
-    };
-    static Recycle garbo;
-//////////////////////////////////
+    std::string _levelFileName;
+    LevelFileHandler* _fileHandler;
+    Scene* _gameScne;
+    int    _gameLevel;
 };
 
 
