@@ -26,6 +26,11 @@ public:
 protected:
     char fileExist[1000];
     int consecutiveNumbers;
+    int sumCount1;
+    int sumCount2;
+    int sumCount3;
+    int sumCount4;
+    
 };
 
 

@@ -54,6 +54,8 @@ public:
     void startListener();
     void stopListener();
     
+    bool isCanTouchRangeCell(const GridCell& cell,int radius);
+    
 public:
     GameLayerMapBorder*   _layerBorder;
     Texture2D*            _textureAlphaMask;

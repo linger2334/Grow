@@ -1,6 +1,7 @@
 #include "GameSceneWin.h"
 #include "GameManager.h"
 #include "ScreenSelectLevel.h"
+#include "LevelManager.h"
 
 using namespace ui;
 
@@ -18,8 +19,14 @@ Scene* GameSceneWin::createScene()
 bool GameSceneWin::init()
 {
     if(Layer::init()){
+        
+        int levelid = LevelManager::getInstance()->_levelId;
+        if (levelid<1 || levelid>4) {
+            GameManager::getInstance()->navigationToGameScene(ScenePageView);
+        }
+        //
         ValueMap levelData = FileUtils::getInstance()->getValueMapFromFile(FileUtils::getInstance()->getWritablePath()+"StatisticsData.plist");
-        ValueMap currentLevelData = levelData.at(StringUtils::format("level%d",GameManager::getInstance()->_gameLevel)).asValueMap();
+        ValueMap currentLevelData = levelData.at(StringUtils::format("level%d",levelid)).asValueMap();
         float defaultScale = VisibleSize.height/DefiniteSize.height;
         //图片相关
         ImageView* background = ImageView::create("UI_WinBackground.jpg");
@@ -132,7 +139,6 @@ bool GameSceneWin::init()
         LinearLayoutParameter* defaultLayoutParameter = LinearLayoutParameter::create();
         defaultLayoutParameter->setGravity(cocos2d::ui::LinearLayoutParameter::LinearGravity::CENTER_HORIZONTAL);
         defaultLayoutParameter->setMargin(cocos2d::ui::Margin(0,10,0,10));
-        log("%f,%f",label_comment1->getContentSize().width,label_comment1->getContentSize().height);
         for (int i = 0; i<42; i++) {
             Layout* placeHolder = Layout::create();
             placeHolder->setContentSize(cocos2d::Size(150,10));

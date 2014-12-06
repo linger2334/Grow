@@ -74,12 +74,12 @@ public:
          _gridData[x + y*_gridWidth]=value;
     }
     
-    const unsigned char&   getValueForGridCellInView(const GridCell& gridCell)const
+    const unsigned char   getValueForGridCellInView(const GridCell& gridCell)const
     {
         return getValue(gridCell._x,gridCell._y);
     }
     
-    const unsigned char&   getValueInView(int x,int y)const
+    const unsigned char   getValueInView(int x,int y)const
     {
         return _gridData[x + (y+_startHeight)*_gridWidth];
     }

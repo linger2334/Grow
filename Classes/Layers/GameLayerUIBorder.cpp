@@ -79,7 +79,7 @@ void   GameLayerUIBorder::addUIBorderBody()
 //        runtime->getGameLayerUIBorderAPRight().x
 //    };
     static ItemModel _sUIBorderBody;
-    _sUIBorderBody.setType(108);
+    _sUIBorderBody.setType(TypeBorderLine);
     for (int i = 0 ; i<2; i++) {
         b2BodyDef bodyDef;
         bodyDef.type = b2_staticBody;

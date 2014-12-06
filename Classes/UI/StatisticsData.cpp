@@ -9,6 +9,7 @@
 #include "StatisticsData.h"
 #include "CocosGUI.h"
 #include "LevelManager.h"
+#include "GameManager.h"
 #include "GameLayerPlant.h"
 #include "Plant.h"
 
@@ -30,8 +31,10 @@ bool StatisticsData::init()
 {
     if(GameLayerBase::init()){
         _userDefault = UserDefault::getInstance();
-        levelid = LevelManager::getInstance()->_levelId - 1;
-        
+        levelid = LevelManager::getInstance()->_levelId;
+#ifdef GROW_LEVELEDITOR
+        levelid = *(GameManager::getInstance()->_fileHandler->_filename.c_str() + strlen("levels/level ")) - ('0' - 0);
+#endif
         initData();
         moveDownDistance = 0;
         plantHeight = 0;
@@ -185,14 +188,15 @@ void StatisticsData::checkNewFlowerUnlock()
         
         ImageView* newFlowerUnlock = ImageView::create("UI_NewFlowerUnlock.png");
         Node* gameSceneNode = GameRunningInfo::getInstance()->getGameSceneNode();
-        newFlowerUnlock->setPosition(Vec2(VisibleSize.width/2,VisibleSize.height+newFlowerUnlock->getBoundingBox().size.height/2));
-        gameSceneNode->addChild(newFlowerUnlock,999);
-        EaseExponentialOut* appear = EaseExponentialOut::create(MoveBy::create(1.5, Vec2(0,-(VisibleSize.height/2+newFlowerUnlock->getBoundingBox().size.height/2))));
-        FadeOut* fadeOut = FadeOut::create(2);
+        newFlowerUnlock->setPosition(Vec2(VisibleSize.width/2,VisibleSize.height/2));
+        newFlowerUnlock->setOpacity(0);
+        FadeIn* appear = FadeIn::create(1);
+        FadeOut* fadeOut = FadeOut::create(1);
         CallFuncN* remove = CallFuncN::create([](Node* node){
             node->removeFromParent();
         });
         newFlowerUnlock->runAction(Sequence::create(appear,fadeOut, remove,NULL));
+        gameSceneNode->addChild(newFlowerUnlock,999);
     }
     
 }

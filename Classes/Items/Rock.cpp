@@ -43,6 +43,9 @@ bool Rock::init(Item& item)
             case Rock_Circle:
                 filename = IMAGE_ROCK_CIRCLE;
                 break;
+            case Rock_Cover:
+                filename = IMAGE_ROCK_COVER;
+                break;
             case Rock_Crinkle:
                 filename = IMAGE_ROCK_CRINKLE;
                 break;
@@ -61,8 +64,20 @@ bool Rock::init(Item& item)
             case Rock_MountInv:
                 filename = IMAGE_ROCK_MOUNT;
                 break;
+            case Rock_Ordinary:
+                filename = IMAGE_ROCK_ORDINARY;
+                break;
             case Rock_Ovoid:
                 filename = IMAGE_ROCK_OVOID;
+                break;
+            case Rock_Pebble:
+                filename = IMAGE_ROCK_PEBBLE;
+                break;
+            case Rock_Pillar:
+                filename = IMAGE_ROCK_PILLAR;
+                break;
+            case Rock_Pocket:
+                filename = IMAGE_ROCK_POCKET;
                 break;
             case Rock_Rect:
                 filename = IMAGE_ROCK_RECT;
@@ -73,8 +88,12 @@ bool Rock::init(Item& item)
             default:
                 return false;
         }
-//        filename += StringUtils::format("%d.png",LevelManager::getInstance()->_levelId);
-        filename += "1.png";
+        
+        int levelId = LevelManager::getInstance()->_levelId;
+#ifdef GROW_LEVELEDITOR
+        levelId = *(GameManager::getInstance()->_fileHandler->_filename.c_str() + strlen("levels/level ")) - ('0' - 0);
+#endif
+        filename += StringUtils::format("%d.png",levelId);
         setTexture(filename);
         if (_type == Rock_MountInv) {
             setRotation3D(Vec3(0, 180, 0));
@@ -106,6 +125,9 @@ void Rock::createBody()
         case Rock_Circle:
             _fixturesCache->addFixturesToBody(_body, "Rock_Circle");
             break;
+        case Rock_Cover:
+            _fixturesCache->addFixturesToBody(_body, "Rock_Cover");
+            break;
         case Rock_Crinkle:
             _fixturesCache->addFixturesToBody(_body, "Rock_Crinkle");
             break;
@@ -124,8 +146,20 @@ void Rock::createBody()
         case Rock_MountInv:
             _fixturesCache->addFixturesToBody(_body, "Rock_MountInv");
             break;
+        case Rock_Ordinary:
+            _fixturesCache->addFixturesToBody(_body, "Rock_Ordinary");
+            break;
         case Rock_Ovoid:
             _fixturesCache->addFixturesToBody(_body, "Rock_Ovoid");
+            break;
+        case Rock_Pebble:
+            _fixturesCache->addFixturesToBody(_body, "Rock_Pebble");
+            break;
+        case Rock_Pillar:
+            _fixturesCache->addFixturesToBody(_body, "Rock_Pillar");
+            break;
+        case Rock_Pocket:
+            _fixturesCache->addFixturesToBody(_body, "Rock_Pocket");
             break;
         case Rock_Rect:
             _fixturesCache->addFixturesToBody(_body, "Rock_Rect");

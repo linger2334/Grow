@@ -46,13 +46,18 @@ enum Item_Type{
     Decoration_Pendant,
     Polygon_,
     Rock_Circle = 101,
+    Rock_Cover,
     Rock_Crinkle,
     Rock_Cross,
     Rock_Dagger,
     Rock_Ellipse,
     Rock_Mount,
     Rock_MountInv,
+    Rock_Ordinary,
     Rock_Ovoid,
+    Rock_Pebble,
+    Rock_Pillar,
+    Rock_Pocket,
     Rock_Rect,
     Rock_Trape
 };
@@ -74,13 +79,18 @@ enum Item_Type{
 #define IMAGE_DECORATION_PENDANT "Decoration_Pendant.png"
 #define IMAGE_POLYGON "Polygon.png"
 #define IMAGE_ROCK_CIRCLE "Rock_Circle"
+#define IMAGE_ROCK_COVER "Rock_Cover"
 #define IMAGE_ROCK_CRINKLE "Rock_Crinkle"
 #define IMAGE_ROCK_CROSS "Rock_Cross"
 #define IMAGE_ROCK_DAGGER "Rock_Dagger"
 #define IMAGE_ROCK_ELLIPSE "Rock_Ellipse"
 #define IMAGE_ROCK_MOUNT "Rock_Mount"
 #define IMAGE_ROCK_MOUNTINV "Rock_MountInv"
+#define IMAGE_ROCK_ORDINARY "Rock_Ordinary"
 #define IMAGE_ROCK_OVOID "Rock_Ovoid"
+#define IMAGE_ROCK_PEBBLE "Rock_Pebble"
+#define IMAGE_ROCK_PILLAR "Rock_Pillar"
+#define IMAGE_ROCK_POCKET "Rock_Pocket"
 #define IMAGE_ROCK_RECT "Rock_Rect"
 #define IMAGE_ROCK_TRAPE "Rock_Trape"
 

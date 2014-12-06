@@ -279,7 +279,7 @@ namespace PlantHelper
             dirList.push_back(FaceDirection::FaceLeft);
             dirList.push_back(FaceDirection::FaceRight);
         }
-        dirList.push_back(FaceDirection::FaceTop);
+        //dirList.push_back(FaceDirection::FaceTop);
     }
     PlantGrowContext getGrowContextGrowNextUnitLengthTestMap(PlantNode* plant)
     {

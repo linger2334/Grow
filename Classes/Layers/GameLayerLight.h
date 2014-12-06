@@ -20,18 +20,13 @@ enum LightState
     LightMoveToPlantLine,
     LightWillRemove,
 };
-enum
-{
-    LightActionNormal,
-    LightActionScaleToNormal,
-    LightActionScaleToBig
-};
+
 struct  LightPathContext
 {
 public:
     LightPathContext():_plantIndex(0),_id(0),_target(nullptr),
         _moveSpeed(0),_toRotateA(0),_toRotateB(0),_changeRotateSpeed(0),
-    _isRemoving(false),_state(LightIntRawState),_isSacling(false),_lightAction(LightActionNormal){}
+    _isRemoving(false),_state(LightIntRawState),_isSacling(false),_lightAction(0){}
     int _plantIndex;
     int _id;
     TuoYuanRotateNode* _target;
@@ -47,7 +42,15 @@ public:
     int   _lightAction;
    // float _heightInPlant;
 };
-
+enum LightAction
+{
+    LightActionFadeInAndOut = 1000,
+    LightActionFadeIn,
+    LightActionFadeOut,
+    LightActionScaleToBigAndSmall,
+    LightActionScaleToBig,
+    LightActionScaleToSmall,
+};
 struct PlantLightContext
 {
 public:
@@ -88,16 +91,16 @@ public:
     void  onPlantCpListChange(float height,int index);
     void  onPlantHeightChange(float height,int index);
     float getLengthByPlantHeight(float plantHeight);
-    
-    void  testAddOneLight();
+
     void  addOneLightByPlantIndex(Vec2 startPoint,int index);
-    void  addOneLightByPlantIndexUseBezier(Vec2 startPoint,int index);
     void  addOneLightByPlantIndex(int index);
     void  addOneLightByPlantIndexRandConfig(int index);
     int   addOneLightByPlantIndex(int index,const LightPathContext& config);
+    
     void  addLightsBySubMapInit(int plantIndex,int count);
-    void addLightsUseBezier(int plantIndex,Node* item,int count);
-    void addLightsUseBezier(int plantIndex,Vec2 point,int count,float waitTime);
+    void  addOneLightByPlantIndexUseBezier(Vec2 startPoint,int index);
+    void  addLightsUseBezier(int plantIndex,Node* item,int count);
+    void  addLightsUseBezier(int plantIndex,Vec2 point,int count,float waitTime);
     int   getLightCountByPlantIndex(int index);
     
     void checkUpdateToPosition(int plantIndex);
@@ -161,7 +164,44 @@ public:
     
     bool isAllPlantHasLights();
     
+
+    bool LightIsScaleToBig(const LightPathContext& context );
+    bool LightIsScaleToSmall(const LightPathContext& context );
+    bool LightIsNotScale(const LightPathContext& context );
+    bool LightIsRotete(const LightPathContext& context );
+    
+    bool LightIsFadeOutAndIn(const LightPathContext& context );
+    void LightFadeOutAndIn(const LightPathContext& context );
+    
+    bool LightIsFadeOut(const LightPathContext& context );
+    void LightFadeOut(const LightPathContext& context );
+    
+    bool LightIsFadeIn(const LightPathContext& context );
+    void LightFadeIn(const LightPathContext& context );
+    
+    void LightScaleToBig(const LightPathContext& context );
+    void LightScaleToSmall(const LightPathContext& context );
+    void LightStartRotate(const LightPathContext& context );
+    void LightStopRotate(const LightPathContext& context );
+    
+    void LightChildRunAction(const LightPathContext& context,Action* action);
+    
+    int getLightRunActionCount(int plantIndex,LightAction act);
+    
+    void randLightRunAction(int plantIndex,LightAction act);
+    
+    Sprite* createOnLightChildNode();
+    
+    Node* getLightChildNode(const LightPathContext& context);
+   
+    ScaleTo*  LightActionScaleTo(float time,float scale);
+    
+    Action* createOneLightAction(LightAction act);
+    
+    void checkLightUpdateAction(int plantIndex,int count,LightAction act);
+    
     void runChangeLightsAction(int loopCount,float waitTime);
+    
     
     std::vector<PlantLightContext> _plantLights;
     

@@ -30,17 +30,9 @@ bool GameLayerLight::init()
 void GameLayerLight::update(float dt)
 {
     for (int i = 0 ; i < _plantCount; i++) {
-   // PlantNode* plant = GameLayerPlant::getRunningLayer()->getPlantNodeByIndex(i);
         
-//        PathListHelper::PathList<ContorlPointV2, std::vector<ContorlPointV2> > plantLineList(&plant->_cpList);
-//        plantLineList.PathGetLength = PathGetLength;
-//        plantLineList.PathGetPoint = PathGetPoint;
-//        float len = plantLineList.getTotalLength();
-//        if (len!=_plantLights[i]._lightLength) {
-//      
-//            onChangePlantList(i);
-//            _plantLights[i]._lightLength = len;
-//        }
+        checkLightUpdateAction(i,4,LightActionFadeInAndOut);
+        checkLightUpdateAction(i,3,LightActionScaleToBigAndSmall);
         updateLightsByPlantIndex(dt,i);
         for (auto& ip : _plantLights[i]._lightLists)
         {
@@ -50,8 +42,9 @@ void GameLayerLight::update(float dt)
             if(ip.second._state != LightNormal) continue;
             ip.second._target->update(dt);
         }
+        
+        
     }
- 
 
 }
 bool GameLayerLight::initGameInfo()
@@ -59,8 +52,6 @@ bool GameLayerLight::initGameInfo()
     GameLayerBase::initGameInfo();
 
     _plantLights.resize(2);
-
-   // testAddOneLight();
     auto call = std::bind(&GameLayerLight::onPlantHeightChange,this,std::placeholders::_1,std::placeholders::_2);
     GameRunningConfig::getInstance()->_plantHeightChangeCallbacks.push_back(call);
     
@@ -102,48 +93,27 @@ void  GameLayerLight::onPlantCpListChange(float height,int index)
     PathListHelper::PathList<ContorlPointV2, std::vector<ContorlPointV2> > plantLineList(&plant->_cpList);
     plantLineList.PathGetLength = PathGetLength;
     plantLineList.PathGetPoint = PathGetPoint;
-    
-//    float totalLenth = plantLineList.getTotalLength();
-//    float step = totalLenth - _plantLights[index]._lightLength;
-//    
-//    if(fabs(step)==0)
-//    {
-//        return ;
-//    }
-//    for (auto& ip : _plantLights[index]._lightLists) {
-//        auto& i = ip.second;
-//        if(i._state == LightNormal||
-//           i._state == LightMoveToPlantLine)
-//        {
-//            if(step > 0)  i._nowLengthByTop += step;
-//            if (i._nowLengthByTop > totalLenth) {
-//                i._state = LightOutPlantLine;
-//            }
-//        }
-//    }
     _plantLights[index]._lightLength = plantLineList.getTotalLength();
-    //onChangePlantList(index);
 }
 void  GameLayerLight::onPlantHeightChange(float height,int index)
 {
     if(height < -400)return ;
     onChangePlantList(index);
-  //  onChangePlantList(index);
 }
-#include "GameManager.h"
-#include "GameRunningInfo.h"
-void GameLayerLight::testAddOneLight()
-{
-    int plantCount = GameLayerPlant::getRunningLayer()->getPlantCount();
-    auto config = GameRunningConfig::getInstance();
-    for(int i = 0 ; i< plantCount;i++)
-    {
-        int count = config->getLightInitCount(i);
-        for (int j  = 0; j <  count; j++) {
-            addOneLightByPlantIndexRandConfig(i);
-        }
-    }
-}
+//#include "GameManager.h"
+//#include "GameRunningInfo.h"
+//void GameLayerLight::testAddOneLight()
+//{
+//    int plantCount = GameLayerPlant::getRunningLayer()->getPlantCount();
+//    auto config = GameRunningConfig::getInstance();
+//    for(int i = 0 ; i< plantCount;i++)
+//    {
+//        int count = config->getLightInitCount(i);
+//        for (int j  = 0; j <  count; j++) {
+//            addOneLightByPlantIndexRandConfig(i);
+//        }
+//    }
+//}
 void GameLayerLight::initLightsBySubMap()
 {
     int plantCount = GameLayerPlant::getRunningLayer()->getPlantCount();
@@ -176,17 +146,17 @@ void  GameLayerLight::addOneLightByPlantIndex(Vec2 startPoint,int index)
     config._toLengthByTop = getOneRandLightInitLength(index);
     config._nowLengthByTop =  config._toLengthByTop;
     config._state = LightMoveToPlantLine;
-   // config._state = LightOutPlantLine;
     config._target->setPosition(startPoint);
     config._target->setContorlPosition(startPoint);
     int id = addOneLightByPlantIndex(index,config);
-     checkUpdateToPosition(index);
+    checkUpdateToPosition(index);
+    
     auto config1 =   getLightContextByPlantIndexAndId(index, id);
-
     auto callfunc = [](LightPathContext* conf,int plantIndex,int lightId)
     {
         conf->_state = LightNormal;
         ((LightNode*)conf->_target->getChildren().at(0))->changeLightState(LightNode::StateRandAction);
+        conf->_target->startRotate();
     };
     CallFunc* call = CallFunc::create(std::bind(callfunc,config1,index,id));
     PlantNode* plant = GameLayerPlant::getRunningLayer()->getPlantNodeByIndex(index);
@@ -202,15 +172,11 @@ void  GameLayerLight::addOneLightByPlantIndex(Vec2 startPoint,int index)
     config1->_target->setContorlPosition(plant->convertToWorldSpace( plantLineList._findType._point));
     Vec2 pt = plant->convertToWorldSpace( plantLineList._findType._point);
     
-
     Vec2 newPt1 = (pt - startPoint);
     MoveBy* moveby = MoveBy::create(1,newPt1);
 
     config1->_target->runAction(Sequence::create(moveby,call, NULL));
-
-
     config1->_nowLengthByTop = config._toLengthByTop ;
-   
 }
 void  GameLayerLight::addOneLightByPlantIndexUseBezier(Vec2 startPoint,int index)
 {
@@ -237,30 +203,13 @@ void  GameLayerLight::addOneLightByPlantIndexUseBezier(Vec2 startPoint,int index
     plantLineList.PathGetPoint = PathGetPoint;;
     plantLineList.getTypePointByLength(config1->_toLengthByTop,false,nullptr);
     config1->_target->setContorlPosition(plant->convertToWorldSpace( plantLineList._findType._point));
-    Vec2 pt = plant->convertToWorldSpace( plantLineList._findType._point);
-
-    Vec2 v2 = startPoint;
-    Vec2 v1 = pt;
+    Vec2 lightPosition = plant->convertToWorldSpace( plantLineList._findType._point);
     
-    Vec2 cp1 = (v1 - v2)*0.3;
-    Vec2 cp2 = (v1 - v2)*(1.0/RandomHelper::rand(3,7));
-    float angle1 ,angle2;
+    config1->_target->setContorlPosition(lightPosition);
+    config1->_target->setPosition(startPoint);
+    Vec2 endPoint = config1->_target->getNowTimeTargetPositionInWorld();
+    auto* bezier = createLightBezierAction(startPoint,endPoint,2);
     
-    angle1 = RandomHelper::rand(25, 80);
-    angle2 = -RandomHelper::rand(30, 65);
-    if (RandomHelper::rand(0, 255)>125) {
-        angle1 = 180 - angle1;
-        angle2 = 180 - angle2;
-    }
-    Vec2 tcp1 = MathHelper::getRotatePosition(v2,  v2+Vec2(-250,0), angle1);
-    Vec2 tcp2 = MathHelper::getRotatePosition(v1, v2 + cp2, angle2);
-    
-    ccBezierConfig v;
-    v.controlPoint_1 = tcp1 - v2;
-    v.controlPoint_2 = tcp2 - v2;
-    v.endPosition = v1 -v2;
-    BezierBy* bezier = BezierBy::create(2.5, v);
-   
     CallFunc* call = CallFunc::create(std::bind(callfunc,config1,index,id));
     config1->_target->runAction(Sequence::create(bezier,call,nullptr));
    
@@ -290,12 +239,6 @@ void  GameLayerLight::updateLightsByPlantIndex(float dt,int index)
             continue;
         }
         if (i._state == LightNormal) {
-            
-           // i._changeRotateSpeed = plantGrowSpeed*0.5;
-//            float maxSpeed1 = plantGrowSpeed;
-//            if ( i._changeRotateSpeed > maxSpeed1) {
-//                i._changeRotateSpeed  = maxSpeed1;
-//            }
            float length = i._toLengthByTop - i._nowLengthByTop;
             {
                 TuoYuanRotateNode* tuoyuan = static_cast<TuoYuanRotateNode*>(i._target);
@@ -324,22 +267,20 @@ void  GameLayerLight::updateLightsByPlantIndex(float dt,int index)
                     tuoyuan->_config.b = nowb ;
                 }
             }
-//            continue;
-            if(static_cast<long>( length ) == 0)
-            {
-                i._moveSpeed = 0;
-              continue;
-            }
-            
+            bool isNeedAddMoveSpeed = false;
+            float newPosition;
             int sign = length > 0 ? 1 : -1;
-            if (sign > 0) {
+            if (static_cast<long>( length ) == 0 || sign > 0) {
                 i._moveSpeed = 0;
-                // continue;
+                newPosition= i._nowLengthByTop;
             }
-            float step = dt * i._moveSpeed;
-            if(step > fabs(length))step = length;
-      
-            float newPosition = i._nowLengthByTop + sign * step;
+            else
+            {
+                float step = dt * i._moveSpeed;
+                if(step > fabs(length))step = length;
+                newPosition= i._nowLengthByTop + sign * step;
+                isNeedAddMoveSpeed = true;
+            }
 
             int ret= plantLineList.getTypePointByLength(newPosition,false,nullptr);
             if( ret < 0 )
@@ -350,20 +291,17 @@ void  GameLayerLight::updateLightsByPlantIndex(float dt,int index)
             }
            
             Vec2 pt = plant->convertToWorldSpace(plantLineList._findType._point);
-           // Node* parent = i._target->getParent();
-           // if (parent) pt = parent->convertToNodeSpace(pt);
-           // i._target->setPosition(pt);
-              i._target->setContorlPosition(pt);
+            Node* parent = i._target->getParent();
+            if (parent) pt = parent->convertToNodeSpace(pt);
+            i._target->setContorlPosition(pt);
    
             i._nowLengthByTop = newPosition;
-            if(i._nowLengthByTop<0)
-            {
-                log("now");
-            }
-             i._moveSpeed += dt*plantGrowSpeed*0.3;
-            float maxSpeed = plantGrowSpeed + fabs(length) * 0.3;
-            if ( i._moveSpeed > maxSpeed) {
-                i._moveSpeed  = maxSpeed;
+            if (isNeedAddMoveSpeed) {
+                i._moveSpeed += dt*plantGrowSpeed*0.3;
+                float maxSpeed = fabs(length);
+                if ( i._moveSpeed > maxSpeed) {
+                    i._moveSpeed  = maxSpeed;
+                }
             }
             continue ;
         }
@@ -378,7 +316,6 @@ void  GameLayerLight::updateLightsByPlantIndex(float dt,int index)
             Vec2 pt = plant->convertToWorldSpace(plantLineList._findType._point);
             Node* parent = i._target->getParent();
             if (parent) pt = parent->convertToNodeSpace(pt);
-            //i._target->setPosition(pt);
             i._target->setContorlPosition(pt);
             i._state = LightNormal;
             i._nowLengthByTop = maxLength;
@@ -397,11 +334,7 @@ void   GameLayerLight::onChangePlantList(float index)
     
     float totalLenth = plantLineList.getTotalLength();
     float step = totalLenth - _plantLights[index]._lightLength;
-    
-//    if(fabs(step)==0)
-//    {
-//        return ;
-//    }
+
     for (auto& ip : _plantLights[index]._lightLists) {
         auto& i = ip.second;
 //        if(i._state == LightNormal||
@@ -422,10 +355,8 @@ void GameLayerLight::moveDownLights(float yLen)
     for (int i = 0; i < count;i++) {
         for (auto& ip :_plantLights[i]._lightLists) {
              auto& i = ip.second;
-          //  if(i._target&&(i._state != LightOutPlantLine))
             if(i._target)
             {
-                
                 i._target->setPositionY(i._target->getPositionY()-yLen);
             }
         }
@@ -466,15 +397,14 @@ LightPathContext GameLayerLight::randLightConfig()
     TuoYuanRotateNode* node = TuoYuanRotateNode::create();
     node->initOvalConfig(Vec2(100,-100),RandomHelper::rand(8, 19),  0,  0,RandomHelper::rand(1, 255)>125);
     node->setPosition(Vec2(100,-100));
-    auto sp = LightNode::create();
     LightPathContext context;
     context._moveSpeed = 0;
-    context._toLengthByTop = rand()%500+50;
+    context._toLengthByTop = rand()%400+50;
     context._state = LightOutPlantLine;
     context._toRotateA = RandomHelper::rand(30, 60);
     context._toRotateB = RandomHelper::rand(25, 50);
     context._changeRotateSpeed = 60;
-    node->addChild(sp);
+    node->addChild(createOnLightChildNode());
     context._target = node;
     addChild(node);
     return  context;
@@ -583,6 +513,7 @@ void GameLayerLight::removeLightTopId(int plantIndex)
 }
 void  GameLayerLight::removeLights(int plantIndex,int count)
 {
+   // removeLightTopId(plantIndex);
     std::function<void(void)> func;
     auto calltem = [](GameLayerLight* layerLight,int plantId)
     {
@@ -590,7 +521,6 @@ void  GameLayerLight::removeLights(int plantIndex,int count)
     };
     func = std::bind(calltem,this,plantIndex);
     CallFunc* callFunc = CallFunc::create(func);
-  //  Repeat* repeat = Repeat::create(callFunc,count);
     this->runAction(callFunc);
 }
 int   GameLayerLight::getLightCountByPlantIndex(int index)
@@ -601,18 +531,14 @@ int GameLayerLight::randLightByPlant(int plantIndex)
 {
     auto& lisths =  _plantLights[plantIndex]._lightLists;
     int size = lisths.size();
-    //add by wlg
-    if (size) {
-        int index = rand()%size;
-        int i =0;
-        for (auto& ip : lisths) {
-            if (i == index) {
-                return ip.second._id;
-            }
-            i++;
+    int index = rand()%size;
+    int i =0;
+    for (auto& ip : lisths) {
+        if (i == index) {
+            return ip.second._id;
         }
+        i++;
     }
-    
     return -1;
 }
 void GameLayerLight::removeLightToPlantList(int plantIndex,int id)
@@ -689,7 +615,7 @@ void GameLayerLight::checkUpdateToPosition(int plantIndex)
         {
         tempCheckToPositionContext temp ;
         temp.id = i.second._id;
-        temp.toLengthByTop = i.second._toLengthByTop;
+        temp.toLengthByTop = i.second._nowLengthByTop;
         list.push_back(temp);
         }
     }
@@ -785,14 +711,14 @@ void GameLayerLight::addLightsUseBezier(int plantIndex,Node* item,int count)
    // Vec2 pt = plant->convertToWorldSpace( plantLineList._findType._point);
     config1->_target->setContorlPosition(lightPosition);
     config1->_target->setPosition(startPoint);
-    
+    Vec2 endPoint = config1->_target->getNowTimeTargetPositionInWorld();
     auto lightNode =    ((LightNode*)config1->_target->getChildren().at(0));
     lightNode->setOpacity(0);
     FadeTo* fadeTo = FadeTo::create(2, 255);
     ScaleTo* scaleTo = ScaleTo::create(2, 0);
 
 
-    auto* bezier = createLightBezierAction(startPoint,lightPosition,2);
+    auto* bezier = createLightBezierAction(startPoint,endPoint,2);
     Spawn* lightSpwan = Spawn::create(bezier->clone(),TargetedAction::create(lightNode,fadeTo), NULL);
     config1->_target->runAction(Sequence::create(lightSpwan,call1,nullptr));
     item->runAction(Sequence::create(Spawn::create(scaleTo,bezier,nullptr), RemoveSelf::create(), NULL));
@@ -872,7 +798,10 @@ float GameLayerLight::getOneRandLightInitLength(int plantIndex)
 {
     float len = getPlantInViewLength(plantIndex);
     if(len<100) len = 100;
-    float ret = len * (RandomHelper::rand(1, 3)/10.0f);
+    if (len > 300) {
+        len = 300;
+    }
+    float ret = len * (RandomHelper::rand(2, 10)/10.0f);
     return ret;
 }
 void GameLayerLight::addLightsBySubMapInit(int plantIndex,int count)
@@ -913,4 +842,201 @@ void GameLayerLight::runChangeLightsAction(int loopCount,float waitTime)
     };
     auto repeat = Repeat::create(Sequence::create(DelayTime::create(waitTime),CallFunc::create(callFunc), NULL),loopCount);
     this->runAction(repeat);
+}
+
+bool GameLayerLight::LightIsScaleToBig(const LightPathContext& context )
+{
+    return context._target->getActionByTag(LightActionScaleToBig)!=nullptr;
+    
+}
+bool GameLayerLight::LightIsScaleToSmall(const LightPathContext& context )
+{
+    return context._target->getActionByTag(LightActionScaleToSmall)!=nullptr;
+}
+bool GameLayerLight::LightIsNotScale(const LightPathContext& context )
+{
+    return LightIsScaleToBig(context)||LightIsScaleToSmall(context);
+    
+}
+bool GameLayerLight::LightIsRotete(const LightPathContext& context )
+{
+    return context._target->isRotate();
+}
+//float  GameLayerLight::LightScaleToBigRandNum()
+//{
+//    
+//}
+//ScaleTo*  GameLayerLight::LightActionScaleTo(float time,float scale)
+//{
+//    ScaleTo* scaleTo = ScaleTo::create(time,scale);
+//}
+
+void GameLayerLight::LightScaleToBig(const LightPathContext& context )
+{
+    ScaleTo* scaleTo = ScaleTo::create(RandomHelper::rand(1, 5),RandomHelper::rand(1, 3));
+    scaleTo->setTag(LightActionScaleToBig);
+    LightChildRunAction(context,scaleTo);
+}
+void GameLayerLight::LightScaleToSmall(const LightPathContext& context )
+{
+    ScaleTo* scaleTo = ScaleTo::create(RandomHelper::rand(1, 5),1);
+    scaleTo->setTag(LightActionScaleToSmall);
+    LightChildRunAction(context,scaleTo);
+}
+bool GameLayerLight::LightIsFadeOutAndIn(const LightPathContext& context )
+{
+    return context._target->getActionByTag(LightActionFadeInAndOut)!=nullptr;
+}
+void GameLayerLight::LightFadeOutAndIn(const LightPathContext& context )
+{
+}
+void GameLayerLight::LightStartRotate(const LightPathContext& context )
+{
+    context._target->startRotate();
+}
+void GameLayerLight::LightStopRotate(const LightPathContext& context )
+{
+     context._target->stopRotate();
+}
+bool GameLayerLight::LightIsFadeOut(const LightPathContext& context )
+{
+    return context._target->getActionByTag(LightActionFadeOut)!=nullptr;
+}
+void GameLayerLight::LightFadeOut(const LightPathContext& context )
+{
+    FadeTo* fadeTo = FadeTo::create(RandomHelper::rand(1, 5), 99);
+    fadeTo->setTag(LightActionFadeIn);
+    LightChildRunAction(context,fadeTo);
+}
+
+bool GameLayerLight::LightIsFadeIn(const LightPathContext& context )
+{
+    return context._target->getActionByTag(LightActionFadeIn)!=nullptr;
+}
+void GameLayerLight::LightFadeIn(const LightPathContext& context )
+{
+    FadeTo* fadeTo = FadeTo::create(RandomHelper::rand(1, 5), 255);
+    fadeTo->setTag(LightActionFadeIn);
+    LightChildRunAction(context,fadeTo);
+}
+void  GameLayerLight::LightChildRunAction(const LightPathContext& context,Action* action)
+{
+    getLightChildNode(context)->runAction(action);
+}
+
+Node*  GameLayerLight::getLightChildNode(const LightPathContext& context)
+{
+    return context._target->getChildren().at(0);
+}
+Sprite* GameLayerLight::createOnLightChildNode()
+{
+    return Sprite::create(GamePaths::_sPathLight);
+}
+int GameLayerLight::getLightRunActionCount(int plantIndex,LightAction act)
+{
+    int count = 0;
+    for (auto& ip : _plantLights[plantIndex]._lightLists ) {
+        if(getLightChildNode(ip.second)->getActionByTag(act)!=nullptr)
+        {
+            count++;
+        }
+    }
+    return count;
+}
+void GameLayerLight::checkLightUpdateAction(int plantIndex,int count,LightAction act)
+{
+    int count1 = 0;
+    std::vector<int> ids;
+    float lightsSize = _plantLights[plantIndex]._lightLists.size();
+    ids.reserve(lightsSize);
+    for (auto& ip : _plantLights[plantIndex]._lightLists ) {
+        if(getLightChildNode(ip.second)->getActionByTag(act)!=nullptr)
+        {
+            count1++;
+        }
+        else  ids.push_back(ip.first);
+    }
+    int flag =  lightsSize * 1.0f / (float)count;
+    if (flag == 0 ) {
+        return ;
+    }
+    if (count1 < flag) {
+        auto action = createOneLightAction(act);
+        Sequence* seq = Sequence::create(DelayTime::create(RandomHelper::randFloat(1,2)),action, NULL);
+        seq->setTag(act);
+        int randIndex = ids[RandomHelper::rand(0, ids.size()-1)];
+        LightChildRunAction(_plantLights[plantIndex]._lightLists[randIndex], seq);
+    }
+   
+}
+void  GameLayerLight::randLightRunAction(int plantIndex,LightAction act)
+{
+    std::vector<int> ids;
+    ids.reserve(_plantLights[plantIndex]._lightLists.size());
+//    for (auto& ip : _plantLights[plantIndex]._lightLists ) {
+//        if(getLightChildNode(ip.second)->getActionByTag(act)!=nullptr)
+//        {
+//            count++;
+//        }
+//    }
+    
+}
+Action* GameLayerLight::createOneLightAction(LightAction act)
+{
+    Action* action = nullptr;
+    switch(act)
+    {
+        case LightActionFadeInAndOut:
+        {
+            FadeTo* fadeTo = FadeTo::create(RandomHelper::rand(2, 5), 99);
+            FadeTo* fadeTo1 = FadeTo::create(RandomHelper::rand(2, 5), 255);
+             auto delay = DelayTime::create(RandomHelper::randFloat(1,7));
+            //fadeTo->setTag(LightActionFadeIn);
+            Sequence* seq =Sequence::create(fadeTo,delay,fadeTo1,nullptr);
+            action = seq;
+        }
+            break;
+        case LightActionScaleToBigAndSmall:
+        {
+            ScaleTo* scaleTo = ScaleTo::create(RandomHelper::rand(2, 5),1);
+            ScaleTo* scaleTo1 = ScaleTo::create(RandomHelper::rand(2, 5),RandomHelper::rand(1, 3));
+            auto delay = DelayTime::create(RandomHelper::randFloat(2,8));
+            Sequence* seq =Sequence::create(scaleTo,delay,scaleTo1,nullptr);
+            // scaleTo->setTag(LightActionScaleToSmall);
+            action = seq;
+        }
+            break;
+        case LightActionFadeIn:
+           {
+               FadeTo* fadeTo = FadeTo::create(RandomHelper::rand(1, 5), 255);
+               //fadeTo->setTag(LightActionFadeIn);
+               action = fadeTo;
+           }
+            break;
+        case LightActionFadeOut:
+        {
+            FadeTo* fadeTo = FadeTo::create(RandomHelper::rand(1, 5), 99);
+            //fadeTo->setTag(LightActionFadeIn);
+            action = fadeTo;
+        }
+            break;
+        case LightActionScaleToBig:
+        {
+            ScaleTo* scaleTo = ScaleTo::create(RandomHelper::rand(2, 5),RandomHelper::rand(1, 3));
+           // scaleTo->setTag(LightActionScaleToSmall);
+            action = scaleTo;
+        }
+            break;
+        case LightActionScaleToSmall:
+        {
+            ScaleTo* scaleTo = ScaleTo::create(RandomHelper::rand(1, 5),1);
+           // scaleTo->setTag(LightActionScaleToSmall);
+            action = scaleTo;
+        }
+            break;
+            
+
+        default:break;
+    }
+    return action;
 }

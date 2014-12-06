@@ -11,19 +11,20 @@
 
 #include <stdio.h>
 #include "Macro.h"
+#include "GameLayerBase.h"
 #include "GuideManager.h"
 
-class ScreenGuide : public Layer,public GuideComponentDelegate
+class ScreenGuide : public GameLayerBase,public GameLayerHelper<ScreenGuide>
 {
 public:
     CREATE_FUNC(ScreenGuide)
     bool init();
     
-    virtual void onEnter();
-    virtual void onExit();
-    
-    void guideProcess(GuideInfo& guidePhase);
-    void onNextStep();
+    void moveDown(float y);
+    void update(float dt);
+protected:
+    GuideManager* _guideManager;
 };
+
 
 #endif /* defined(__Grow_UI__ScreenGuide__) */

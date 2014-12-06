@@ -17,19 +17,23 @@
 -(void)viewDidLoad
 {
     [super viewDidLoad];
-    self.scrollview.contentSize = CGSizeMake(768, 1536);
+    self.scrollview.contentSize = CGSizeMake(768, 1792);
     self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
     self.backButton.frame = CGRectMake(280, 900, 212, 110);
     [self.view addSubview:self.backButton];
     
     std::string imageName;
     int levelId = *(GameManager::getInstance()->_fileHandler->_filename.c_str() + strlen("levels/level ")) - ('0' - 0);
-    std::string suffix = StringUtils::format("%d.png",levelId);
+    std::string suffix = StringUtils::format("%d",levelId);
+    std::set<UIView*> _toDelete;
     for(UIButton* button in self.scrollview.subviews){
         if (button.tag<=Rock_Trape && button.tag>=Rock_Circle) {
             switch (button.tag) {
                 case Rock_Circle:
                     imageName = IMAGE_ROCK_CIRCLE;
+                    break;
+                case Rock_Cover:
+                    imageName = IMAGE_ROCK_COVER;
                     break;
                 case Rock_Crinkle:
                     imageName = IMAGE_ROCK_CRINKLE;
@@ -49,8 +53,20 @@
                 case Rock_MountInv:
                     imageName = IMAGE_ROCK_MOUNTINV;
                     break;
+                case Rock_Ordinary:
+                    imageName = IMAGE_ROCK_ORDINARY;
+                    break;
                 case Rock_Ovoid:
                     imageName = IMAGE_ROCK_OVOID;
+                    break;
+                case Rock_Pebble:
+                    imageName = IMAGE_ROCK_PEBBLE;
+                    break;
+                case Rock_Pillar:
+                    imageName = IMAGE_ROCK_PILLAR;
+                    break;
+                case Rock_Pocket:
+                    imageName = IMAGE_ROCK_POCKET;
                     break;
                 case Rock_Rect:
                     imageName = IMAGE_ROCK_RECT;
@@ -62,9 +78,21 @@
                     break;
             }
             imageName += suffix;
-            [button setImage:[UIImage imageNamed:[NSString stringWithUTF8String:imageName.c_str()]] forState:UIControlStateNormal];
+            NSString* fullPath = [[NSBundle mainBundle] pathForResource:[NSString stringWithUTF8String:imageName.c_str()] ofType:@".png"];
+            if ([[NSFileManager defaultManager] fileExistsAtPath:fullPath]) {
+                imageName += ".png";
+                [button setImage:[UIImage imageNamed:[NSString stringWithUTF8String:imageName.c_str()]] forState:UIControlStateNormal];
+            }else{
+                _toDelete.insert(button);
+            }
+            
         }
     }
+    
+    for(UIView* view : _toDelete){
+        [view removeFromSuperview];
+    }
+    
 }
 
 

@@ -11,7 +11,7 @@
 
 #define GROW_MIN_ANGLE_NEAR_BORDER_LEFT (-80)
 #define GROW_MIN_ANGLE_NEAR_BORDER_RIGHT (80)
-#define LEAF_RAND_LENGTH 101
+#define LEAF_RAND_LENGTH 51
 #define LEAF_LENGHT      201
 
 
@@ -50,6 +50,7 @@ bool  GameLayerPlant_Level_1::initGameInfo()
     list->addOneContext(0, 0);
     list->addOneContext(60, 25);
     list->addOneContext(400, 80);
+    
     
     int id = addOnePlant();
     createHeadB2Body(id);
@@ -94,29 +95,26 @@ bool  GameLayerPlant_Level_1::initGameInfo()
     };
     ItemModel* outLeft = nullptr;
     ItemModel* outRight = nullptr;
-    Vec2 vleft = MathHelper::getRotatePosition(cpo, cpo + Vec2(-150,0),0);
-    Vec2 vright = MathHelper::getRotatePosition(cpo, cpo + Vec2(150,0),0);
+    Vec2 vleft = MathHelper::getRotatePosition(cpo, cpo + Vec2(-250,0),0);
+    Vec2 vright = MathHelper::getRotatePosition(cpo, cpo + Vec2(250,0),0);
     float lenLeft = physicalWorld->rayCastTest(cpo,vleft,rayCall,&outLeft);
     float lenRight = physicalWorld->rayCastTest(cpo,vright,rayCall,&outRight);
     
    
-    if (lenLeft > 0 && outLeft){// && outLeft && cpo.y > (outLeft->getBoundingBox().origin.y+30)) {
+    if (lenLeft > 0 && outLeft){
         Vec2 pt =outLeft->getPosition();
         float itemy = pt.y;
         if (outLeft->getParent()) {
             itemy = outLeft->getParent()->convertToWorldSpace(pt).y;
         }
-//        
-//        float itemy = outLeft->getParent()->convertToWorldSpace(outLeft->getPosition()).y;
         if (cpo.y > itemy + 30 - outLeft->getContentSize().height*0.5) {
             if (lenLeft > 80) {
                 angleLeft = -80;
             }
             angleLeft = -nearAngle(lenLeft, 90,20,70);
-            //angleLeft = -60;
         }
     }
-    if (lenRight > 0 && outRight){// && outRight && cpo.y > (outRight->getBoundingBox().origin.y+30)) {
+    if (lenRight > 0 && outRight){
         Vec2 pt =outRight->getPosition();
         float itemy = pt.y;
         if (outRight->getParent()) {
@@ -128,7 +126,6 @@ bool  GameLayerPlant_Level_1::initGameInfo()
                 angleRight = 80;
             }
               angleRight = nearAngle(lenRight, 90,20,70);
-        //angleRight = 60;
         }
        
     }
@@ -233,96 +230,95 @@ float  GameLayerPlant_Level_1::growByIndex(float length,int index)
     bool isGrow = false;
     
     PlantNode* node = getPlantNodeByIndex(index);
-//    if (!_growList.empty()) {
-//        retLen = node->grow(_growList.front(), 1);
-//        _growList.pop_front();
-//    }
-//    return retLen;
-    bool isInStone = PlantHelper::isPlantHeadInStone(node);
+    float angle = node->getHeadAnalge();
+    
+    Vec2 headTop = node->getHeadPositionInWorld();
+    auto call2 = [=](ItemModel* item)
+    {
+        return item->isStone();
+    };
+    auto con2 = PlantHelper::getPlantRayCastContext1(headTop,150,angle - 90,10,18,call2);
+    
+    int lcount =con2.getCrashLengthCountByAngleRange(60, -90, angle);
+    int rcount =con2.getCrashLengthCountByAngleRange(60, angle, 90);
+    
+    float lave =con2.getCrashLengthAveByAngleRange(-90, angle);
+    float rave =con2.getCrashLengthAveByAngleRange( angle, 90);
+    
+    PlantHelper::PlantGrowContext growStone(true);
+    if (lcount > 0 && rcount ==0 && lave < 60) {
+        growStone._left = false;
+    }
+    else if(lcount > 0 && rcount > 0)
+    {
+        growStone._left = lave <= rave ? false : true;
+        growStone._right =  !growStone._left;
+    }
+    else  if (rcount > 0 && lcount ==0 && rave < 60) {
+        growStone._right = false;
+    }
+    else if(rcount > 0 && lcount > 0)
+    {
+        growStone._right = rave < lave ? false : true;
+        growStone._left =  !growStone._left;
+    }
+    
+    auto growAngle = getPlantGrowContextAngle(node);
+    float al1s = con2.getCrashLengthAveByAngleRange(angle - 80,angle);
+    float ar1s = con2.getCrashLengthAveByAngleRange(angle,angle + 80);
+    bool isNearStone = al1s < 44 && ar1s < 44;
+    bool isAndGrowStone =!(growAngle&growStone).allIsValue(false);
+    bool isTestStone = (!isNearStone) && (isAndGrowStone);
+
     auto call = [=](ItemModel* item)
     {
-       return item->isDirtLine()||item->isStone();
+        if(item->isDirtLine())
+        {
+            return true;
+        }
+        else if(isTestStone &&item->isStone()){
+            return true;
+        }
+        return false;
+      // return item->isDirtLine()||(isTestStone && item->isStone());
     };
-
+    
+    
+    
     std::vector<FaceDirection> growDirList;
     PlantHelper::getGroeDirList(node,growDirList);
     
     auto minGrow = PlantHelper::getGrowContextGrowNextUnitLengthTestMap(node);
 
-    auto growStone = getPlantGrowContextStone(node);
-    auto growAngle = getPlantGrowContextAngle(node);
-    PlantHelper::PlantGrowContext min;
-    min._left = minGrow._left && growAngle._left && growStone._left;
-    min._right = minGrow._right  && growAngle._right && growStone._right;
-    min = growAngle;
-    float angle = node->getHeadAnalge();
-    //auto con = PlantHelper::getPlantRayCastContext(node,80,angle, 1,80,call);
+   
+    PlantHelper::PlantGrowContext min(true);
+    min &= minGrow;
+    min &= growAngle;
+    if (isAndGrowStone) {
+        min &= growStone;
+    }
+//    min._left = minGrow._left && growAngle._left;
+//    min._right = minGrow._right  && growAngle._right;
+//    min._top = minGrow._top && growAngle._top;
     
-    Vec2 headTop = node->getHeadPositionInWorld();
     auto con1 = PlantHelper::getPlantRayCastContext1(headTop,80,angle - 90,10,18,call);
-//    auto call2 = [=](ItemModel* item)
-//    {
-//        return item->isStone();
-//    };
-//    auto con2 = PlantHelper::getPlantRayCastContext1(headTop,150,-90 ,10,18,call2);
-    
-    if (con1.getCrashLengthCountByAngleRange(4,angle -80,angle+80) > 0)
-    return 0;
-        
-//    if (con) {
-//        c
-//    }
-//    int lcount =con2.getCrashLengthCountByAngleRange(40, -90, angle-20);
-//    int rcount =con2.getCrashLengthCountByAngleRange(40, angle+10, 90);
-//    if (lcount > 0&& lcount >= rcount) {
-//        min._left = false;
-//    }
-//    else if(rcount > 0 &&rcount > lcount)
-//    {
-//        min._right =false;
-//    }
-//    if (con2.getCrashLengthCountByAngleRange(44,angle-10, angle+10)) {
-//        min._top =false;
-//    }
-//    if (con2.getCrashLengthCountByAngleRange(130,0,0)>0) {
-//        if (angle < -60 && angle > -90) {
-//            min._left = false;
-//        }
-//        else if (angle > -60 && angle < 90)
-//        {
-//            min._right = false;
-//        }
-//    }
+
+    PlantHelper::PlantGrowContext  growTest(true);
+    float al1 = con1.getCrashLengthAveByAngleRange(angle - 80,angle);
+    float ar1 = con1.getCrashLengthAveByAngleRange(angle,angle + 80);
+    if (al1 < 30 )  growTest._left = false;
+    if (ar1 < 30 )  growTest._right = false;
+    min &= growTest;
+
     for (int i = 0 ; i < 2 ; i++)
     {
         PlantHelper::PlantGrowContext  grow(true);
-//        float al = con.getLeftCrashLengthAve();
-//        float ar = con.getRightCrashLengthAve();
-        float al1 = con1.getCrashLengthAveByAngleRange(angle - 80,angle);
-        float ar1 = con1.getCrashLengthAveByAngleRange(angle,angle + 80);
-        
-        int lc1 = con1.getCrashLengthCountByAngleRange(40,angle - 80,angle-STEP_ANGLE);
-        int rc1 =  con1.getCrashLengthCountByAngleRange(40,angle+STEP_ANGLE,angle + 80);
-        
-        int tc1 = con1.getCrashLengthCountByAngleRange(40, angle-11, angle+11);
-        if (lc1 > 1 )  grow._left = false;
-        if (rc1 > 1 )  grow._right = false;
-        if (tc1 > 1 )  grow._top = false;
-//        int lc = con.getLeftCrashCount(40);
-//        int rc = con.getRightCrashCount(40);
-//        if (lc > 0 )  grow._left = false;
-//        if (rc > 0 )  grow._right = false;
-//        if (al1 < 30 )  grow._left = false;
-//        if (ar1 < 30 )  grow._right = false;
-//           if (ar1 < 30 )  grow._right = false;
         if (i<1&&min.allIsValue(true)) {
-        if((fabs(angle)<90&& grow.allIsValue(true))||
-                (fabs(angle)>=90&&al1<80&& ar1<80))
+        if((fabs(angle)<90)||
+            (fabs(angle)>=90&&al1<80&& ar1<80))
             {
-//                grow._left = (ar - al) > 3  ? false : true;
-//                grow._right = (al - ar) > 3 ? false : true;
-                grow._left = (ar1 - al1) > 5  ? false : true;
-                grow._right = (al1 - ar1) > 5 ? false : true;
+                grow._left = (ar1 - al1) > 0 ? false : true;
+                grow._right = (al1 - ar1) > 0 ? false : true;
             }
         }
             

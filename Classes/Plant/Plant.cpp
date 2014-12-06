@@ -2,7 +2,7 @@
 #include "TypeBase.h"
 #include "GameHeaders.h"
 #include "PathListHelper.hpp"
-#define OUT_GROW_DIR 1
+//#define OUT_GROW_DIR 1
 
 
 static float PathGetLength(const ContorlPointV2& p1,const ContorlPointV2& p2)

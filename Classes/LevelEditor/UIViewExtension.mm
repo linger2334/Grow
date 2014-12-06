@@ -164,6 +164,9 @@
             case Rock_Circle:
                 imageFilename = IMAGE_ROCK_CIRCLE + suffix;
                 break;
+            case Rock_Cover:
+                imageFilename = IMAGE_ROCK_COVER + suffix;
+                break;
             case Rock_Crinkle:
                 imageFilename = IMAGE_ROCK_CRINKLE + suffix;
                 break;
@@ -182,8 +185,20 @@
             case Rock_MountInv:
                 imageFilename = IMAGE_ROCK_MOUNTINV + suffix;
                 break;
+            case Rock_Ordinary:
+                imageFilename = IMAGE_ROCK_ORDINARY + suffix;
+                break;
             case Rock_Ovoid:
                 imageFilename = IMAGE_ROCK_OVOID + suffix;
+                break;
+            case Rock_Pebble:
+                imageFilename = IMAGE_ROCK_PEBBLE + suffix;
+                break;
+            case Rock_Pillar:
+                imageFilename = IMAGE_ROCK_PILLAR + suffix;
+                break;
+            case Rock_Pocket:
+                imageFilename = IMAGE_ROCK_POCKET + suffix;
                 break;
             case Rock_Rect:
                 imageFilename = IMAGE_ROCK_RECT + suffix;
@@ -542,6 +557,9 @@
         case Rock_Circle:
             name = "Rock_Circle";
             break;
+        case Rock_Cover:
+            name = "Rock_Cover";
+            break;
         case Rock_Crinkle:
             name = "Rock_Crinkle";
             break;
@@ -560,8 +578,20 @@
         case Rock_MountInv:
             name = "Rock_MountInv";
             break;
+        case Rock_Ordinary:
+            name = "Rock_Ordinary";
+            break;
         case Rock_Ovoid:
             name = "Rock_Ovoid";
+            break;
+        case Rock_Pebble:
+            name = "Rock_Pebble";
+            break;
+        case Rock_Pillar:
+            name = "Rock_Pillar";
+            break;
+        case Rock_Pocket:
+            name = "Rock_Pocket";
             break;
         case Rock_Rect:
             name = "Rock_Rect";

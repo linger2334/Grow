@@ -72,6 +72,39 @@ namespace PlantHelper
             return ;
         }
         bool allIsValue(bool test){return _left== test && _right ==test;}
+        
+        PlantGrowContext& operator &=(const PlantGrowContext& con)
+        {
+            _left &= con._left;
+            _right &= con._right;
+            _top &= con._top;
+            return *this;
+        }
+        PlantGrowContext operator &(const PlantGrowContext& con)
+        {
+            PlantGrowContext temp = *this;;
+            temp._left &= con._left;
+            temp._right &= con._right;
+            temp._top &= con._top;
+            return temp;
+        }
+        
+        PlantGrowContext& operator |=(const PlantGrowContext& con)
+        {
+            _left |= con._left;
+            _right |= con._right;
+            _top |= con._top;
+            return *this;
+        }
+        PlantGrowContext operator |(const PlantGrowContext& con)
+        {
+            PlantGrowContext temp = *this;;
+            temp._left |= con._left;
+            temp._right |= con._right;
+            temp._top |= con._top;
+            return temp;
+        }
+
         bool _left;
         bool _right;
         bool _top;

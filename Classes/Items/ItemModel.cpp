@@ -87,38 +87,12 @@ ItemModel* ItemModel::create(Item& item)
         case Decoration_Pendant:
             itemModel = Decoration::create(item);
             break;
-        case Rock_Circle:
-            itemModel = Rock::create(item);
-            break;
-        case Rock_Crinkle:
-            itemModel = Rock::create(item);
-            break;
-        case Rock_Cross:
-            itemModel = Rock::create(item);
-            break;
-        case Rock_Dagger:
-            itemModel = Rock::create(item);
-            break;
-        case Rock_Ellipse:
-            itemModel = Rock::create(item);
-            break;
-        case Rock_Mount:
-            itemModel = Rock::create(item);
-            break;
-        case Rock_MountInv:
-            itemModel = Rock::create(item);
-            break;
-        case Rock_Ovoid:
-            itemModel = Rock::create(item);
-            break;
-        case Rock_Rect:
-            itemModel = Rock::create(item);
-            break;
-        case Rock_Trape:
-            itemModel = Rock::create(item);
-            break;
         default:
             break;
+    }
+    
+    if (item.type>=Rock_Circle && item.type<=Rock_Trape) {
+        itemModel = Rock::create(item);
     }
     
     return itemModel;

@@ -22,12 +22,14 @@ bool ScreenEnergy::init()
         grayLayer->setBackGroundColor(Color3B(0,0,0));
         grayLayer->setBackGroundColorOpacity(180);
         grayLayer->setTouchEnabled(true);
+        grayLayer->setCascadeOpacityEnabled(true);
         addChild(grayLayer);
         //operation panel
         ImageView* panel = ImageView::create("UI_SpeedUpPanel.png");
         panel->setPosition(Vec2(VisibleSize.width/2,VisibleSize.height/2));
         panel->setTouchEnabled(true);
-        grayLayer->addChild(panel);
+        panel->setCascadeOpacityEnabled(true);
+        addChild(panel);
         
         Size panelSize = panel->getBoundingBox().size;
         //particle
@@ -101,10 +103,26 @@ bool ScreenEnergy::init()
                     if (!particleDidResume) {
                         this->resumeParticle();
                     }
+                    if (progress == 100) {
+                        UserDefault::getInstance()->setIntegerForKey("accumulativeTime_Natural", 0);
+                        FadeOut* disappear = FadeOut::create(1.5);
+                        RemoveSelf* remove = RemoveSelf::create();
+                        TargetedAction* particleDisappear = TargetedAction::create(_particleEffect, FadeOut::create(1));
+                        TargetedAction* particleRemove = TargetedAction::create(_particleEffect, remove->clone());
+                        this->runAction(Spawn::create(Sequence::create(disappear,remove, NULL),Sequence::create(particleDisappear,particleRemove,NULL),NULL));
+                    }
                     break;
                 case Widget::TouchEventType::CANCELED:
                     if (!particleDidResume) {
                         this->resumeParticle();
+                    }
+                    if (progress == 100) {
+                        UserDefault::getInstance()->setIntegerForKey("accumulativeTime_Natural", 0);
+                        FadeOut* disappear = FadeOut::create(1.5);
+                        RemoveSelf* remove = RemoveSelf::create();
+                        TargetedAction* particleDisappear = TargetedAction::create(_particleEffect, FadeOut::create(1));
+                        TargetedAction* particleRemove = TargetedAction::create(_particleEffect, remove->clone());
+                        this->runAction(Spawn::create(Sequence::create(disappear,remove, NULL),Sequence::create(particleDisappear,particleRemove,NULL),NULL));
                     }
                     break;
                 default:
@@ -119,11 +137,21 @@ bool ScreenEnergy::init()
             if (eventType == Widget::TouchEventType::ENDED) {
                 UserDefault::getInstance()->setIntegerForKey("accumulativeTime_Natural", accumulativeTime_Natural);
                 UserDefault::getInstance()->flush();
-                this->removeFromParent();
+                FadeOut* disappear = FadeOut::create(1.5);
+                RemoveSelf* remove = RemoveSelf::create();
+                TargetedAction* particleDisappear = TargetedAction::create(_particleEffect, FadeOut::create(1));
+                TargetedAction* particleRemove = TargetedAction::create(_particleEffect, remove->clone());
+                this->runAction(Spawn::create(Sequence::create(disappear,remove, NULL),Sequence::create(particleDisappear,particleRemove,NULL),NULL));
             }
-        });
+        }); 
         panel->addChild(close);
         
+        for (int i = 0; i<panel->getChildrenCount(); i++) {
+            Node* child = dynamic_cast<Node*>(panel->getChildren().at(i));
+            child->setCascadeOpacityEnabled(true);
+        }
+        setOpacity(0);
+        setCascadeOpacityEnabled(true);
         scheduleUpdate();
         return true;
     }
@@ -134,16 +162,14 @@ bool ScreenEnergy::init()
 void ScreenEnergy::onEnter()
 {
     Layer::onEnter();
-    Sequence* popupAction = Sequence::create(
-                                             Place::create(Vec2(0,VisibleSize.height)),
-                                             EaseExponentialOut::create(MoveTo::create(0.5, Vec2(0, 0))),
-                                             NULL);
-    runAction(popupAction);
+    FadeIn* appear = FadeIn::create(1.5);
+    runAction(appear);
 }
 
 void ScreenEnergy::onExit()
 {
     if(progress == 100){
+        
         
     }
     
@@ -172,8 +198,8 @@ void ScreenEnergy::update(float dt)
         accelerationTime += dt;
 //        waittime = 60 - accelerationTime > 0? 60 - accelerationTime : 0;
 //        progress = accelerationTime/60*100.0 < 100.0? accelerationTime/60*100.0 : 100.0;
-        waittime = 2.0 -accelerationTime>0? 2.0-accelerationTime : 0;
-        progress = accelerationTime/2.0*100 <100.0? accelerationTime/2.0*100 : 100.0;
+        waittime = 5.0 -accelerationTime>0? 5.0-accelerationTime : 0;
+        progress = accelerationTime/5.0*100 <100.0? accelerationTime/5.0*100 : 100.0;
         
     }else{
         accelerationTime = 0;
@@ -183,12 +209,8 @@ void ScreenEnergy::update(float dt)
     
     _waitLabel->setString(StringUtils::format("wait: %2dm%2ds",(int)waittime/60,(int)waittime%60));
     _progressLabel->setString(StringUtils::format("%d%%",progress));
-    
     if (progress == 100) {
         unscheduleUpdate();
-        UserDefault::getInstance()->setIntegerForKey("accumulativeTime_Natural", 0);
-        runAction(Sequence::create(EaseExponentialIn::create(MoveBy::create(0.5, Vec2(0,VisibleSize.height))),RemoveSelf::create(), NULL));
     }
-    
 }
 

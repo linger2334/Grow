@@ -29,7 +29,7 @@
     
     // Uncomment the following line to preserve selection between presentations.
     self.clearsSelectionOnViewWillAppear = NO;
-    self.contentSizeForViewInPopover = CGSizeMake(180, 180);
+    self.contentSizeForViewInPopover = CGSizeMake(100, 40);
     self._options = [NSMutableArray array];
     [self._options addObject:@"upper"];
     [self._options addObject:@"lowest"];

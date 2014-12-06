@@ -412,8 +412,19 @@ bool  GameLayerMap::touchClearGrid(Point touchPoint)
     return clearGridCellBorderByRange(cell,  GameRuntime::getInstance()->getTouchClearGridRadius())>0;
     
 }
+bool GameLayerMap::isCanTouchRangeCell(const GridCell& cell,int radius)
+{
+  auto   mapcell = _mapGrid.gridCellToInViewCell(cell);
+    if (mapcell._y > _mapGrid.getGridMaxViewHeight() - radius) {
+        return false;
+    }
+    return true;
+}
 int  GameLayerMap::clearGridCellBorderByRange(GridCell cell, int radius)
 {
+    if (!isCanTouchRangeCell(cell,radius)) {
+        return -1;
+    }
     int x1,y1;
     x1=cell._x;
     y1=cell._y;

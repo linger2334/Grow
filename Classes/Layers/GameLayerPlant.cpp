@@ -74,7 +74,7 @@ void GameLayerPlant::moveDown(float yLen)
 }
 void GameLayerPlant::update(float dt)
 {
-    if(!GameRunningInfo::getInstance()->isPlantNeedGrow())return;
+    if(GameRunningInfo::getInstance()->isPause()||!GameRunningInfo::getInstance()->isPlantNeedGrow())return;
     int count = this->getPlantCount();
     for(int i = 0; i < count;i++)
     {

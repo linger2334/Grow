@@ -87,6 +87,9 @@ void LevelFileHandler::loadFile()
             else if(!strcmp(typestr, "Rock_Circle")){
                 type = Rock_Circle;
             }
+            else if (!strcmp(typestr, "Rock_Cover")){
+                type = Rock_Cover;
+            }
             else if(!strcmp(typestr, "Rock_Crinkle")){
                 type = Rock_Crinkle;
             }
@@ -105,8 +108,20 @@ void LevelFileHandler::loadFile()
             else if(!strcmp(typestr, "Rock_MountInv")){
                 type = Rock_MountInv;
             }
+            else if (!strcmp(typestr, "Rock_Ordinary")){
+                type = Rock_Ordinary;
+            }
             else if(!strcmp(typestr, "Rock_Ovoid")){
                 type = Rock_Ovoid;
+            }
+            else if (!strcmp(typestr, "Rock_Pebble")){
+                type = Rock_Pebble;
+            }
+            else if (!strcmp(typestr, "Rock_Pillar")){
+                type = Rock_Pillar;
+            }
+            else if (!strcmp(typestr, "Rock_Pocket")){
+                type = Rock_Pocket;
             }
             else if(!strcmp(typestr, "Rock_Rect")){
                 type = Rock_Rect;
@@ -346,6 +361,9 @@ int LevelFileHandler::saveFile()
             case Rock_Circle:
                 itemElement->SetName("Rock_Circle");
                 break;
+            case Rock_Cover:
+                itemElement->SetName("Rock_Cover");
+                break;
             case Rock_Crinkle:
                 itemElement->SetName("Rock_Crinkle");
                 break;
@@ -364,8 +382,20 @@ int LevelFileHandler::saveFile()
             case Rock_MountInv:
                 itemElement->SetName("Rock_MountInv");
                 break;
+            case Rock_Ordinary:
+                itemElement->SetName("Rock_Ordinary");
+                break;
             case Rock_Ovoid:
                 itemElement->SetName("Rock_Ovoid");
+                break;
+            case Rock_Pebble:
+                itemElement->SetName("Rock_Pebble");
+                break;
+            case Rock_Pillar:
+                itemElement->SetName("Rock_Pillar");
+                break;
+            case Rock_Pocket:
+                itemElement->SetName("Rock_Pocket");
                 break;
             case Rock_Rect:
                 itemElement->SetName("Rock_Rect");
