@@ -19,7 +19,7 @@ void GuideNode::onNextStep()
 void GuideNode::onEnter()
 {
     ClippingNode::onEnter();
-    ActionInterval* appear = FadeIn::create(1.5);
+    ActionInterval* appear = FadeIn::create(1);
     CallFunc* registerSelf = CallFunc::create([&](){
         GuideManager::getInstance()->Register(this);
     });
@@ -31,6 +31,19 @@ bool StrokeDirt::init()
 {
     if(ClippingNode::init()){
         setInstanceName("StrokeDirt");
+        
+        DrawNode* stencil = DrawNode::create();
+        Vec2 rect[4];
+        rect[0] = Vec2(100,100);
+        rect[1] = Vec2(200,100);
+        rect[2] = Vec2(200,200);
+        rect[3] = Vec2(100,200);
+        Color4F red(1,0,0,1);
+        stencil->drawPolygon(rect, 4, red, 1, Color4F::WHITE);
+        stencil->setPosition(Vec2(VisibleSize.width/2,VisibleSize.height/2));
+        this->setStencil(stencil);
+        this->setInverted(true);
+        this->setAlphaThreshold(0.5);
         
         Layout* graylayer = Layout::create();
         graylayer->setBackGroundColorType(cocos2d::ui::Layout::BackGroundColorType::SOLID);
@@ -70,18 +83,8 @@ bool StrokeDirt::init()
 
 void StrokeDirt::guideProcess(GuideInfo &guidePhase)
 {
-    DrawNode* stencil = DrawNode::create();
-    Vec2 rect[4];
-    rect[0] = Vec2(100,100);
-    rect[1] = Vec2(200,100);
-    rect[2] = Vec2(200,200);
-    rect[3] = Vec2(100,200);
-    Color4F red(1,0,0,1);
-    stencil->drawPolygon(rect, 4, red, 1, Color4F::WHITE);
-    stencil->setPosition(Vec2(VisibleSize.width/2,VisibleSize.height/2));
-    this->setStencil(stencil);
-    this->setInverted(true);
-    this->setAlphaThreshold(0);
+    
+    onNextStep();
 }
 
 

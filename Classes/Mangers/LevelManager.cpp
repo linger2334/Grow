@@ -21,6 +21,7 @@
 #include "GameRunningInfo.h"
 //////////add for UI
 #include "StatisticsData.h"
+#include "ScreenGuide.h"
 
 std::map<int,std::string> LevelManager::_mapFiles;
 std::map< int,std::vector<int> > LevelManager::_mapGroups;
@@ -306,6 +307,7 @@ void LevelManager::createBasesLayers()
     auto uiBorder = GameLayerUIBorder::create();
     auto layerItem = LayerItem::create();
     auto statisticsdata = StatisticsData::create();
+    auto layerGuide = ScreenGuide::create();
     auto ui = GameLayerUI::create();
     auto crashShow = GameLayerPlantCrashEffect::create();
     auto layerLight = GameLayerLight::create();
@@ -322,6 +324,7 @@ void LevelManager::createBasesLayers()
     gameScene->addChild(ui,SceneGameChildZorder::MapUI);
     gameScene->addChild(layerItem->_layerItemExt,SceneGameChildZorder::MapItemExt);
     gameScene->addChild(statisticsdata);
+    gameScene->addChild(layerGuide,1000);
     
     back->initGameInfo();
     layerPlant->initGameInfo();

@@ -2,5 +2,7 @@
 <guide>
     <level1>
         <step sequence="0" instanceName="StrokeDirt" subSeq="1"/>
+        <step sequence="1" instanceName="StrokeDirt" subSeq="2"/>
+        <step sequence="2" instanceName="FlameWhite" subSeq="1"/>
     </level1>
 </guide>

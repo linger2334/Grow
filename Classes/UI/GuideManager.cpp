@@ -43,34 +43,41 @@ void GuideManager::init()
 
 void GuideManager::loadGuideXML()
 {
-    bool isFileExist = FileUtils::getInstance()->isFileExist("guide.xml");
+    std::string filePath = FileUtils::getInstance()->fullPathForFilename("guide.xml");
+    bool isFileExist = FileUtils::getInstance()->isFileExist(filePath);
     if (isFileExist) {
         XMLDocument* pDoc = new XMLDocument();
-        pDoc->LoadFile("guide.xml");
-        
-        XMLElement* rootElement = pDoc->RootElement();
-        XMLElement* levelElement = rootElement->FirstChildElement(StringUtils::format("level%d",levelid).c_str());
         std::vector<GuideInfo> phaseInfos;
-        if (levelElement) {
-            XMLElement* guidePhase = levelElement->FirstChildElement();
-            int sequcnece;
-            std::string instanceName;
-            int subSeq;
-            bool noSynchro = false;
+        int ret = pDoc->LoadFile(filePath.c_str());
+        if (ret == XML_SUCCESS) {
+            XMLElement* rootElement = pDoc->RootElement();
+            XMLElement* levelElement = rootElement->FirstChildElement(StringUtils::format("level%d",levelid).c_str());
             
-            while (guidePhase) {
-                sequcnece = guidePhase->IntAttribute("sequence");
-                instanceName = guidePhase->Attribute("instanceName");
-                subSeq = guidePhase->IntAttribute("subSeq");
-                noSynchro = guidePhase->QueryBoolAttribute("noSynchro", &noSynchro);
-                GuideInfo singleInfo(sequcnece,instanceName,subSeq,noSynchro);
-                phaseInfos.push_back(singleInfo);
+            if (levelElement) {
+                XMLElement* guidePhase = levelElement->FirstChildElement();
+                int sequcnece;
+                std::string instanceName;
+                int subSeq;
+                bool noSynchro = false;
                 
-                guidePhase = guidePhase->NextSiblingElement();
+                while (guidePhase) {
+                    sequcnece = guidePhase->IntAttribute("sequence");
+                    instanceName = guidePhase->Attribute("instanceName");
+                    subSeq = guidePhase->IntAttribute("subSeq");
+                    guidePhase->QueryBoolAttribute("noSynchro", &noSynchro);
+                    GuideInfo singleInfo(sequcnece,instanceName,subSeq,noSynchro);
+                    phaseInfos.push_back(singleInfo);
+                    
+                    noSynchro = false;
+                    guidePhase = guidePhase->NextSiblingElement();
+                }
+                
+                std::sort(phaseInfos.begin(), phaseInfos.end());
             }
-            
-            std::sort(phaseInfos.begin(), phaseInfos.end());
+        }else{
+            log("XMLError is %d",ret);
         }
+        
         
         if (pDoc) {
             delete pDoc;
@@ -90,7 +97,7 @@ void GuideManager::setUp(std::vector<GuideInfo> &guidePhases)
         for (int i =0; i<len; i++) {
             _phaseArray.push_back(guidePhases.at(i));
             _sequenceName.push_back(guidePhases.at(i).instanceName);
-            _instanceQueue[i] = _memberMap[_sequenceName.at(i)];
+            _instanceQueue.push_back(_memberMap[_sequenceName.at(i)]);
             _finishList.push_back(false);
         }
     }
