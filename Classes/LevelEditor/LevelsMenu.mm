@@ -149,16 +149,20 @@ void LevelsMenu::selectLevel(cocos2d::Ref *sender, cocos2d::ui::ListView::EventT
         fileIndex = i;
     }
 
-    
+    int levelid = 0;
     std::string fileName;
     if (fileIndex<sumCount1) {
-        fileName = StringUtils::format("levels/level %d - %d",1,fileIndex + 1);
+        levelid = 1;
+        fileName = StringUtils::format("levels/level %d - %d",levelid,fileIndex + 1);
     }else if (fileIndex<sumCount2 && fileIndex>=sumCount1){
-        fileName = StringUtils::format("levels/level %d - %d",2,fileIndex-sumCount1 + 1);
+        levelid = 2;
+        fileName = StringUtils::format("levels/level %d - %d",levelid,fileIndex-sumCount1 + 1);
     }else if (fileIndex<sumCount3 && fileIndex>=sumCount2){
-        fileName = StringUtils::format("levels/level %d - %d",3,fileIndex-sumCount2 + 1);
+        levelid = 3;
+        fileName = StringUtils::format("levels/level %d - %d",levelid,fileIndex-sumCount2 + 1);
     }else if (fileIndex<sumCount4 && fileIndex>=sumCount3){
-        fileName = StringUtils::format("levels/level %d - %d",4,fileIndex-sumCount3 + 1);
+        levelid = 4;
+        fileName = StringUtils::format("levels/level %d - %d",levelid,fileIndex-sumCount3 + 1);
     }else{
         return;
     }
@@ -173,7 +177,7 @@ void LevelsMenu::selectLevel(cocos2d::Ref *sender, cocos2d::ui::ListView::EventT
             if(selectedIndex == 1){
                 Director::getInstance()->replaceScene(LevelEditor::createScene());
             }else{
-                LevelManager::getInstance()->selectLevel(5);
+                LevelManager::getInstance()->selectLevel(levelid);
                 auto manager = GameManager::getInstance();
 //                manager->releaseGameScene();
                 manager->_levelFileName = fileName;

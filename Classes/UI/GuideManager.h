@@ -44,6 +44,7 @@ public:
     void setUp(std::vector<GuideInfo>& guidePhases);
     void uninstall();
     void Register(GuideComponentDelegate* instance);
+    void unRegister(GuideComponentDelegate* instance);
     void start(int from=0);
     void goNextStep(int designedStep=-1);
     void pauseGuide();
@@ -56,6 +57,8 @@ public:
     inline bool isSetUp() { return _setUp;}
     inline bool isPaused() { return _paused;}
     inline int getCurrentStep() { return _currentStep;}
+    int getStepIndexBySequence(int sequenceNum);
+    int getSequenceNumByIndex(int index);
     void onStepFinish(GuideInfo& guidePhase);
     void onGuideFinish();
     int levelid;

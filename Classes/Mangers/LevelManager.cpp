@@ -137,7 +137,7 @@ void LevelManager::initLevelInfoByRecord()
 }
 void LevelManager::initLevelInfo()
 {
-    LevelManager::selectMapFile(_mapGroupId,_mapGroupSubId);
+//    LevelManager::selectMapFile(_mapGroupId,_mapGroupSubId);
     
     switch (_levelId) {
         case 1:

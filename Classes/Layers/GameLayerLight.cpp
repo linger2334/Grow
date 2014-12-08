@@ -531,14 +531,18 @@ int GameLayerLight::randLightByPlant(int plantIndex)
 {
     auto& lisths =  _plantLights[plantIndex]._lightLists;
     int size = lisths.size();
-    int index = rand()%size;
-    int i =0;
-    for (auto& ip : lisths) {
-        if (i == index) {
-            return ip.second._id;
+    ////add by wlg
+    if (size >0 ) {
+        int index = rand()%size;
+        int i =0;
+        for (auto& ip : lisths) {
+            if (i == index) {
+                return ip.second._id;
+            }
+            i++;
         }
-        i++;
     }
+    
     return -1;
 }
 void GameLayerLight::removeLightToPlantList(int plantIndex,int id)

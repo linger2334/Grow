@@ -59,7 +59,7 @@ void StatisticsData::initData()
     std::string currentdate = StringUtils::format("%d%02d%02d",year,month,day);
     
     std::string fullPath = FileUtils::getInstance()->getWritablePath() + "StatisticsData.plist";
-    if(_userDefault->getBoolForKey("isBeginner", true)){
+    if(true){
         _userDefault->setIntegerForKey("collectedWhite", 0);
         _userDefault->setIntegerForKey("collectedBlue", 0);
         _userDefault->setIntegerForKey("collectedViolet", 0);
@@ -75,7 +75,7 @@ void StatisticsData::initData()
             leveldata->setObject(__String::create(currentdate), "date");
             leveldata->setObject(__Integer::create(0), "clearances");
             
-            leveldata->setObject(__Integer::create(0), "days");
+            leveldata->setObject(__Integer::create(1), "days");
             leveldata->setObject(__Integer::create(0), "hours");
             leveldata->setObject(__Integer::create(0), "minutes");
             leveldata->setObject(__Integer::create(0), "totalFlame_White");
@@ -86,6 +86,10 @@ void StatisticsData::initData()
             leveldata->setObject(__Integer::create(0), "failures");
             leveldata->setObject(__Integer::create(0), "collectionVolume");
             
+            leveldata->setObject(__Bool::create(true), "needGuide");
+            leveldata->setObject(__Integer::create(0), "guideCourse");
+            leveldata->setObject(__Integer::create(0), "guideSequence");
+
             root->setObject(leveldata, StringUtils::format("level%d",i+1));
         }
         root->writeToFile(fullPath.c_str());
@@ -106,12 +110,15 @@ void StatisticsData::initData()
     hours = ((__String*)_currentLevelData->objectForKey("hours"))->intValue();
     minutes = ((__String*)_currentLevelData->objectForKey("minutes"))->intValue();
     totalFlame_White = ((__String*)_currentLevelData->objectForKey("totalFlame_White"))->intValue();
-    totalFlame_Blue = ((__String*)_currentLevelData)->intValue();
-    totalFlame_Violet = ((__String*)_currentLevelData)->intValue();
-    totalFlame_Orange = ((__String*)_currentLevelData)->intValue();
-    clearances = ((__String*)_currentLevelData)->intValue();
-    failures = ((__String*)_currentLevelData)->intValue();
-    collectionVolume = ((__String*)_currentLevelData)->intValue();
+    totalFlame_Blue = ((__String*)_currentLevelData->objectForKey("totalFlame_Blue"))->intValue();
+    totalFlame_Violet = ((__String*)_currentLevelData->objectForKey("totalFlame_Violet"))->intValue();
+    totalFlame_Orange = ((__String*)_currentLevelData->objectForKey("totalFlame_Orange"))->intValue();
+    clearances = ((__String*)_currentLevelData->objectForKey("clearances"))->intValue();
+    failures = ((__String*)_currentLevelData->objectForKey("failures"))->intValue();
+    collectionVolume = ((__String*)_currentLevelData->objectForKey("collectionVolume"))->intValue();
+    needGuide = ((__String*)(_currentLevelData->objectForKey("needGuide")))->boolValue();
+    guideCourse = ((__String*)_currentLevelData->objectForKey("guideCourse"))->intValue();
+    guideSequence = ((__String*)_currentLevelData->objectForKey("guideSequence"))->intValue();
     
 }
 
@@ -141,6 +148,9 @@ void StatisticsData::saveData()
     _currentLevelData->setObject(totalDistance, "totalDistance");
     _currentLevelData->setObject(__Integer::create(failures), "failures");
     _currentLevelData->setObject(__Integer::create(collectionVolume), "collectionVolume");
+    _currentLevelData->setObject(__Bool::create(needGuide), "needGuide");
+    _currentLevelData->setObject(__Integer::create(guideCourse), "guideCourse");
+    _currentLevelData->setObject(__Integer::create(guideSequence), "guideSequence");
     _statisticsdata->setObject(_currentLevelData, StringUtils::format("level%d",levelid));
 }
 

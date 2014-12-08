@@ -8,6 +8,7 @@
 
 #include "GuideNode.h"
 #include "CocosGUI.h"
+#include "ScreenGuide.h"
 
 using namespace ui;
 
@@ -16,14 +17,10 @@ void GuideNode::onNextStep()
     GuideManager::getInstance()->goNextStep();
 }
 
-void GuideNode::onEnter()
+void GuideNode::onExit()
 {
-    ClippingNode::onEnter();
-    ActionInterval* appear = FadeIn::create(1);
-    CallFunc* registerSelf = CallFunc::create([&](){
-        GuideManager::getInstance()->Register(this);
-    });
-    this->runAction(Sequence::createWithTwoActions(appear, registerSelf));
+    ClippingNode::onExit();
+    GuideManager::getInstance()->unRegister(this);
 }
 
 ///////////////
@@ -43,7 +40,8 @@ bool StrokeDirt::init()
         stencil->setPosition(Vec2(VisibleSize.width/2,VisibleSize.height/2));
         this->setStencil(stencil);
         this->setInverted(true);
-        this->setAlphaThreshold(0.5);
+        //针对模板
+        this->setAlphaThreshold(1);
         
         Layout* graylayer = Layout::create();
         graylayer->setBackGroundColorType(cocos2d::ui::Layout::BackGroundColorType::SOLID);
@@ -83,8 +81,18 @@ bool StrokeDirt::init()
 
 void StrokeDirt::guideProcess(GuideInfo &guidePhase)
 {
+    if (guidePhase.subSeq == 1) {
+        ScreenGuide::getRunningLayer()->addChild(this);
+        FadeIn* appear = FadeIn::create(1.5);
+        CallFunc* goNext = CallFunc::create([&](){
+            this->onNextStep();
+        });
+        runAction(Sequence::create(appear,goNext,NULL));
+    }else if(guidePhase.subSeq == 2){
+        onNextStep();
+        log("complete 2nd phase");
+    }
     
-    onNextStep();
 }
 
 

@@ -62,6 +62,24 @@ enum Item_Type{
     Rock_Trape
 };
 
+enum class GuideCourse1{
+    StrokeDirt,
+    FlameWhite,
+    FlameBlue
+};
+
+enum class GuideCourse2{
+    EncounterCicada
+};
+
+enum class GuideCourse3{
+    EncounterSerpent
+};
+
+enum class GuideCourse4{
+    EncounterGear
+};
+
 #define IMAGE_FLAME_BLUE "Flame_Blue.png"
 #define IMAGE_FLAME_ORANGE "Flame_Orange.png"
 #define IMAGE_FLAME_VIOLET "Flame_Violet.png"

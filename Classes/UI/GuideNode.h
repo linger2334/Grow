@@ -20,7 +20,7 @@ public:
     virtual void guideProcess(GuideInfo& guidePhase) { }
     virtual void guideClear() { }
     virtual void onNextStep();
-    void onEnter();
+    void onExit();
 };
 
 class StrokeDirt : public GuideNode

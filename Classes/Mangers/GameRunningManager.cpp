@@ -73,6 +73,7 @@ bool GameRunningManager::checkChangeSubMap()
            GameRunningInfo::getInstance()->_gamePassHeight > submapHeight)
         {
                GameRunningInfo::getInstance()->getGameSceneNode()->unscheduleUpdate();
+#ifndef GROW_LEVELEDITOR
             if (LevelManager::getInstance()->selectNextSubLevel()) {
                 GameManager::getInstance()->releaseGameScene();
                 GameManager::getInstance()->navigationTo(SceneLoding);
@@ -80,11 +81,13 @@ bool GameRunningManager::checkChangeSubMap()
             }
             else
             {
-//                GameManager::getInstance()->releaseGameScene();
-//                GameManager::getInstance()->navigationTo(SceneGameWin);
+                GameManager::getInstance()->releaseGameScene();
+                GameManager::getInstance()->navigationTo(SceneGameWin);
                 return true;
             }
-         
+#else
+            return true;
+#endif
         }
     }
     return false;

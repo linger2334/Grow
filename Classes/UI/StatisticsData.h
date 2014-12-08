@@ -40,6 +40,9 @@ public:
     int clearances;
     int failures;
     int collectionVolume;
+    bool needGuide;
+    int guideCourse;
+    int guideSequence;
     
 protected:
     time_t startTime;

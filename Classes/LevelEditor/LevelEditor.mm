@@ -54,8 +54,6 @@ bool LevelEditor::init()
 
 void LevelEditor::playLevel()
 {
-    
-    LevelManager::getInstance()->selectLevel(5);
     auto manager = GameManager::getInstance();
 //    manager->releaseGameScene();
     manager->_fileHandler->_items.sort(OrderByHeight);

@@ -123,7 +123,7 @@ void GameSceneMain::initLevelEditorMenu()
     Menu* menu = Menu::create(toLevelsItem,toEditorItem,NULL);
     menu->setPosition(Vec2(VisibleSize.width/2,toEditorItem->getContentSize().height/2));
     menu->alignItemsHorizontallyWithPadding(VisibleSize.width/10);
-    GameRunningInfo::getInstance()->getGameSceneNode()->addChild(menu,999);
+    GameRunningInfo::getInstance()->getGameSceneNode()->addChild(menu,MapLevelEditorMenu);
     
     Button* addSpeed = Button::create("addspeed.png");
     Button* reduceSpeed = Button::create("reducespeed.png");
@@ -170,8 +170,8 @@ void GameSceneMain::initLevelEditorMenu()
         }
     });
     
-    GameRunningInfo::getInstance()->getGameSceneNode()->addChild(addSpeed,1000);
-    GameRunningInfo::getInstance()->getGameSceneNode()->addChild(reduceSpeed,1000);
-    GameRunningInfo::getInstance()->getGameSceneNode()->addChild(currentSpeed,1000);
+    GameRunningInfo::getInstance()->getGameSceneNode()->addChild(addSpeed,MapLevelEditorMenu);
+    GameRunningInfo::getInstance()->getGameSceneNode()->addChild(reduceSpeed,MapLevelEditorMenu);
+    GameRunningInfo::getInstance()->getGameSceneNode()->addChild(currentSpeed,MapLevelEditorMenu);
 //    GameRunningInfo::getInstance()->getGameSceneNode()->addChild(invert,1000);
 }

@@ -8,6 +8,7 @@
 
 #include "GuideManager.h"
 #include "tinyxml2/tinyxml2.h"
+#include "StatisticsData.h"
 using namespace tinyxml2;
 
 GuideManager* GuideManager::_sharedGuideManager = nullptr;
@@ -78,14 +79,12 @@ void GuideManager::loadGuideXML()
             log("XMLError is %d",ret);
         }
         
-        
         if (pDoc) {
             delete pDoc;
             pDoc = nullptr;
         }
         
         setUp(phaseInfos);
-        start();
     }
 }
 
@@ -107,6 +106,8 @@ void GuideManager::uninstall()
 {
     if (_setUp) {
         _setUp = false;
+        _paused = false;
+        levelid = -1;
         if (_currentStep >= 0) {
             doClear(_instanceQueue.at(_currentStep));
         }
@@ -141,6 +142,20 @@ void GuideManager::Register(GuideComponentDelegate *instance)
     }
 }
 
+void GuideManager::unRegister(GuideComponentDelegate *instance)
+{
+    if (instance) {
+        std::string name = instance->getInstanceName();
+        if (_memberMap[name]) {
+            for (int i = 0; i<_sequenceName.size(); i++) {
+                if (!_sequenceName.at(i).compare(name)) {
+                    _instanceQueue.at(i) = nullptr;
+                }
+            }
+        }
+    }
+}
+
 void GuideManager::start(int from/*0*/)
 {
     goNextStep(from);
@@ -169,7 +184,6 @@ void GuideManager::goNextStep(int designedStep/*-1*/)
         _instanceQueue.at(_nextStep)->guideProcess(_phaseArray.at(_nextStep));
     }else if(_nextStep == _instanceQueue.size()){
         onGuideFinish();
-        uninstall();
     }else{
         pauseGuide();
     }
@@ -209,12 +223,33 @@ void GuideManager::doClear(GuideComponentDelegate* instance)
     }
 }
 
+int GuideManager::getStepIndexBySequence(int sequenceNum)
+{
+    int len = _phaseArray.size();
+    for (int i = 0; i<len; i++) {
+        if (_phaseArray.at(i).sequence == sequenceNum) {
+            return i;
+        }
+    }
+    
+    return 0;
+}
+
+int GuideManager::getSequenceNumByIndex(int index)
+{
+    int len = _phaseArray.size();
+    CCASSERT(index>=0 && index<len, "index is not valid!");
+    return _phaseArray.at(index).sequence;
+}
+
 void GuideManager::onStepFinish(GuideInfo &guidePhase)
 {
-    
+    if (!guidePhase.noSynchro) {
+        StatisticsData::getRunningLayer()->guideSequence = getSequenceNumByIndex(_currentStep + 1);
+    }
 }
 
 void GuideManager::onGuideFinish()
 {
-    
+    uninstall();
 }

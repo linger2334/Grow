@@ -13,6 +13,7 @@
 #include "Macro.h"
 #include "GameLayerBase.h"
 #include "GuideManager.h"
+#include "StatisticsData.h"
 
 class ScreenGuide : public GameLayerBase,public GameLayerHelper<ScreenGuide>
 {
@@ -23,7 +24,10 @@ public:
     void moveDown(float y);
     void update(float dt);
 protected:
+    StatisticsData* _statisticsData;
     GuideManager* _guideManager;
+    int levelid;
+    int guideCourse;
 };
 
 
