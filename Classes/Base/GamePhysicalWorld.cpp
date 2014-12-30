@@ -17,7 +17,17 @@ void GamePhysicalWorld::update(float dt)
 }
 bool GamePhysicalWorld::isInMapDirtOrOutMap(Vec2 point)
 {
-   
+    auto& mapGrid = GameLayerMap::getRunningLayer()->_mapGrid;
+    auto cell = mapGrid.getMapGridCellByPosition(point.x, point.y);
+    bool ret = false;
+    if (!mapGrid.isOutMapGrid(cell)&&
+        mapGrid.getValue(cell._x, cell._y) == GridType::Dirt) {
+        ret = true;
+    }
+    if (mapGrid.isOutMapGridX(cell)) {
+        ret = true;
+    }
+    return ret;
 }
 void  GamePhysicalWorld::initBox2dWorld()
 {

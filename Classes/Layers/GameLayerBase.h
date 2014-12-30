@@ -3,6 +3,7 @@
 #include "common.h"
 #include <typeinfo>
 #include "GameRunningInfo.h"
+
 class GameLayerBase : public  Node
 {
 public:
@@ -13,13 +14,15 @@ public:
     virtual bool  initGameInfo(){return true;}
     virtual bool  releaseGameInfo(){return true;}
     virtual void  moveDown(float y) = 0;
-    virtual void updateConfigs(){}
-    virtual bool onTouchBegan(Touch*,Event*){return false;}
-    virtual void onTouchMoved(Touch*,Event*){}
-    virtual void onTouchEnded(Touch*,Event*){}
-    virtual void onTouchCancelled(Touch*,Event*){}
-//  virtual bool saveToFile();
-//  virtual bool initBySave();
+    virtual void  updateConfigs(){}
+    virtual bool  onTouchBegan(Touch*,Event*){return false;}
+    virtual void  onTouchMoved(Touch*,Event*){}
+    virtual void  onTouchEnded(Touch*,Event*){}
+    virtual void  onTouchCancelled(Touch*,Event*){}
+    
+    virtual bool  saveToFile(){return true;}
+    virtual bool  initBySaveConfig(){return true;}
+    
     virtual const std::type_info& getType();
     virtual const std::string getTypeName();
     bool         _isHandle;

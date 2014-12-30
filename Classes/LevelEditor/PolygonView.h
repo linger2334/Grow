@@ -18,6 +18,8 @@
 
 @property(nonatomic,assign)BOOL isSelected;
 @property(nonatomic,assign)BOOL isConvex;
+@property(nonatomic,copy)NSString* itemtype;
+@property(nonatomic,strong)NSMutableArray* _bindIDs;
 @property(nonatomic,copy)NSString* pointType;
 @property(nonatomic,assign)UILabel* pathNum;
 @property(nonatomic,copy)UIColor* defaultColor;

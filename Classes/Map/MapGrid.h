@@ -145,7 +145,15 @@ public:
     {
         return isOutMapGrid(cell._x, cell._y);
     }
-    
+    bool isOutMapGridX(int x,int y) const
+    {
+        return x < 0 ||
+        x >= _gridWidth;
+    }
+    bool isOutMapGridX(const GridCell& cell)
+    {
+        return isOutMapGridX(cell._x, cell._y);
+    }
     bool isViewTopOutMapGrid()
     {
         return isOutMapGrid(0,_startHeight+_maxViewHeight);

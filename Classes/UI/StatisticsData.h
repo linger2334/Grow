@@ -25,7 +25,8 @@ public:
     void initData();
     void saveData();
     void saveBothFiles();
-    void checkNewFlowerUnlock();
+//    void checkNewFlowerUnlock();
+    void checkNewFlowerUnlock(int flowerID);
     void moveDown(float y);
     void update(float dt);
     
@@ -44,6 +45,7 @@ public:
     int guideCourse;
     int guideSequence;
     
+    inline __Array* getFlowerUnlockInfo() { return _flowerUnlockInfo;};
 protected:
     time_t startTime;
     int levelid;
@@ -52,6 +54,7 @@ protected:
     UserDefault* _userDefault;
     __Dictionary* _statisticsdata;
     __Dictionary* _currentLevelData;
+    __Array* _flowerUnlockInfo;
     ValueVector _flowersInfo;
     
 };

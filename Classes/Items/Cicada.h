@@ -13,9 +13,13 @@
 #include "Box2d/Box2d.h"
 #include "Macro.h"
 #include "ItemModel.h"
-//#define CICADA_OLD 1
 
-class Cicada : public ItemModel
+enum class Cicada_State{
+    Motionless,
+    Moving
+};
+
+class Cicada : public ItemModel,public ReversalProtocol
 {
 public:
     Cicada();
@@ -25,23 +29,20 @@ public:
     bool init(Item& item);
     
     void createBody();
-    
+    void wingStir();
+    void wingFanning();
+    void onStateChangeToMotionless();
+    void onStateChangeToMoving();
+    void switchItemStatus();
+    void update(float dt);
 protected:
-#ifdef CICADA_OLD
-    Sprite* _head;
     Sprite* _belly;
-    Sprite* _leftwing;
-    Sprite* _rightwing;
-    
-    float w;
-    float includedAngle;
-    float fanningDuration;
-    float interval;
-    float bellyTransparency;
-#else
-    Sprite* _eye;
-    
-#endif
+    Sprite* _wing;
+    Vec2 prePosition;
+    CC_SYNTHESIZE(float, fanningSpeed, FanningSpeed)
+    CC_SYNTHESIZE(bool, autoTurnHead, AutoTurnHeadState)
+    CC_SYNTHESIZE(bool, autoFanning, AutoFannningState)
+    CC_SYNTHESIZE(Cicada_State, state, CicadaState)
     
 };
 

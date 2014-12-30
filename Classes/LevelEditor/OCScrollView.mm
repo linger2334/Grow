@@ -52,6 +52,69 @@
     CGPoint center = CGPointMake(width/2*currentZoomFactor, self.contentOffset.y + height/2);
     PolygonView* centerview = [[PolygonView alloc] initWithFrame:CGRectMake(center.x - kDefaultPolygonPointRadius*currentZoomFactor, center.y - kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor)];
     centerview.bounds = CGRectMake(-kDefaultPolygonPointRadius*currentZoomFactor, -kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor);
+    centerview.itemtype = @"Polygon_";
+    centerview._bindIDs = [NSMutableArray array];
+    centerview.backgroundColor = [UIColor grayColor];
+    centerview.defaultColor = centerview.backgroundColor;
+    centerview.pointType = @"centerview";
+    centerview.tag = [self firstUnusedTag];
+    polygontags.push_back(centerview.tag);
+    
+    [self addGestureRecognizerForCenterView:centerview];
+    [self addSubview:centerview];
+    [self.centerViews addObject:centerview];
+    [centerview release];
+    
+    //默认六个子节点
+    for(int i = 0;i<6;i++){
+        float dx,dy;
+        switch (i) {
+            case 0:
+                dx = kDefaultNewPolygonHalfDiameter*cosf(M_PI/3);
+                dy = kDefaultNewPolygonHalfDiameter*sinf(M_PI/3);
+                break;
+            case 1:
+                dx = kDefaultNewPolygonHalfDiameter*cosf(M_PI*2/3);
+                dy = kDefaultNewPolygonHalfDiameter*sinf(M_PI*2/3);
+                break;
+            case 2:
+                dx = kDefaultNewPolygonHalfDiameter*cosf(M_PI);
+                dy = kDefaultNewPolygonHalfDiameter*sinf(M_PI);
+                break;
+            case 3:
+                dx = kDefaultNewPolygonHalfDiameter*cosf(M_PI*4/3);
+                dy = kDefaultNewPolygonHalfDiameter*sinf(M_PI*4/3);
+                break;
+            case 4:
+                dx = kDefaultNewPolygonHalfDiameter*cosf(M_PI*5/3);
+                dy = kDefaultNewPolygonHalfDiameter*sinf(M_PI*5/3);
+                break;
+            case 5:
+                dx = kDefaultNewPolygonHalfDiameter*cosf(M_PI*2);
+                dy = kDefaultNewPolygonHalfDiameter*sinf(M_PI*2);
+                break;
+            default:
+                break;
+        }
+        dx *= currentZoomFactor;
+        dy *= -currentZoomFactor;
+        PolygonView* pointview = [self createPointViewAtLocalPoint:CGPointMake(dx,dy)];
+        [centerview addSubview:pointview];
+        [pointview release];
+        
+    }
+    
+    [self setNeedsDisplay];
+}
+
+-(void)createNewTriggerAtCenter
+{
+    //中心点
+    CGPoint center = CGPointMake(width/2*currentZoomFactor, self.contentOffset.y + height/2);
+    PolygonView* centerview = [[PolygonView alloc] initWithFrame:CGRectMake(center.x - kDefaultPolygonPointRadius*currentZoomFactor, center.y - kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor)];
+    centerview.bounds = CGRectMake(-kDefaultPolygonPointRadius*currentZoomFactor, -kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor);
+    centerview.itemtype = @"Trigger";
+    centerview._bindIDs = [NSMutableArray array];
     centerview.backgroundColor = [UIColor grayColor];
     centerview.defaultColor = centerview.backgroundColor;
     centerview.pointType = @"centerview";
@@ -68,26 +131,26 @@
         float dx,dy;
         switch (i) {
             case 0:
-                dx = - kDefaultNewPolygonHalfWidth;
-                dy = - kDefaultNewPolygonHalfHeight;
+                dx = - kDefaultNewTriggerHalfWidth;
+                dy = kDefaultNewTriggerHalfHeight;
                 break;
             case 1:
-                dx = - kDefaultNewPolygonHalfWidth;
-                dy = kDefaultNewPolygonHalfHeight;
+                dx = - kDefaultNewTriggerHalfWidth;
+                dy = - kDefaultNewTriggerHalfHeight;
                 break;
             case 2:
-                dx = kDefaultNewPolygonHalfWidth;
-                dy = kDefaultNewPolygonHalfHeight;
+                dx = kDefaultNewTriggerHalfWidth;
+                dy = - kDefaultNewTriggerHalfHeight;
                 break;
             case 3:
-                dx = kDefaultNewPolygonHalfWidth;
-                dy = - kDefaultNewPolygonHalfHeight;
+                dx = kDefaultNewTriggerHalfWidth;
+                dy = kDefaultNewTriggerHalfHeight;
                 break;
             default:
                 break;
         }
         dx *= currentZoomFactor;
-        dy *= currentZoomFactor;
+        dy *= -currentZoomFactor;
         PolygonView* pointview = [self createPointViewAtLocalPoint:CGPointMake(dx,dy)];
         [centerview addSubview:pointview];
         [pointview release];
@@ -97,16 +160,18 @@
     [self setNeedsDisplay];
 }
 
--(PolygonView*)createNewPolygonOfTag:(int)tag AtCCPercentPosition:(cocos2d::Vec2)position WithCCLocalVertxex:(cocos2d::__Array *)vertexes OfType:(bool)isConvex
+-(PolygonView*)createNewPolygonOfTag:(int)tag AtCCPercentPosition:(Vec2)position WithCCLocalVertxex:(__Array*)vertexes IsConvex:(bool)isConvex OfType:(NSString*)type andBindIDs:(NSMutableArray*)bindIDs
 {
     PolygonView* centerview = [[PolygonView alloc] initWithFrame:CGRectMake((position.x*width-kDefaultPolygonPointRadius)*currentZoomFactor, ((PAGE_COUNTS-position.y)*height - kDefaultPolygonPointRadius)*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor)];
     centerview.bounds = CGRectMake(-kDefaultPolygonPointRadius*currentZoomFactor, -kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor, 2*kDefaultPolygonPointRadius*currentZoomFactor);
+    centerview.isConvex = isConvex;
+    centerview.itemtype = type;
+    centerview._bindIDs = bindIDs;
     centerview.backgroundColor = [UIColor grayColor];
     centerview.defaultColor = centerview.backgroundColor;
     centerview.pointType = @"centerview";
     centerview.tag = tag;
     polygontags.push_back(centerview.tag);
-    centerview.isConvex = isConvex;
     
     [self addGestureRecognizerForCenterView:centerview];
     [self addSubview:centerview];
@@ -280,6 +345,13 @@
     [uiview addGestureRecognizer:tapRecgonzier];
     [tapRecgonzier release];
     
+    if ([uiview.itemtype isEqualToString:@"Trigger"]) {
+        UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:_gameManager->_levelEditor->_myViewController  action:@selector(handleLongPress:)];
+        longPressRecognizer.minimumPressDuration = 0.5;
+        [uiview addGestureRecognizer:longPressRecognizer];
+        [longPressRecognizer release];
+    }
+    
 }
 
 -(void)addGestureRecognizerForScrollView
@@ -399,11 +471,17 @@
             }
         }
         //
-        std::string mainKey = StringUtils::format("polygon%d",polygon.tag-1000);
+        std::string mainKey = StringUtils::format("polygon%d",polygon.tag);
         __Dictionary* propertyDict = __Dictionary::create();
         
         __String* position = __String::createWithFormat("{%f,%f}",polygon.center.x/self.contentSize.width,PAGE_COUNTS - polygon.center.y/(self.contentSize.height/PAGE_COUNTS));
         __Bool* isConvex = __Bool::create(polygon.isConvex);
+        __String* type = __String::create([polygon.itemtype UTF8String]);
+        __Array* bindIDs = __Array::create();
+        for (NSNumber* number in polygon._bindIDs) {
+            __String* ID = __String::createWithFormat("%d",[number intValue]);
+            bindIDs->addObject(ID);
+        }
         __Array* Vertexes = __Array::createWithCapacity(vertexes.count);
         for (NSValue* vertex in vertexes) {
             __String* point = __String::createWithFormat("{%f,%f}",[vertex CGPointValue].x,[vertex CGPointValue].y);
@@ -412,6 +490,10 @@
         
         propertyDict->setObject(position, "position");
         propertyDict->setObject(isConvex, "isConvex");
+        propertyDict->setObject(type, "type");
+        if (!type->compare("Trigger")) {
+            propertyDict->setObject(bindIDs, "bindIDs");
+        }
         propertyDict->setObject(Vertexes, "vertexes");
         
         polygonsDict->setObject(propertyDict, mainKey);
@@ -488,6 +570,13 @@
             CGContextAddLineToPoint(context,point.x, point.y);
         }
         CGContextClosePath(context);
+        if ([centerview.itemtype isEqualToString:@"Polygon_"]) {
+            CGContextSetStrokeColorWithColor(context, [UIColor whiteColor].CGColor);
+        }else if ([centerview.itemtype isEqualToString:@"Trigger"]){
+            NSString* triggerTag = [NSString stringWithFormat:@"%d",centerview.tag];
+            [triggerTag drawAtPoint:CGPointMake(centerview.frame.origin.x+kDefaultPolygonPointRadius*currentZoomFactor*0.2, centerview.frame.origin.y-kDefaultPolygonPointRadius*currentZoomFactor) withFont:[UIFont systemFontOfSize:kDefaultFontSize*currentZoomFactor]];
+            CGContextSetStrokeColorWithColor(context, [UIColor redColor].CGColor);
+        }
         CGContextStrokePath(context);
     }
     
@@ -539,11 +628,15 @@
 -(void)popupFeaturesPickerPopoverWith:(UIView*)uiview At:(CGPoint)position
 {
     self.longPressedView = uiview;
-    if (!self.featuresPicker) {
-        self.featuresPicker = [[[FeaturesPickerController alloc] initWithStyle:UITableViewStylePlain] autorelease];
-        self.featuresPicker._delegate = self;
-        self.featuresPickerPopover = [[[UIPopoverController alloc] initWithContentViewController:self.featuresPicker] autorelease];
+    UITableViewStyle tableViewStyle;
+    if ([uiview isKindOfClass:[ItemView class]]) {
+        tableViewStyle = UITableViewStylePlain;
+    }else if ([uiview isKindOfClass:[PolygonView class]]){
+        tableViewStyle = UITableViewStyleGrouped;
     }
+    self.featuresPicker = [[[FeaturesPickerController alloc] initWithStyle:tableViewStyle andUIView:uiview] autorelease];
+    self.featuresPicker._delegate = self;
+    self.featuresPickerPopover = [[[UIPopoverController alloc] initWithContentViewController:self.featuresPicker] autorelease];
     
     [self.featuresPickerPopover presentPopoverFromRect:uiview.frame inView:self permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
 }
@@ -562,7 +655,7 @@
         propertyController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
         propertyController.modalPresentationStyle = UIModalPresentationFormSheet;
         [self.featuresPickerPopover dismissPopoverAnimated:YES];
-        [_gameManager->_levelEditor->_myViewController presentModalViewController:propertyController animated:YES];
+        [_gameManager->_levelEditor->_myViewController presentModalViewController:propertyController animated:NO];
     }else if([option isEqualToString:@"addPathPoint"]){
         [self.featuresPickerPopover dismissPopoverAnimated:YES];
         [self addPathPointOnTouch:(ItemView*)self.longPressedView];
@@ -579,7 +672,7 @@
 
 -(NSInteger)pickerView:(UIPickerView*)pickerView numberOfRowsInComponent:(NSInteger)component
 {
-    return 10;
+    return 4;
 }
 
 -(NSString*)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
@@ -653,7 +746,6 @@
 {
     self.centerViews = nil;
     self.toDealWithPointView = nil;
-    self.featuresPicker = nil;
     self.featuresPickerPopover = nil;
     [super dealloc];
 }

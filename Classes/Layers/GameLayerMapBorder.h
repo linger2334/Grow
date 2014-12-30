@@ -28,7 +28,7 @@ public:
     bool isHasBorder(const GridCell& cell);
     void removeBorder(const GridCell& cell);
     void addBorderLine(const GameBorderLine& line);
-    
+    void clearBorders();
     int createOneQuad();
     void releaseQuad(int index);
     
@@ -45,7 +45,11 @@ public:
     void  addBorderCell(BorderCell);
     
     void updateBorder(int x,int y, int width,int height);
+    void updateBorderCheckRemove(int x,int y, int width,int height);
+    void updateBorder(std::set<BorderCell>&& borders);
     bool isBorderCell(int x,int y,unsigned char type,BorderCell& cellOut);
+    
+    bool isNewBorderCell(int x,int y,unsigned char type,BorderCell& cellOut);
     
     b2Vec2 getB2Vec2ByCell(const BorderCell& cell);
     void addBorderLineToBox2dWorld( GameBorderLine& line);

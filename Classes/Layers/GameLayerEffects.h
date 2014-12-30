@@ -11,18 +11,16 @@ public:
     virtual bool initGameInfo();
     virtual bool releaseGameInfo();
     virtual void moveDown(float yLen);
-   // void removeBorderLight();
+
     void removeLightBorderByCell(int tag);
- //   void showCrashBorderLight();
-    
+
     void showCrashBorderLight(int plantIndex = 0);
     void removeBorderLight(int plantIndex = 0);
     void onChangeCellCall(const GridCell& cell);
-    bool   _islightRuningAction;
-    SpriteBatchNode*    _crashBorderBatch;
+
     std::vector<SpriteBatchNode*>  _crashBorderBatchs;
     std::vector<bool>           _islightRuningActions;
-  //  std::map<GridCell,Sprite*> _crashBorderLightMap;
+
     int     _gridWidth;
 };
 

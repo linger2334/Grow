@@ -26,7 +26,9 @@ bool Barrier::init(Item &item)
 {
     if (ItemModel::init(item)) {
         
-        setTexture(IMAGE_BARRIER);
+        setStatus(ItemStatus::NormalStatus);
+        setTexture(IMAGE_BARRIER_RED);
+        setCascadeOpacityEnabled(true);
         setRotation(CC_RADIANS_TO_DEGREES(item.angle));
         setScale(item.scale);
         
@@ -47,4 +49,24 @@ void Barrier::createBody()
     
     ((LayerItem*)getParent())->_fixturesCache->addFixturesToBody(_body, "Barrier");
     
+}
+
+void Barrier::switchItemStatus()
+{
+    std::string filename;
+    if (status == ItemStatus::NormalStatus) {
+        status = ItemStatus::ReversalStatus;
+        filename = "Barrier_Blue.png";
+    }else{
+        status = ItemStatus::NormalStatus;
+        filename = "Barrier_Red.png";
+    }
+
+    FadeOut* fadeaway = FadeOut::create(kDefaultSwitchStatusInterval);
+    CallFunc* changeTexture = CallFunc::create([=](){
+        setTexture(filename);
+    });
+    FadeIn* fadeIn = FadeIn::create(kDefaultSwitchStatusInterval);
+    Sequence* turnColor = Sequence::create(fadeaway,changeTexture,fadeIn,NULL);
+    runAction(turnColor);
 }

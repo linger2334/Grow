@@ -62,3 +62,30 @@ RenderMaskColorNode* RenderMaskColorNode::createReverseMask()
 {
     return RenderMaskColorNode::create(!(_colorMask&ColorMask::Red),!(_colorMask&ColorMask::Green),!(_colorMask&ColorMask::Blue),!(_colorMask&ColorMask::Alpha));
 }
+RenderOpenOrCloseDep*  RenderOpenOrCloseDep::create(bool isOpenDep)
+{
+    RenderOpenOrCloseDep *pRet = new RenderOpenOrCloseDep();
+    if (pRet && pRet->init())
+    {
+        pRet->_isOpenDep = isOpenDep;
+        pRet->autorelease();
+        return pRet;
+    }
+    else
+    {
+        delete pRet;
+        pRet = NULL;
+        return NULL;
+    }
+    
+}
+void RenderOpenOrCloseDep::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
+{
+    _customCommand.init(_globalZOrder);
+    _customCommand.func = CC_CALLBACK_0(RenderOpenOrCloseDep::onDraw, this, transform, flags);
+    renderer->addCommand(&_customCommand);
+}
+void RenderOpenOrCloseDep::onDraw(const Mat4 &transform, uint32_t flags)
+{
+     Director::getInstance()->setDepthTest(_isOpenDep);
+}

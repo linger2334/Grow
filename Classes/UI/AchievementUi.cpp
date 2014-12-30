@@ -8,6 +8,7 @@
 #include "AchievementUi.h"
 #include "FlowerDescription.h"
 #include "ScreenSelectLevel.h"
+#include "StatisticsData.h"
 using namespace ui;
 
 #define SCROLL_DEACCEL_RATE  0.95f  
@@ -197,19 +198,37 @@ void AchievementUi::addFlowers()
         m_container->addChild(spriteRight);
     }
     
-    seedlingIdx = UserDefault::getInstance()->getIntegerForKey("seedlingIndex");
-    
     _flowersInfo = FileUtils::getInstance()->getValueVectorFromFile("flowersinfo.plist");
+    __Array* flowerUnlockInfo;
+    if (StatisticsData::isHasRunningLayer()) {
+        flowerUnlockInfo = StatisticsData::getRunningLayer()->getFlowerUnlockInfo();
+    }else{
+        std::string path = FileUtils::getInstance()->getWritablePath() +"StatisticsData.plist";
+        if (FileUtils::getInstance()->isFileExist(path)) {
+            __Dictionary* dict = __Dictionary::createWithContentsOfFile(path.c_str());
+            flowerUnlockInfo = static_cast<__Array*>(dict->objectForKey("flowerUnlock"));
+        }else{
+            flowerUnlockInfo = __Array::createWithCapacity(FLOWER_COUNT);
+            for (int i =0; i<FLOWER_COUNT; i++) {
+                flowerUnlockInfo->addObject(__Bool::create(false));
+            }
+        }
+        
+    }
+    
     Sprite* stone;
     MenuItemImage* item;
     std::string flowImageName;
     for (int i = 0; i<FLOWER_COUNT+1; i++) {
         flowImageName = _flowersInfo.at(i).asValueMap().at("imagename").asString();
-        if(i < seedlingIdx){
+        bool isUnlock = false;
+        if (i<FLOWER_COUNT) {
+            isUnlock = static_cast<__String*>(flowerUnlockInfo->getObjectAtIndex(i))->boolValue();
+        }
+        if(isUnlock){
             item = MenuItemImage::create(flowImageName,flowImageName,CC_CALLBACK_1(AchievementUi::flowerClicked, this));
             item->setScale(0.5);
-        }
-        else if( i == seedlingIdx){
+        }else{
             item = MenuItemImage::create("UI_AchiSeedling.png","UI_AchiSeedling.png",CC_CALLBACK_1(AchievementUi::flowerClicked, this));
             item->setName("seedling");
             //添加浮动
@@ -217,10 +236,10 @@ void AchievementUi::addFlowers()
             criclefloat->setPosition(0.95*item->getBoundingBox().size.width,0.75*item->getBoundingBox().size.height);
             criclefloat->runAction(RepeatForever::create(Sequence::create(MoveBy::create(5,Vec2(0,25)),MoveBy::create(5, Vec2(0,-25)), NULL)));
             item->addChild(criclefloat);
-    
-        }else{
-            item = MenuItemImage::create("UI_AchiLock.png","UI_AchiLock.png",CC_CALLBACK_1(AchievementUi::flowerClicked, this));
-            item->setEnabled(false);
+//    
+//        }else{
+//            item = MenuItemImage::create("UI_AchiLock.png","UI_AchiLock.png",CC_CALLBACK_1(AchievementUi::flowerClicked, this));
+//            item->setEnabled(false);
         }
         
         extern GLProgramState*  _glprogramstate;
@@ -240,8 +259,10 @@ void AchievementUi::addFlowers()
                 stone->setPosition(Vec2(XL2,(POSITION_RATIO*(i/3))*VisibleSize.height));
             }
             item->setPosition(stone->getPosition()+ITEM_OFFSET_L);
-            if (i >= seedlingIdx) {
+            if (!isUnlock) {
                 item->setPositionY(item->getPositionY()+ITEM_OFFSET_L_Y_ADD);
+            }else{
+                adjustFlowerPos(item, i);
             }
 
         }
@@ -257,8 +278,10 @@ void AchievementUi::addFlowers()
                 stone->setPosition(Vec2(XL3,(POSITION_RATIO*((i-1)/3))*VisibleSize.height+STONE_MIDDLE_OFFSET));
             }
             item->setPosition(stone->getPosition()+ITEM_OFFSET_M);
-            if (i >= seedlingIdx) {
+            if (!isUnlock) {
                 item->setPositionY(item->getPositionY()+ITEM_OFFSET_M_Y_ADD);
+            }else{
+                adjustFlowerPos(item, i);
             }
 
         }
@@ -274,8 +297,10 @@ void AchievementUi::addFlowers()
                 stone->setPosition(Vec2(XL4,(POSITION_RATIO*((i-2)/3))*VisibleSize.height));
             }
             item->setPosition(stone->getPosition()+ITEM_OFFSET_R);
-            if (i >= seedlingIdx) {
+            if (!isUnlock) {
                 item->setPositionY(item->getPositionY()+ITEM_OFFSET_R_Y_ADD);
+            }else{
+                adjustFlowerPos(item, i);
             }
         }
         
@@ -323,7 +348,7 @@ void AchievementUi::flowerClicked(cocos2d::Ref *sender)
 {
     MenuItemImage* flower = static_cast<MenuItemImage*>(sender);
     if (flower->getName() == "seedling") {
-        popupSeedlingPage(seedlingIdx);
+//        popupSeedlingPage(flower->getTag());
     }else{
         auto scene =  FlowerDescription::createScene(flower->getTag());
         Director::getInstance()->replaceScene(TransitionFade::create(2, scene));
@@ -429,5 +454,46 @@ void AchievementUi::update(float dt)
             MenuItem* item = static_cast<MenuItem*>(menu->getChildren().at(i));
             item->setVisible(true);
         }
+    }
+}
+
+void AchievementUi::adjustFlowerPos(cocos2d::MenuItemImage *flower, int index)
+{
+    float width = flower->getBoundingBox().size.width;
+    float height = flower->getBoundingBox().size.height;
+    Vec2 previousPos = flower->getPosition();
+    switch (index) {
+        case 2:
+            flower->setPosition(previousPos + Vec2(-0.2*width,0.1*height));
+            break;
+        case 5:
+            flower->setPosition(previousPos + Vec2(0, 0.1*height));
+            break;
+        case 6:
+            flower->setPosition(previousPos + Vec2(0, 0.05*height));
+            break;
+        case 8:
+            flower->setPosition(previousPos + Vec2(0, 0.1*height));
+            break;
+        case 10:
+            flower->setPosition(previousPos + Vec2(0,0.05*height));
+            break;
+        case 11:
+            flower->setPosition(previousPos + Vec2(0, 0.1*height));
+            break;
+        case 12:
+            flower->setPosition(previousPos + Vec2(0,0.05*height));
+            break;
+        case 13:
+            flower->setPosition(previousPos + Vec2(0,0.07*height));
+            break;
+        case 14:
+            flower->setPosition(previousPos + Vec2(0, 0.05*height));
+            break;
+        case 15:
+            flower->setPosition(previousPos + Vec2(0,0.03*height));
+            break;
+        default:
+            break;
     }
 }

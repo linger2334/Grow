@@ -41,6 +41,7 @@ Sprite*  GameLayerRollImage::addImage( bool topDir)
     if(topDir)_imageList.push_back(tempDirt);
     else _imageList.push_front(tempDirt);
     this->addChild(tempDirt);
+    //tempDirt->setColor(Color3B(60,48,40));
     return tempDirt;
 }
 

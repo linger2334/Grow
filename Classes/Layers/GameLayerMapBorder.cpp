@@ -308,13 +308,14 @@ bool GameLayerMapBorder::releaseGameInfo()
 }
 void GameLayerMapBorder::updateBox2dBorderLine()
 {
+    //return ;
    // _isBox2DBorderLineDirt = true;
     if(_isBox2DBorderLineDirt)
     {
         _isBox2DBorderLineDirt = false;
         removeAllBorderLineInBox2dWorld();
         std::set<BorderCell> oldSet;
-        float y = GameLayerPlant::getRunningLayer()->getPlantMinTopHeightInView()-70;
+        float y = GameLayerPlant::getRunningLayer()->getPlantMinTopHeightInView()-200;
         auto cellmin= _mapGrid->getMapGridCellByPosition(0, y);
         int minY =cellmin._y;
         for(auto& i:_borderMap)
@@ -436,9 +437,71 @@ void GameLayerMapBorder::removeBorder(const GridCell& cell)
     }
     
 }
+void GameLayerMapBorder::updateBorder(std::set<BorderCell>&& borders)
+{
+    
+}
+bool GameLayerMapBorder::isNewBorderCell(int x,int y,unsigned char type,BorderCell& cellOut)
+{
+    if (isBorderCell(x,y,(unsigned char)GridType::Dirt,cellOut)&&
+        !isHasBorder(cellOut._cell)) {
+        return true;
+    }
+    return false;
+}
+void GameLayerMapBorder::updateBorderCheckRemove(int x,int y, int width,int height)
+{
+    auto layerMap = GameLayerMap::getRunningLayer();
+    std::set<GridCell> cells;
+    for (int i = x; i < x+width; i++)
+    {
+        for (int j = y; j< y+height; j++)
+        {
+            GridCell gridCell = GridCell(i,j);
+            if (_mapGrid->isOutMapGrid(gridCell._x, gridCell._y)) {
+                continue;
+            }
+            
+            BorderCell cell;
+            if (!isBorderCell(x,y,(unsigned char)GridType::Dirt,cell)&&cell._maskDir > 0) {
+                static GridCell _vgrid[]=
+                {
+                    GridCell(-1,0),GridCell(1,0),GridCell(0,1),GridCell(0,-1),
+                    GridCell(-1,1),GridCell(-1,-1),GridCell(1,1),GridCell(1,-1)
+                };
+                for(int i = 0; i<(sizeof(_vgrid)/sizeof(GridCell));i++)
+                {
+                    GridCell tcell =cell._cell+_vgrid[i];
+                    if(_mapGrid->getValue(tcell._x,tcell._y)==GridType::None)continue;
+                    cells.insert(tcell);
+                }
+                layerMap->changeGridCell(cell._cell._x,cell._cell._y,GridType::None);
+            }
+        }
+    }
+    while (!cells.empty()) {
+        auto ip = cells.begin();
+        BorderCell cell;
+        if (!isBorderCell(ip->_x,ip->_x,(unsigned char)GridType::Dirt,cell)&&cell._maskDir > 0) {
+            static GridCell _vgrid[]=
+            {
+                GridCell(-1,0),GridCell(1,0),GridCell(0,1),GridCell(0,-1),
+                GridCell(-1,1),GridCell(-1,-1),GridCell(1,1),GridCell(1,-1)
+            };
+            for(int i = 0; i<(sizeof(_vgrid)/sizeof(GridCell));i++)
+            {
+                GridCell tcell =cell._cell+_vgrid[i];
+                if(_mapGrid->getValue(tcell._x,tcell._y)==GridType::None)continue;
+                cells.insert(tcell);
+            }
+            layerMap->changeGridCell(cell._cell._x,cell._cell._y,GridType::None);
+        }
+        cells.erase(ip);
+    }
+}
 void GameLayerMapBorder::updateBorder(int x,int y, int width,int height)
 {
- 
+    //updateBorderCheckRemove(x,y,width,height);
     std::set<BorderCell> borderSet;
     for (int i = x; i < x+width; i++)
     {
@@ -450,12 +513,12 @@ void GameLayerMapBorder::updateBorder(int x,int y, int width,int height)
             }
             
             BorderCell cell;
-            if (isBorderCell(gridCell._x, gridCell._y,(unsigned char)GridType::Dirt,cell)&&
-                !isHasBorder(cell._cell)) {
+            if (isNewBorderCell(gridCell._x, gridCell._y,(unsigned char)GridType::Dirt,cell)) {
                 borderSet.insert(cell);
             }
         }
     }
+      _isBox2DBorderLineDirt = true;
     std::list<GameBorderLine> list(std::move(getBorderlines(std::move(borderSet))));
     if (list.size()<=0) {
         return;
@@ -465,7 +528,7 @@ void GameLayerMapBorder::updateBorder(int x,int y, int width,int height)
     {
         addBorderLine(line);
     }
-    _isBox2DBorderLineDirt = true;
+//    _isBox2DBorderLineDirt = true;
 }
 
 void GameLayerMapBorder::linkBorderLines(std::list<GameBorderLine>& lineList)
@@ -515,7 +578,9 @@ std::list<GameBorderLine> GameLayerMapBorder::getBorderlines( std::set<BorderCel
                 else tgrid = tcell.getPreMapCell();
                 if(set.empty())break;
                 auto ipn = set.find(tgrid);// std::find(set.begin(),set.end(),tgrid);
-                if(ipn == set.end()){ break;}
+                if(ipn == set.end()){
+                    break;
+                }
                 if(i==0)line.push_back(*ipn);
                 else line.push_fornt(*ipn);
                 tcell =*ipn;
@@ -537,7 +602,9 @@ std::list<GameBorderLine> GameLayerMapBorder::getBorderlines( std::set<BorderCel
     bool bRet=false;
     if(_mapGrid->getValue(x,y)==GridType::None)return false;
     int mask = 0;
-    
+    /// Test Log
+    bool masks[8]={false};
+    ///
     for (int i=0; i<8; i++) {
         if (_mapGrid->isOutMapGrid(x+vecs[i][0], y+vecs[i][1])) {
             continue;
@@ -546,7 +613,7 @@ std::list<GameBorderLine> GameLayerMapBorder::getBorderlines( std::set<BorderCel
         {
             mask |= (int)pow(2,i);
             bRet=true;
-            
+            masks[i] = true;
         }
     }
     if (bRet&&BorderCell::isValidBorderCell((BorderMaskType)mask))
@@ -554,7 +621,20 @@ std::list<GameBorderLine> GameLayerMapBorder::getBorderlines( std::set<BorderCel
         cellOut._cell=GridCell(x,y);
         cellOut._maskDir = (BorderMaskType)mask;
     }
-    else {bRet=false;}
+    else if(bRet) {
+        ///// Test Log undefine BorderCell
+        static  std::set<int> set;
+        if(set.find(mask)==set.end())
+        {
+             log("Border Mask %d%d%d%d%d%d%d%d",masks[0],masks[1],
+                 masks[2],masks[3],masks[4],masks[5],masks[6],masks[7]);
+            set.insert(mask);
+        }
+       /////
+        cellOut._cell=GridCell(x,y);
+        cellOut._maskDir = (BorderMaskType)mask;
+        bRet=false;
+    }
     return bRet;
 }
 void GameLayerMapBorder::moveDownGridCell(int len)
@@ -619,7 +699,7 @@ void GameLayerMapBorder::onDraw(const Mat4 &transform, uint32_t flags)
 //    glClearColor(1,1,1,1);
 //    glClear(GL_COLOR_BUFFER_BIT);
 //    glColorMask(true, true, true, true);
-//    return ;
+   //return ;
     getGLProgram()->use();
     getGLProgram()->setUniformsForBuiltins(transform);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -671,21 +751,24 @@ void GameLayerMapBorder::addBorderLineToBox2dWorld( GameBorderLine& line)
     if (count > 1) {
         auto v=  getB2Vec2ByCell(line._borderList.back());
         if(index > 0 && ((int)v.x != (int)verts[index-1].x)&&
-           ((int)v.y != (int)verts[index-1].y))
+           ((int)v.y != (int)verts[index-1].y)&&
+           ((int)v.x != (int)verts[0].x)&&
+           ((int)v.y != (int)verts[0].y))
         {
             verts[index] = v;
             index++;
         }
     }
-//    else
-//        index -= 1;
+    else
+       index -= 1;
     if(index > 2)
     {
         b2ChainShape b2line;
         if (count>0 && line.isRing()) {
             b2line.CreateLoop(verts, index);
         }
-        else    b2line.CreateChain(verts,index);
+        else
+            b2line.CreateChain(verts,index);
         
         fixtureDef.shape = &b2line;
         fixtureDef.filter.groupIndex = -1;
@@ -702,4 +785,11 @@ void GameLayerMapBorder::removeAllBorderLineInBox2dWorld()
     }
     _world->ClearForces();
     _bodies.clear();
+}
+ void GameLayerMapBorder::clearBorders()
+{
+    removeAllBorderLineInBox2dWorld();
+    _borderMap.clear();
+    _quads->removeAllQuads();
+    _quadsPool.clear();
 }

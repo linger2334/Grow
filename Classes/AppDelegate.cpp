@@ -32,7 +32,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     GameManager::getInstance()->initGameManagerInfo();
     GameRunningInfo::getInstance()->initGameRunningInfo();
     
-    director->setDisplayStats(false);
+    director->setDisplayStats(true);
 
     director->setAnimationInterval(1.0 / 60);
     auto menu = LevelsMenu::createScene();

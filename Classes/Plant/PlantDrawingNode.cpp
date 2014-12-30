@@ -62,7 +62,7 @@ void PlantDrawingNode::onDrawPlant(const Mat4 &transform, uint32_t flags)
 {
     auto plantLayer = GameLayerPlant::getRunningLayer();
     int count = plantLayer->getPlantCount();
-    for (int i = 0; i<2; i++) {
+    for (int i = 0; i<count; i++) {
         PlantNode* node = plantLayer->getPlantNodeByIndex(i);
         node->updateVertices();
         GL::bindTexture2D( node->_texture->getName());

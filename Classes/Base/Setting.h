@@ -22,6 +22,7 @@
 #define SHADER_NAME_PLANT_1_LEVEL_3 ""
 #define SHADER_NAME_PLANT_2_LEVEL_3 ""
 
+//#define OUT_GROW_DIR 1
 
 
 #endif

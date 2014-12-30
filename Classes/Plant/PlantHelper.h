@@ -72,7 +72,7 @@ namespace PlantHelper
             return ;
         }
         bool allIsValue(bool test){return _left== test && _right ==test;}
-        
+        bool allIsValueLR(bool test){return _left== test && _right ==test;}
         PlantGrowContext& operator &=(const PlantGrowContext& con)
         {
             _left &= con._left;
@@ -121,9 +121,19 @@ namespace PlantHelper
     PlantGrowContext getGrowContextGrowNextUnitLengthTestStone(PlantNode* plant);
     
     bool  isPlantHeadInStone(PlantNode* plant);
+    
+    float checkDetFromPointAToPointBWithPointC(Vec2 pointA,Vec2 pointB,Vec2 pointC);
+    PlantGrowContext getGrowContextPositionAngle(PlantNode* plant);
+    
+    
+    float growByPlantNode(PlantNode* plant);
+    
+    float  getMinMaxAngleByLength(float lenght,float minLen,float maxLen,float minAngle,float maxAngle);
     class RadiusContext
     {
     public:
+        RadiusContext(){}
+        RadiusContext(float height,float radius):_height(height),_radius(radius){}
         float _height;
         float _radius;
     };
@@ -136,15 +146,24 @@ namespace PlantHelper
         PlantRadiusHelper():_defaultRadius(0){ _preIterator = _contextList.begin();}
         
         PlantRadiusHelper(float defaultRadius):_defaultRadius(defaultRadius){}
-        
+        PlantRadiusHelper(const PlantRadiusHelper& obj)
+        {
+            _defaultRadius = obj._defaultRadius;
+            _contextList = obj._contextList;
+            _preIterator = _contextList.begin();
+        }
+        PlantRadiusHelper( const std::vector<RadiusContext>& list)
+        {
+            _contextList = list;
+            _preIterator = _contextList.begin();
+        }
         float getRadiusByHeight(float);
         
         void addOneContext(float height,float radius);
         
-        float _defaultRadius;
+        float _defaultRadius = 0.0f;
         PlantRadiusContextList _contextList;
         PlantRadiusContextList::iterator _preIterator;
-        
     };
 };
 

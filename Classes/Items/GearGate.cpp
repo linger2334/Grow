@@ -9,6 +9,7 @@
 #include "GearGate.h"
 #include "GameManager.h"
 #include "LayerItem.h"
+#include "GameRunningInfo.h"
 
 GearGate::GearGate():_left(nullptr),_leftEye(nullptr),_right(nullptr),_rightEye(nullptr)
 {
@@ -41,19 +42,18 @@ bool GearGate::init(Item &item)
         _left = Sprite::create("GearGate_Subject_L.png");
         _left->setCascadeOpacityEnabled(true);
         _leftEye = Sprite::create("GearGate_RedEye_L.png");
-        _leftEye->setPosition(77.0/121.0*_left->getBoundingBox().size.width,91.0/198.0*_left->getBoundingBox().size.height);
+        _leftEye->setPosition(75.0/121.0*_left->getBoundingBox().size.width,72.0/128.0*_left->getBoundingBox().size.height);
         _leftEye->setCascadeOpacityEnabled(true);
         _left->addChild(_leftEye);
         
         _right = Sprite::create("GearGate_Subject_L.png");
         _right->setCascadeOpacityEnabled(true);
         _rightEye = Sprite::create("GearGate_RedEye_L.png");
-        _rightEye->setPosition(77.0/121.0*_right->getBoundingBox().size.width,91.0/198.0*_right->getBoundingBox().size.height);
+        _rightEye->setPosition(75.0/121.0*_right->getBoundingBox().size.width,72.0/128.0*_right->getBoundingBox().size.height);
         _rightEye->setCascadeOpacityEnabled(true);
         _right->addChild(_rightEye);
-        _right->setRotation3D(Vec3(0, 180, 0));
+        _right->setScaleX(-1*_rightEye->getScaleX());
 
-        
         _left->setPosition(getPositionX()-_left->getContentSize().width/2*cosf(CC_DEGREES_TO_RADIANS(getRotation())),getPositionY()+_left->getContentSize().width/2*sinf(CC_DEGREES_TO_RADIANS(getRotation())));
         _left->setRotation(getRotation());
         
@@ -91,9 +91,11 @@ void GearGate::createBody()
 
 void GearGate::openGate()
 {
-    GameManager::getInstance()->getBox2dWorld()->DestroyBody(_body);
-    _body = nullptr;
-    
+    if (_body) {
+        GameManager::getInstance()->getBox2dWorld()->DestroyBody(_body);
+        _body = nullptr;
+    }
+
     //
     FadeOut* elapse = FadeOut::create(0.2);
     CallFunc* changeTexture_L = CallFunc::create([&](){
@@ -111,9 +113,20 @@ void GearGate::openGate()
     
     FiniteTimeAction* group1 = Spawn::create(turnColor_L,turnColor_R, NULL);
     FiniteTimeAction* group2 = Spawn::create(openLeftGate, openRightGate,NULL);
-    CallFunc* enableUpdate = CallFunc::create([&](){
-        this->scheduleUpdate();
-    });
-    
-    runAction(Sequence::create(group1,group2, enableUpdate,NULL));
+    ////add by wzf
+    auto callfunc =[=]()
+    {
+        for (auto& i : this->_waitingPlants) {
+            GameRunningManager::getInstance()->setPlantWaiting(i,false);
+        }
+        _waitingPlants.clear();
+    };
+    auto callRemove = [=]()
+    {
+        FadeTo* fadeTo = FadeTo::create(1, 0);
+        Sequence* seq = Sequence::create(fadeTo,RemoveSelf::create(), NULL);
+        _left->runAction(seq);
+        _right->runAction(seq->clone());
+    };
+    runAction(Sequence::create(group1,group2,CallFunc::create(callfunc),CallFunc::create(callRemove),RemoveSelf::create(true),NULL));
 }

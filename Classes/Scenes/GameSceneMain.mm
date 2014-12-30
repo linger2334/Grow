@@ -25,7 +25,6 @@ using namespace ui;
 GameSceneMain::~GameSceneMain()
 {
     GameRunningInfo::getInstance()->setGameSceneNode(nullptr);
-    GameManager::getInstance()->_gameScne = nullptr;
     CC_SAFE_RELEASE(GameManager::getInstance()->_fileHandler);
 }
 Scene* GameSceneMain::createScene()
@@ -94,17 +93,17 @@ void GameSceneMain::onDraw(const Mat4 &transform, uint32_t flags)
 #include "GameLayerMapBorder.h"
 void    GameSceneMain::updateFirstGrowPlant(float dt)
 {
-    GameLayerMap::getRunningLayer()->update(dt);
-    GameLayerMapBorder::getRunningLayer()->update(dt);
-    auto layerLight = GameLayerLight::getRunningLayer();
-    if (layerLight->isAllPlantHasLights()) {
-        unschedule(schedule_selector(GameSceneMain::updateFirstGrowPlant));
-        scheduleUpdate();
-        return ;
-    }
-    GameLayerPlant::getRunningLayer()->update(dt);
-    layerLight->update(dt);
-     GamePhysicalWorld::getInstance()->update(dt);
+//    GameLayerMap::getRunningLayer()->update(dt);
+//    GameLayerMapBorder::getRunningLayer()->update(dt);
+//    auto layerLight = GameLayerLight::getRunningLayer();
+//    if (layerLight->isAllPlantHasLights()) {
+//        unschedule(schedule_selector(GameSceneMain::updateFirstGrowPlant));
+//        scheduleUpdate();
+//        return ;
+//    }
+//    GameLayerPlant::getRunningLayer()->update(dt);
+//    layerLight->update(dt);
+//     GamePhysicalWorld::getInstance()->update(dt);
 }
 
 void GameSceneMain::initLevelEditorMenu()
@@ -117,6 +116,8 @@ void GameSceneMain::initLevelEditorMenu()
     Label* editorLabel = Label::createWithTTF("Editor", "Marker Felt.ttf", 36);
     MenuItem* toEditorItem = MenuItemLabel::create(editorLabel,[&](Ref*){
       //  GameManager::getInstance()->navigationTo(LevelEditor::createScene());
+        auto manager = GameManager::getInstance();
+        manager->releaseGameScene();
         Director::getInstance()->replaceScene(LevelEditor::createScene());
     });
     
@@ -158,20 +159,7 @@ void GameSceneMain::initLevelEditorMenu()
         }
     });
     
-    Text* invert = Text::create("Invert", "Arial", 24);
-    invert->setPosition(Vec2(0.85*VisibleSize.width,0.2*VisibleSize.height));
-    invert->setTouchEnabled(true);
-    invert->addTouchEventListener([](Ref* sender,Widget::TouchEventType eventType){
-        if(eventType == Widget::TouchEventType::ENDED){
-            Text* invert = dynamic_cast<Text*>(sender);
-            Sequence* scale = Sequence::create(ScaleTo::create(0.1, 1.2),ScaleTo::create(0.1, 1), nil);
-            invert->runAction(scale);
-            //LayerItem::getRunningLayer()->invertStatusInCurrentScreen();
-        }
-    });
-    
     GameRunningInfo::getInstance()->getGameSceneNode()->addChild(addSpeed,MapLevelEditorMenu);
     GameRunningInfo::getInstance()->getGameSceneNode()->addChild(reduceSpeed,MapLevelEditorMenu);
     GameRunningInfo::getInstance()->getGameSceneNode()->addChild(currentSpeed,MapLevelEditorMenu);
-//    GameRunningInfo::getInstance()->getGameSceneNode()->addChild(invert,1000);
 }

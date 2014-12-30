@@ -13,14 +13,14 @@
 #include "Macro.h"
 #include "ItemModel.h"
 
-class Barrier : public ItemModel
+class Barrier : public ItemModel,public ReversalProtocol
 {
 public:
     static Barrier* create(Item& item);
     bool init(Item& item);
     
     void createBody();
-    
+    void switchItemStatus();
 };
 
 

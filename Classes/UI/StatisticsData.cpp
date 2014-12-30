@@ -65,7 +65,6 @@ void StatisticsData::initData()
         _userDefault->setIntegerForKey("collectedViolet", 0);
         _userDefault->setIntegerForKey("collectedOrange", 0);
         _userDefault->setIntegerForKey("growHeight", 0);
-        _userDefault->setIntegerForKey("seedlingIndex", 0);
         _userDefault->setIntegerForKey("accumulativeTime_Natural", 0);
         
         __Dictionary* root = __Dictionary::create();
@@ -92,8 +91,18 @@ void StatisticsData::initData()
 
             root->setObject(leveldata, StringUtils::format("level%d",i+1));
         }
-        root->writeToFile(fullPath.c_str());
         
+        __Array* flowerUnlock = __Array::createWithCapacity(FLOWER_COUNT);
+        for (int i=0; i<FLOWER_COUNT; i++) {
+            if (i<16) {
+                flowerUnlock->addObject(__Bool::create(true));
+            }else{
+                flowerUnlock->addObject(__Bool::create(false));
+            }
+        }
+        root->setObject(flowerUnlock, "flowerUnlock");
+        
+        root->writeToFile(fullPath.c_str());
         _userDefault->setBoolForKey("isBeginner", false);
         _userDefault->flush();
     }
@@ -120,6 +129,7 @@ void StatisticsData::initData()
     guideCourse = ((__String*)_currentLevelData->objectForKey("guideCourse"))->intValue();
     guideSequence = ((__String*)_currentLevelData->objectForKey("guideSequence"))->intValue();
     
+    _flowerUnlockInfo = dynamic_cast<__Array*>(_statisticsdata->objectForKey("flowerUnlock"));
 }
 
 void StatisticsData::saveData()
@@ -141,8 +151,8 @@ void StatisticsData::saveData()
     LevelManager* levelManager = LevelManager::getInstance();
     if(levelManager->_mapGroupSubId >= levelManager->_mapGroups[levelManager->_mapGroupId].size()){
         clearances++;
-        _currentLevelData->setObject(__Integer::create(clearances), "clearances");
     }
+    _currentLevelData->setObject(__Integer::create(clearances), "clearances");
     srand((unsigned)time(nullptr));
     __Float* totalDistance= __Float::create(PAGE_COUNTS*DefiniteSize.height*levelManager->_mapGroups[levelManager->_mapGroupId].size()*clearances + DefiniteSize.height*rand()/(RAND_MAX+1.0));
     _currentLevelData->setObject(totalDistance, "totalDistance");
@@ -151,7 +161,6 @@ void StatisticsData::saveData()
     _currentLevelData->setObject(__Bool::create(needGuide), "needGuide");
     _currentLevelData->setObject(__Integer::create(guideCourse), "guideCourse");
     _currentLevelData->setObject(__Integer::create(guideSequence), "guideSequence");
-    _statisticsdata->setObject(_currentLevelData, StringUtils::format("level%d",levelid));
 }
 
 void StatisticsData::saveBothFiles()
@@ -171,44 +180,65 @@ void StatisticsData::saveBothFiles()
     _userDefault->flush();
 }
 
-void StatisticsData::checkNewFlowerUnlock()
+//void StatisticsData::checkNewFlowerUnlock()
+//{
+//    int FlameWhiteCount = _userDefault->getIntegerForKey("collectedWhite");
+//    int FlameBlueCount = _userDefault->getIntegerForKey("collectedBlue");
+//    int FlameVioltCount = _userDefault->getIntegerForKey("collectedViolet");
+//    int FlameOrangeCount = _userDefault->getIntegerForKey("collectedOrange");
+//    int growHeight = _userDefault->getIntegerForKey("growHeight") + moveDownDistance + GameLayerPlant::getRunningLayer()->getPlantNodeByIndex(0)->getHeadPosition().y;
+//    int seedlingIndex = _userDefault->getIntegerForKey("seedlingIndex", 0);
+//    
+//    ValueMap flowerTerm = _flowersInfo.at(seedlingIndex).asValueMap();
+//    if (FlameWhiteCount>=flowerTerm.at("condition").asValueMap().at("Flame_White").asInt()&&
+//        FlameBlueCount>=flowerTerm.at("condition").asValueMap().at("Flame_Blue").asInt()&&
+//        FlameVioltCount>=flowerTerm.at("condition").asValueMap().at("Flame_Violet").asInt()&&
+//        FlameOrangeCount>=flowerTerm.at("condition").asValueMap().at("Flame_Orange").asInt()&&
+//        growHeight>=flowerTerm.at("condition").asValueMap().at("Height").asInt())
+//    {
+//        _userDefault->setIntegerForKey("collectedWhite", 0);
+//        _userDefault->setIntegerForKey("collectedBlue", 0);
+//        _userDefault->setIntegerForKey("collectedViolet", 0);
+//        _userDefault->setIntegerForKey("collectedOrange", 0);
+//        _userDefault->setIntegerForKey("growHeight", 0);
+//        moveDownDistance = 0;
+//        _userDefault->setIntegerForKey("seedlingIndex", ++seedlingIndex<FLOWER_COUNT? seedlingIndex : FLOWER_COUNT-1);
+//        collectionVolume++;
+//        
+//        ImageView* newFlowerUnlock = ImageView::create("UI_NewFlowerUnlock.png");
+//        Node* gameSceneNode = GameRunningInfo::getInstance()->getGameSceneNode();
+//        newFlowerUnlock->setPosition(Vec2(VisibleSize.width/2,VisibleSize.height/2));
+//        newFlowerUnlock->setOpacity(0);
+//        FadeIn* appear = FadeIn::create(1);
+//        FadeOut* fadeOut = FadeOut::create(1);
+//        CallFuncN* remove = CallFuncN::create([](Node* node){
+//            node->removeFromParent();
+//        });
+//        newFlowerUnlock->runAction(Sequence::create(appear,fadeOut, remove,NULL));
+//        gameSceneNode->addChild(newFlowerUnlock,999);
+//    }
+//    
+//}
+
+void StatisticsData::checkNewFlowerUnlock(int flowerID)
 {
-    int FlameWhiteCount = _userDefault->getIntegerForKey("collectedWhite");
-    int FlameBlueCount = _userDefault->getIntegerForKey("collectedBlue");
-    int FlameVioltCount = _userDefault->getIntegerForKey("collectedViolet");
-    int FlameOrangeCount = _userDefault->getIntegerForKey("collectedOrange");
-    int growHeight = _userDefault->getIntegerForKey("growHeight") + moveDownDistance + GameLayerPlant::getRunningLayer()->getPlantNodeByIndex(0)->getHeadPosition().y;
-    int seedlingIndex = _userDefault->getIntegerForKey("seedlingIndex", 0);
-    
-    ValueMap flowerTerm = _flowersInfo.at(seedlingIndex).asValueMap();
-    if (FlameWhiteCount>=flowerTerm.at("condition").asValueMap().at("Flame_White").asInt()&&
-        FlameBlueCount>=flowerTerm.at("condition").asValueMap().at("Flame_Blue").asInt()&&
-        FlameVioltCount>=flowerTerm.at("condition").asValueMap().at("Flame_Violet").asInt()&&
-        FlameOrangeCount>=flowerTerm.at("condition").asValueMap().at("Flame_Orange").asInt()&&
-        growHeight>=flowerTerm.at("condition").asValueMap().at("Height").asInt())
-    {
-        _userDefault->setIntegerForKey("collectedWhite", 0);
-        _userDefault->setIntegerForKey("collectedBlue", 0);
-        _userDefault->setIntegerForKey("collectedViolet", 0);
-        _userDefault->setIntegerForKey("collectedOrange", 0);
-        _userDefault->setIntegerForKey("growHeight", 0);
-        moveDownDistance = 0;
-        _userDefault->setIntegerForKey("seedlingIndex", ++seedlingIndex<FLOWER_COUNT? seedlingIndex : FLOWER_COUNT-1);
-        collectionVolume++;
-        
-        ImageView* newFlowerUnlock = ImageView::create("UI_NewFlowerUnlock.png");
-        Node* gameSceneNode = GameRunningInfo::getInstance()->getGameSceneNode();
-        newFlowerUnlock->setPosition(Vec2(VisibleSize.width/2,VisibleSize.height/2));
-        newFlowerUnlock->setOpacity(0);
-        FadeIn* appear = FadeIn::create(1);
-        FadeOut* fadeOut = FadeOut::create(1);
-        CallFuncN* remove = CallFuncN::create([](Node* node){
-            node->removeFromParent();
-        });
-        newFlowerUnlock->runAction(Sequence::create(appear,fadeOut, remove,NULL));
-        gameSceneNode->addChild(newFlowerUnlock,999);
+    if (flowerID>=1 && flowerID<= FLOWER_COUNT) {
+        bool isUnlocked = static_cast<__String*>(_flowerUnlockInfo->getObjectAtIndex(flowerID - 1))->boolValue();
+        if (!isUnlocked) {
+            _flowerUnlockInfo->replaceObjectAtIndex(flowerID-1, __String::create("1"));
+            ImageView* newFlowerUnlock = ImageView::create("UI_NewFlowerUnlock.png");
+            Node* gameSceneNode = GameRunningInfo::getInstance()->getGameSceneNode();
+            newFlowerUnlock->setPosition(Vec2(VisibleSize.width/2,VisibleSize.height/2));
+            newFlowerUnlock->setOpacity(0);
+            FadeIn* appear = FadeIn::create(1);
+            FadeOut* fadeOut = FadeOut::create(1);
+            CallFuncN* remove = CallFuncN::create([](Node* node){
+                node->removeFromParent();
+            });
+            newFlowerUnlock->runAction(Sequence::create(appear,fadeOut, remove,NULL));
+            gameSceneNode->addChild(newFlowerUnlock,999);
+        }
     }
-    
 }
 
 void StatisticsData::moveDown(float y)
@@ -219,6 +249,6 @@ void StatisticsData::moveDown(float y)
 
 void StatisticsData::update(float dt)
 {
-    checkNewFlowerUnlock();
+
     
 }

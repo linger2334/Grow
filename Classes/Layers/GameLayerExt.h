@@ -23,7 +23,6 @@ public:
 
 class RenderMaskColorNode : public Node
 {
-    
 public:
     static RenderMaskColorNode* create(unsigned char mask);
     
@@ -36,5 +35,13 @@ public:
     CustomCommand _customCommand;
     unsigned char _colorMask;
 };
-
+class RenderOpenOrCloseDep  : public Node
+{
+public:
+    static RenderOpenOrCloseDep* create(bool isOpenDep);
+    virtual void draw(Renderer *renderer, const Mat4 &transform, uint32_t flags) override;
+    void onDraw(const Mat4 &transform, uint32_t flags);
+    bool _isOpenDep;
+     CustomCommand _customCommand;
+};
 #endif /* defined(__Grow_Demo_test__GameLayerExt__) */

@@ -20,6 +20,9 @@ extern const float kDefaultAngle;
 extern const float kDefaultScale;
 extern const bool kDefaultAnimatedOnState;
 extern const float kDefaultTriggerTime;
+extern const float kDefaultElapsedTime;
+extern const int kDefaultBindedTriggerID;
+extern const bool kDefaultAutoSmoothingState;
 extern const bool kDefaultAnimatedLoopState;
 
 extern const float kDefaultAnimationWaitTime;
@@ -30,10 +33,10 @@ extern const Vec2 kDefaultAnimationPosition;
 
 extern const float kDefaultCardinalSplineTension;
 
-extern const float kDefaultCicadaW;
-extern const float kDefaultCicadaIncludedAngle;
-extern const float kDefaultCicadaFanningDuration;
-extern const float kDefaultCicadaInterval;
+extern const float kDefaultCicadaFanningSpeed;
+extern const bool kDefaultCicadaAutoTurnHeadState;
+extern const bool kDefaultCicadaAutoFanningState;
+extern const bool kDefaultCicadaReversalStatus;
 extern const float kDefaultCicadaBellyTransparency;
 
 extern const float kDefaultDragonW;
@@ -52,12 +55,17 @@ extern const float kDefaultGearButtonSinkSpeed;
 extern const int kDefaultGearGateGap;
 extern const float kDefaultGearGateStartRate;
 
+extern const int kDefaultDecorationFlowerID;
+extern const float kDefaultSproutsGrowSpeed;
+
 extern const int kDefaultPolygonVexNum;
 extern const float kDefaultPolygonPointRadius;
 extern const float kDefaultPolygonBorderWidth;
 extern const float kDefaultPolygonLineWidth;
-extern const float kDefaultNewPolygonHalfWidth;
-extern const float kDefaultNewPolygonHalfHeight;
+extern const float kDefaultNewPolygonHalfDiameter;
+
+extern const float kDefaultNewTriggerHalfWidth;
+extern const float kDefaultNewTriggerHalfHeight;
 
 extern const float kDefaultPathPointRadius;
 extern const float kDefaultPathPointBorderWidth;
@@ -65,5 +73,6 @@ extern const float kDefaultPathPointLineWidth;
 
 extern const int kDefaultInitialLoadScreenCount;
 extern const int kDefaultPreLoadScreenCount;
+extern const float kDefaultSwitchStatusInterval;
 
 #endif /* defined(__Grow__GameConstants__) */

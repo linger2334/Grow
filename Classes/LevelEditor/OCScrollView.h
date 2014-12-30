@@ -25,7 +25,7 @@
 @property(nonatomic,strong)NSMutableSet* toDealWithPointView;
 //for popover
 @property(nonatomic,assign)UIView* longPressedView;
-@property(nonatomic,strong)FeaturesPickerController* featuresPicker;
+@property(nonatomic,assign)FeaturesPickerController* featuresPicker;
 @property(nonatomic,strong)UIPopoverController* featuresPickerPopover;
 @property(nonatomic,readonly)UIViewController* animationGroupCountController;
 @property(nonatomic,readonly)UIPickerView* animationGroupCountPickerView;
@@ -34,7 +34,8 @@
 -(void)addGestureRecognizerForCenterView:(PolygonView*)uiview;
 -(int)firstUnusedTag;
 -(void)createNewPolygonAtCenter;
--(PolygonView*)createNewPolygonOfTag:(int)tag AtCCPercentPosition:(Vec2)position WithCCLocalVertxex:(__Array*)vertexes OfType:(bool)isConvex;
+-(void)createNewTriggerAtCenter;
+-(PolygonView*)createNewPolygonOfTag:(int)tag AtCCPercentPosition:(Vec2)position WithCCLocalVertxex:(__Array*)vertexes IsConvex:(bool)isConvex OfType:(NSString*)type andBindIDs:(NSMutableArray*)bindIDs;
 
 -(PolygonView*)copyPathPoint:(PolygonView*)pathpoint;
 

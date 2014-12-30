@@ -6,6 +6,9 @@
 #include "PathListHelper.hpp"
 #include "TuoYuanRotateNode.h"
 #define  MAX_LIGHT_COUNT 1000
+
+typedef  PathListHelper::PathList<ContorlPointV2, std::vector<ContorlPointV2> > PlantPathList;
+
 class TuoYuanRotateNode;
 enum LightState
 {
@@ -25,22 +28,27 @@ struct  LightPathContext
 {
 public:
     LightPathContext():_plantIndex(0),_id(0),_target(nullptr),
-        _moveSpeed(0),_toRotateA(0),_toRotateB(0),_changeRotateSpeed(0),
-    _isRemoving(false),_state(LightIntRawState),_isSacling(false),_lightAction(0){}
-    int _plantIndex;
-    int _id;
+        _moveSpeed(0),_state(LightIntRawState),_isSacling(false){}
+    
+    //,_toRotateA(0),_toRotateB(0),_changeRotateSpeed(0),_isRemoving(false)
+    //bool  _isRemoving = false;
+    
+    bool  _isSacling = false;
+    bool  _isFading = false;
+    int   _id  = 0;
+    int   _state;
+    int   _plantIndex = 0;
+  
     TuoYuanRotateNode* _target;
     float _nowLengthByTop;
     float _toLengthByTop;
     float _moveSpeed;
-    int   _state;
-    float _toRotateA;
-    float _toRotateB;
-    float _changeRotateSpeed;
-    bool  _isRemoving;
-    bool  _isSacling;
-    int   _lightAction;
-   // float _heightInPlant;
+
+    //float _changeRotateSpeed;
+    //float _toRotateA;
+    //float _toRotateB;
+    //int   _lightAction;
+    //float _heightInPlant;
 };
 enum LightAction
 {
@@ -54,12 +62,13 @@ enum LightAction
 struct PlantLightContext
 {
 public:
-    PlantLightContext():_lightLength(0.0f),_isRemoveingLight(false){}
+    PlantLightContext():_lightLength(0.0f){}
+    //,_isRemoveingLight(false)
     std::map<int,LightPathContext> _lightLists;
     float                          _lightLength;
-    ContorlPointV2                 _topCP;
-    float                          _heightInPlant;
-    bool                           _isRemoveingLight;
+    //ContorlPointV2               _topCP;
+    //float                        _heightInPlant;
+    //bool                         _isRemoveingLight;
 };
 class ItemModel;
 class tempCheckToPositionContext
@@ -92,10 +101,12 @@ public:
     void  onPlantHeightChange(float height,int index);
     float getLengthByPlantHeight(float plantHeight);
 
+    CallFunc* createLightRunningInitActionEndCall(LightPathContext* conf,int plantIndex,int lightId);
+    void  onLightRunningInitActionEnd(LightPathContext* conf,int plantIndex,int lightId);
+    
     void  addOneLightByPlantIndex(Vec2 startPoint,int index);
-    void  addOneLightByPlantIndex(int index);
-    void  addOneLightByPlantIndexRandConfig(int index);
-    int   addOneLightByPlantIndex(int index,const LightPathContext& config);
+    
+    int   _addOneLightByPlantIndex(int index,const LightPathContext& config);
     
     void  addLightsBySubMapInit(int plantIndex,int count);
     void  addOneLightByPlantIndexUseBezier(Vec2 startPoint,int index);
@@ -107,13 +118,15 @@ public:
     
     Action* createInitAction(Vec2 startPoint,const LightPathContext& context );
     void onRemoveLightCall(Node* node,void* data);
+    
     void removeLight(int plantIndex,int id);
     void removeLightUseUseBezier(int plantIndex,int id,Vec2 endPoint);
+    void removeLightUseUseBezier(int plantIndex,int id,Vec2 endPoint,float bezierTime ,float fadeTime);
     void removeLightRandId(int plantIndex);
     void removeLightTopId(int plantIndex);
     void removeLights(int plantIndex,int count);
     void removeOneLightUseBezier(int plantIndex,Vec2 endPoint);
-    
+    void removeOneLightUseBezier(int plantIndex,Vec2 endPoint,float bezierTime ,float fadeTime );
     int  getMinLengthLightId( int plantIndex);
     
     LightPathContext* getLightContextByPlantIndexAndId(int plantIndex,int id);
@@ -125,10 +138,8 @@ public:
     
     void removeLightRandIdByPlantIndex(int plantIndex);
     
-
-    
     int randLightByPlant(int plantIndex);
-    
+    int randLightByPlantNotWillRemove(int plantIndex);
     int getLingtPlantIndexByTag(int tag)
     {
         return tag/MAX_LIGHT_COUNT;
@@ -139,7 +150,6 @@ public:
     }
     int getLightTag(int plantIndex,int id);
     
-
     void removeLightsRandIdUseSacel(int plantIndex,int count);
     
     LightPathContext&  getOneInsertLightConfig(int plantIndex);
@@ -164,23 +174,12 @@ public:
     
     bool isAllPlantHasLights();
     
-
-    bool LightIsScaleToBig(const LightPathContext& context );
-    bool LightIsScaleToSmall(const LightPathContext& context );
-    bool LightIsNotScale(const LightPathContext& context );
     bool LightIsRotete(const LightPathContext& context );
     
     bool LightIsFadeOutAndIn(const LightPathContext& context );
     void LightFadeOutAndIn(const LightPathContext& context );
     
-    bool LightIsFadeOut(const LightPathContext& context );
-    void LightFadeOut(const LightPathContext& context );
-    
-    bool LightIsFadeIn(const LightPathContext& context );
-    void LightFadeIn(const LightPathContext& context );
-    
-    void LightScaleToBig(const LightPathContext& context );
-    void LightScaleToSmall(const LightPathContext& context );
+
     void LightStartRotate(const LightPathContext& context );
     void LightStopRotate(const LightPathContext& context );
     
@@ -188,8 +187,7 @@ public:
     
     int getLightRunActionCount(int plantIndex,LightAction act);
     
-    void randLightRunAction(int plantIndex,LightAction act);
-    
+
     Sprite* createOnLightChildNode();
     
     Node* getLightChildNode(const LightPathContext& context);
@@ -202,6 +200,11 @@ public:
     
     void runChangeLightsAction(int loopCount,float waitTime);
     
+    PlantPathList getOnePlantPathList(int plantIndex);
+    LightPathContext* randCreateLightPahtContext(int plantIndex,Vec2 startPoint);
+    
+    bool  saveToFile();
+    bool  initBySaveConfig();
     
     std::vector<PlantLightContext> _plantLights;
     

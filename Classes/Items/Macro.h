@@ -34,17 +34,23 @@ enum Item_Type{
     Flame_Violet,
     Flame_White,
     Cicada,
-    Dragon_Anti,
-    Dragon_Clockwise,
     DoubDragon_Anti,
     DoubDragon_Clockwise,
     Serpent_,
     Gear_Button,
     Gear_Gate,
+    Gear_Reversal,
     Barrier_,
     Decoration_Bridge,
+    Decoration_Flower,
+    Decoration_FlowerInv,
     Decoration_Pendant,
+    Sprouts_Dextro,
+    Sprouts_Levo,
+    Sprouts_Slope,
     Polygon_,
+    Trigger,
+    
     Rock_Circle = 101,
     Rock_Cover,
     Rock_Crinkle,
@@ -84,17 +90,23 @@ enum class GuideCourse4{
 #define IMAGE_FLAME_ORANGE "Flame_Orange.png"
 #define IMAGE_FLAME_VIOLET "Flame_Violet.png"
 #define IMAGE_FLAME_WHITE "Flame_White.png"
-#define IMAGE_CICADA "Cicada.png"
-#define IMAGE_DRAGON_ANTI "Dragon_Anti.png"
-#define IMAGE_DRAGON_CLOCKWISE "Dragon_Clockwise.png"
+#define IMAGE_CICADA_RED "Cicada_Red.png"
+#define IMAGE_CICADA_BLUE "Cicada_Blue.png"
 #define IMAGE_DOUBDRAGON_ANTI "DoubDragon_Anti.png"
 #define IMAGE_DOUBDRAGON_CLOCKWISE "DoubDragon_Clockwise.png"
 #define IMAGE_SERPENT "Serpent.png"
 #define IMAGE_GEARBUTTON "GearButton.png"
 #define IMAGE_GEARGATE "GearGate.png"
-#define IMAGE_BARRIER "Barrier.png"
+#define IMAGE_GEARREVERSAL "GearReversal.png"
+#define IMAGE_BARRIER_RED "Barrier_Red.png"
 #define IMAGE_DECORATION_BRIDGE "Decoration_Bridge.png"
+#define IMAGE_DECORATION_FLOWER "Decoration_Flower.png"
+#define IMAGE_DECORATION_FLOWERINV "Decoration_FlowerInv.png"
 #define IMAGE_DECORATION_PENDANT "Decoration_Pendant.png"
+#define IMAGE_SPROUTS_DEXTRO "Sprouts_Dextro.png"
+#define IMAGE_SPROUTS_LEVO "Sprouts_Levo.png"
+#define IMAGE_SPROUTS_SLOPE "Sprouts_Slope.png"
+#define IMAGE_TRIGGER "Trigger.png"
 #define IMAGE_POLYGON "Polygon.png"
 #define IMAGE_ROCK_CIRCLE "Rock_Circle"
 #define IMAGE_ROCK_COVER "Rock_Cover"

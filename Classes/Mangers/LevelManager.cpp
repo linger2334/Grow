@@ -19,23 +19,23 @@
 #include "GameSceneMain.h"
 #include "GameLayerLight.h"
 #include "GameRunningInfo.h"
-//////////add for UI
 #include "StatisticsData.h"
-#include "ScreenGuide.h"
-
+#include "PlantLeafs.h"
 std::map<int,std::string> LevelManager::_mapFiles;
 std::map< int,std::vector<int> > LevelManager::_mapGroups;
+std::vector<std::vector<std::string> > LevelManager::_sMapConfigInfos;
+std::vector<PlantConfigInfo>   LevelManager::_sPlantConfigInfos;
 bool LevelManager::_sIsInitMapInfo = false;
 #define ADD_MAP_FILE(ID,FILE) LevelManager::_mapFiles[ID] = FILE;
 void LevelManager::initMapsInfo()
 {
     if(_sIsInitMapInfo)return;
     _sIsInitMapInfo = true;
+    ADD_MAP_FILE(0,"level 1 - 1");
     ADD_MAP_FILE(1,"level 1 - 1");
-    ADD_MAP_FILE(1,"level 1 - 2");
-    ADD_MAP_FILE(2,"level 1 - 3");
-    ADD_MAP_FILE(3,"level 1 - 4");
-    ADD_MAP_FILE(4,"level 1 - 1");
+    ADD_MAP_FILE(2,"level 1 - 2");
+    ADD_MAP_FILE(3,"level 1 - 3");
+    ADD_MAP_FILE(4,"level 1 - 4");
     ADD_MAP_FILE(5,"level 1 - 3");
     ADD_MAP_FILE(6,"level 1 - 3");
     ADD_MAP_FILE(7,"level 1 - 3");
@@ -52,47 +52,180 @@ void LevelManager::initMapsInfo()
     ADD_MAP_FILE(18,"level 1 - 3");
     ADD_MAP_FILE(19,"level 1 - 3");
     {
-        std::vector<int> groups;
-        groups.push_back(1);
-        groups.push_back(2);
-        groups.push_back(3);
-        groups.push_back(4);
-        LevelManager::_mapGroups[1] = groups;
+        LevelManager::_mapGroups[1] = {1,2,3,4};
     }
     {
-        std::vector<int> groups;
-        groups.push_back(1);
-        groups.push_back(2);
-        groups.push_back(3);
-        groups.push_back(4);
-        LevelManager::_mapGroups[2] = groups;
+        LevelManager::_mapGroups[2] = {1,2,3,4};
     }
     {
-        std::vector<int> groups;
-        groups.push_back(1);
-        groups.push_back(2);
-        groups.push_back(3);
-        groups.push_back(4);
-        LevelManager::_mapGroups[3] = groups;
+        LevelManager::_mapGroups[3] = {1,2,3,4};
     }
     {
-        std::vector<int> groups;
-        groups.push_back(1);
-        groups.push_back(2);
-        groups.push_back(3);
-        groups.push_back(4);
-        LevelManager::_mapGroups[4] = groups;
+        LevelManager::_mapGroups[4]  = {1,2,3,4};
     }
-    {
-        std::vector<int> groups;
-        groups.push_back(1);
-        LevelManager::_mapGroups[4] = groups;
-    }
-}
 
+    
+    LevelManager::_sMapConfigInfos =
+    {
+        {   GamePaths::_sPathBackground_level_1_1,
+            GamePaths::_sPathMapDirt_level_1_1,
+            GamePaths::_sPathMapBorder_level_1_1,
+            GamePaths::_sPathUIBorder_level_1_1
+        },
+        {   GamePaths::_sPathBackground_level_2_1,
+            GamePaths::_sPathMapDirt_level_2_1,
+            GamePaths::_sPathMapBorder_level_2_1,
+            GamePaths::_sPathUIBorder_level_2_1
+        },
+        {   GamePaths::_sPathBackground_level_3_1,
+            GamePaths::_sPathMapDirt_level_3_1,
+            GamePaths::_sPathMapBorder_level_3_1,
+            GamePaths::_sPathUIBorder_level_3_1
+        },
+        {   GamePaths::_sPathBackground_level_1_1,
+            GamePaths::_sPathMapDirt_level_1_1,
+            GamePaths::_sPathMapBorder_level_1_1,
+            GamePaths::_sPathUIBorder_level_1_1
+        },
+    };
+
+    float x = Director::getInstance()->getWinSize().width*0.5;
+///////////////////////////////
+    LevelManager::_sPlantConfigInfos =
+    {
+        ////id - 0
+        {
+            {
+                {
+                    {x,0.0f},40.0f
+                },
+            },
+            GamePaths::_sPathPlantBody_level_1_1,
+            {"plant1_leaf_2.png","plant1_leaf_3.png","plant1_leaf_4.png"},
+            {
+                {
+                    {0.0f,0.1f},{80.0f,20.0f},{400.0f,60.0f},{600.0f,75.0f}
+                }
+            },
+            {
+                {
+                    {0.0f,0.0f},{100.0f,0.1f},{300.0f,0.2f},{600.0f,0.3f}
+                }
+            },
+            201.0f,
+            51.0f
+        },
+        ////id - 1
+        {
+            {
+                {
+                    {x,0.0f},40.0f
+                },
+            },
+            GamePaths::_sPathPlantBody_level_2_1,
+            {"plant2_leaf_1.png"},
+            {
+                {
+                    {0.0f,0.1f},{80.0f,20.0f},{400.0f,60.0f},{600.0f,75.0f}
+                }
+//                {
+//                    {0.0f,1.0f},{80.0f,20.0f},{400.0f,80.0f},{600.0f,90.0f}
+//                }
+            },
+            {
+                {
+                    {0.0f,0.0f},{100.0f,0.1f},{300.0f,0.18f},{600.0f,0.26f}
+                }
+            },
+            31.0f,
+            11.0f
+        },
+        
+        ////id - 2
+        
+        {
+            {
+                {
+                    {x,0.0f},40.0f
+                },
+            },
+            GamePaths::_sPathPlantBody_level_2_1,
+            {"plant2_leaf_1.png"},
+            {
+                {
+                    {0.0f,0.0f},{80.0f,20.0f},{400.0f,60.0f},{600.0f,75.0f}
+                }
+            },
+            {
+                {
+                    {0.0f,0.0f},{100.0f,0.1f},{300.0f,0.2f},{600.0f,0.3f}
+                }
+            },
+            71.0f,
+            21.0f
+        },
+
+        
+        ////id - 3
+        {
+            {
+                {
+                    {x,0.0f},30.0f
+                },
+            },
+            GamePaths::_sPathPlantBody_level_1_1,
+            {"plant1_leaf_2.png","plant1_leaf_3.png","plant1_leaf_4.png"},
+            {
+                {
+                    {0.0f,1.0f},{80.0f,20.0f},{400.0f,50.0f},{600.0f,60.0f}
+                }
+            },
+            {
+                {
+                    {0.0f,0.0f},{100.0f,0.1f},{300.0f,0.2f},{600.0f,0.3f}
+                }
+            },
+            201.0f,
+            51.0f
+        },
+        
+        ////id - 4
+        {
+            {
+                {
+                    {x,0.0f},30.0f
+                },
+            },
+            GamePaths::_sPathPlantBody_level_1_1,
+            {"plant1_leaf_2.png","plant1_leaf_3.png","plant1_leaf_4.png"},
+            {
+                {
+                    {0.0f,0.1f},{80.0f,20.0f},{400.0f,60.0f},{600.0f,75.0f}
+                }
+            },
+            {
+                {
+                    {0.0f,0.0f},{100.0f,0.1f},{300.0f,0.2f},{600.0f,0.3f}
+                }
+            },
+            201.0f,
+            51.0f
+        }
+    };
+}
+void LevelManager::selectConfigInfo(int id)
+{
+    auto conifg = GameRunningConfig::getInstance();
+    auto& mapInfo = _sMapConfigInfos[id];
+    auto cache = Director::getInstance()->getTextureCache();
+    conifg->setTextureBackGround(cache->addImage(mapInfo[0]));
+    conifg->setTextureMapDirt(cache->addImage(mapInfo[1]));
+    conifg->setTextureMapBorder(cache->addImage(mapInfo[2]));
+    conifg->setTextureUIBorder(cache->addImage(mapInfo[3]));
+}
 void LevelManager::selectLevel(int id)
 {
-    assert(id>0&&id<6);
+    assert(id>0&&id<5);
     _levelId = id;
     _mapGroupId = id ;
     _mapGroupSubId = 0 ;
@@ -137,7 +270,7 @@ void LevelManager::initLevelInfoByRecord()
 }
 void LevelManager::initLevelInfo()
 {
-//    LevelManager::selectMapFile(_mapGroupId,_mapGroupSubId);
+   // LevelManager::selectMapFile(_mapGroupId,_mapGroupSubId);
     
     switch (_levelId) {
         case 1:
@@ -149,6 +282,9 @@ void LevelManager::initLevelInfo()
         case 3:
             initLevelInfo_3();
             break;
+        case 4:
+            initLevelInfo_4();
+            break;
         case 5:
             initLevelInfo_1();
             break;
@@ -156,105 +292,74 @@ void LevelManager::initLevelInfo()
             break;
     }
 }
-void LevelManager::initLevelInfo_1()
+
+GamePlantConfig&  LevelManager::initPlantConfig(int runningConfigId,int idConfig)
 {
+    auto& info = LevelManager::_sPlantConfigInfos[idConfig];
     auto conifg = GameRunningConfig::getInstance();
     auto cache = Director::getInstance()->getTextureCache();
-    auto back = cache->addImage(GamePaths::_sPathBackground_level_1_1);
-    conifg->setTextureBackGround(back);
-    conifg->setTextureMapDirt(cache->addImage(GamePaths::_sPathMapDirt_level_1_1));
-    conifg->setTextureMapBorder(cache->addImage(GamePaths::_sPathMapBorder_level_1_1));
-    conifg->setTextureUIBorder(cache->addImage(GamePaths::_sPathUIBorder_level_1_1));
-    
     GamePlantConfig  first;
-    first._textureLeft = 0;
-    first._textureRight =1;
-    first._growSpeed = 60;
-    first._reGrowSpeed =100;
-    first._plantNodeInitPosition=Vec2(0,0);
+    first._textureLeft = info._textureLeft;
+    first._textureRight = info._textureRight;
+    first._growSpeed = info._growSpeed;
+    first._reGrowSpeed = info._reGrowSpeed;
+    first._plantNodeInitPosition = info._plantNodeInitPosition;
+    first._plantStartContorlPointList = info._plantStartContorlPointList;
     
-    ContorlPointV2 cp;
-    cp._rotateRadius = 60;
-    cp._angle = 0;
-    cp._height = 0;
-    float x1 = GameRuntime::getInstance()->getVisibleSize().width * 0.5;
-    cp._point = Vec2(x1,-1);
-    cp._radius = 60;
-    cp._zPosition  = 0;
-    first._plantStartContorlPointList.push_back(cp);
-    auto tex = cache->addImage(GamePaths::_sPathPlantBody_level_1_1);
+    auto tex = cache->addImage(info._pathPlangBody);
     Texture2D::TexParams  parms = { GL_LINEAR,GL_LINEAR, GL_REPEAT,GL_REPEAT};
     tex->setTexParameters(parms);
     first._texturePlantBody = tex;
-    conifg->getPlantConfigs().push_back(first);
+    
+    first._leafsRadiusList = info._leafsRadiusList;
+    first._radiusList = info._bodyRadiusList;
+    
+    first._leafHeightStep = info._leafHeightStep;
+    first._leafHeightRange = info._leafHeightRange;
+    first._texturePlantLeaf = info._pathPlantLeaf;
+    conifg->getPlantConfigs().reserve(runningConfigId+1);
+    auto& plantConfig = conifg->getPlantConfigs();
+    int size = plantConfig.size();
+    for (int i = size; i < runningConfigId+1; i++) {
+        plantConfig.push_back(GamePlantConfig());
+    }
+    plantConfig[runningConfigId] = first;
+    
+    return *(&plantConfig[runningConfigId]);
+}
+GamePlantConfig&  LevelManager::initPlantConfig(int runningConfigId,int idConfig,Vec2 pt)
+{
+    auto& config = initPlantConfig(runningConfigId,idConfig);
+    (config._plantStartContorlPointList.rbegin())->_point = pt;
+    return config;
+}
+GamePlantConfig&  LevelManager::initPlantConfig(int runningConfigId,int idConfig,ContorlPointV2 cp)
+{
+    auto& config = initPlantConfig(runningConfigId,idConfig);
+    config._plantStartContorlPointList = {cp};
+    return config;
+}
+void LevelManager::initLevelInfo_1()
+{
+    selectConfigInfo(0);
+    initPlantConfig(0,0);
 }
 
 void LevelManager::initLevelInfo_2()
 {
-    auto conifg = GameRunningConfig::getInstance();
-    auto cache = Director::getInstance()->getTextureCache();
-    auto back = cache->addImage(GamePaths::_sPathBackground_level_2_1);
-    conifg->setTextureBackGround(back);
-    conifg->setTextureMapDirt(cache->addImage(GamePaths::_sPathMapDirt_level_2_1));
-    conifg->setTextureMapBorder(cache->addImage(GamePaths::_sPathMapBorder_level_2_1));
-    conifg->setTextureUIBorder(cache->addImage(GamePaths::_sPathUIBorder_level_1_1));
-    
-    GamePlantConfig  first;
-    first._textureLeft = 0;
-    first._textureRight =1;
-    first._growSpeed = 60;
-    first._reGrowSpeed =100;
-    first._plantNodeInitPosition=Vec2(0,0);
-    
-    ContorlPointV2 cp;
-    cp._rotateRadius = 60;
-    cp._angle = 0;
-    cp._height = 0;
-    float x1= GameRuntime::getInstance()->getVisibleSize().width * 0.5;
-    cp._point = Vec2(x1,-1);
-    cp._radius = 60;
-    cp._zPosition  = 0;
-    first._plantStartContorlPointList.push_back(cp);
-    auto tex = cache->addImage(GamePaths::_sPathPlantBody_level_1_1);
-    Texture2D::TexParams  parms = { GL_LINEAR,GL_LINEAR, GL_REPEAT,GL_REPEAT};
-    tex->setTexParameters(parms);
-    first._texturePlantBody = tex;
-    conifg->getPlantConfigs().push_back(first);
+    selectConfigInfo(1);
+    initPlantConfig(0,1);
 }
 void LevelManager::initLevelInfo_3()
 {
-    auto conifg = GameRunningConfig::getInstance();
-    auto cache = Director::getInstance()->getTextureCache();
-    conifg->setTextureBackGround(cache->addImage(GamePaths::_sPathBackground_level_1_1));
-    conifg->setTextureMapDirt(cache->addImage(GamePaths::_sPathMapDirt_level_1_1));
-    conifg->setTextureMapBorder(cache->addImage(GamePaths::_sPathMapBorder_level_1_1));
-    conifg->setTextureUIBorder(cache->addImage(GamePaths::_sPathUIBorder_level_1_1));
-    
-    GamePlantConfig  first;
-    first._textureLeft = 0;
-    first._textureRight =1;
-    first._growSpeed = 60;
-    first._reGrowSpeed =100;
-    first._plantNodeInitPosition=Vec2(0,0);
-    
-    ContorlPointV2 cp;
-    cp._rotateRadius = 50;
-    cp._angle = 0;
-    cp._height = 0;
-    cp._point = Vec2(100,-10);
-    cp._radius = 60;
-    cp._zPosition  = 0;
-    first._plantStartContorlPointList.push_back(cp);
-    auto tex = cache->addImage(GamePaths::_sPathPlantBody_level_1_1);
-    Texture2D::TexParams  parms = { GL_LINEAR,GL_LINEAR, GL_REPEAT,GL_REPEAT};
-    tex->setTexParameters(parms);
-    first._texturePlantBody = tex;
-    conifg->getPlantConfigs().push_back(first);
-    first._plantStartContorlPointList.clear();
-    cp._point = Vec2(500,-10);
-    first._plantStartContorlPointList.push_back(cp);
-    conifg->getPlantConfigs().push_back(first);
- 
+    selectConfigInfo(2);
+    initPlantConfig(0,2);
+    initPlantConfig(1,3);
+}
+void LevelManager::initLevelInfo_4()
+{
+    selectConfigInfo(3);
+    initPlantConfig(0,3);
 }
 
 void LevelManager::selectMapFile(int groupId,int groupSubId)
@@ -264,8 +369,7 @@ void LevelManager::selectMapFile(int groupId,int groupSubId)
         initMapFile(LevelManager::_mapFiles[id]);
     }
     else{
-       // log(GameManager::getInstance()->_levelFileName.c_str());
-//        initMapFile(GameManager::getInstance()->_levelFileName);
+        
     }
 }
 void LevelManager::initMapFile(std::string fileName)
@@ -289,6 +393,9 @@ GameLayerPlant* LevelManager::createLayerPlantById(int id)
         case 3:
             ret=  static_cast<GameLayerPlant*>(GameLayerPlant_Level_3::create());
             break;
+        case 4:
+            ret=  static_cast<GameLayerPlant*>(GameLayerPlant_Level_1::create());
+            break;
         case 5:
             ret = static_cast<GameLayerPlant*>(GameLayerPlant_Level_1::create());
             break;
@@ -307,14 +414,13 @@ void LevelManager::createBasesLayers()
     auto uiBorder = GameLayerUIBorder::create();
     auto layerItem = LayerItem::create();
     auto statisticsdata = StatisticsData::create();
-    auto layerGuide = ScreenGuide::create();
     auto ui = GameLayerUI::create();
     auto crashShow = GameLayerPlantCrashEffect::create();
     auto layerLight = GameLayerLight::create();
     //auto layerLandmark = GameLayerShowLandmark::create();
     
     gameScene->addChild(layerLight,SceneGameChildZorder::MapLight);
-   // gameScene->addChild(layerLandmark,SceneGameChildZorder::MapItem+1);
+    //gameScene->addChild(layerLandmark,SceneGameChildZorder::MapItem+1);
     gameScene->addChild(back,SceneGameChildZorder::MapBackground);
     gameScene->addChild(layerPlant,SceneGameChildZorder::MapPlant);
     gameScene->addChild(crashShow,SceneGameChildZorder::MapDirt-1);
@@ -324,7 +430,6 @@ void LevelManager::createBasesLayers()
     gameScene->addChild(ui,SceneGameChildZorder::MapUI);
     gameScene->addChild(layerItem->_layerItemExt,SceneGameChildZorder::MapItemExt);
     gameScene->addChild(statisticsdata);
-    gameScene->addChild(layerGuide,1000);
     
     back->initGameInfo();
     layerPlant->initGameInfo();
@@ -334,11 +439,11 @@ void LevelManager::createBasesLayers()
     crashShow->initGameInfo();
     layerLight->initGameInfo();
     //layerLandmark->initGameInfo();
-//    auto size = GameRuntime::getInstance()->getMapGridSize();
-//    
-//    layerItem->loadItemsAndBodys(0);
-//    layerItem->moveDown(0);
-//    map->updateExcavatePolygon(0,0,size.width,size.height+MAX_CRASH_LENGTH);
-//    map->update(0.1);
+    //auto size = GameRuntime::getInstance()->getMapGridSize();
+    //
+    //layerItem->loadItemsAndBodys(0);
+    //layerItem->moveDown(0);
+    //map->updateExcavatePolygon(0,0,size.width,size.height+MAX_CRASH_LENGTH);
+    //map->update(0.1);
 
 }

@@ -8,17 +8,19 @@
 
 #include "GameManager.h"
 #include "ItemModel.h"
+#include "CustomAction.h"
 #include "Flame.h"
 #include "Rock.h"
 #include "Cicada.h"
-#include "Dragon.h"
 #include "DoubleDragon.h"
 #include "Serpent.h"
 #include "GearButton.h"
 #include "GearGate.h"
+#include "GearReversal.h"
 #include "Barrier.h"
 #include "Decoration.h"
 #include "Polygon.h"
+#include "Sprouts.h"
 
 ItemModel::ItemModel():_body(nullptr),_animatesParallel(nullptr),_animatesCardinalSpline(nullptr),_animatesCustomCurve(nullptr)
 {
@@ -57,12 +59,6 @@ ItemModel* ItemModel::create(Item& item)
         case Cicada:
             itemModel = Cicada::create(item);
             break;
-        case Dragon_Anti:
-            itemModel = Dragon::create(item);
-            break;
-        case Dragon_Clockwise:
-            itemModel = Dragon::create(item);
-            break;
         case DoubDragon_Anti:
             itemModel = DoubleDragon::create(item);
             break;
@@ -78,14 +74,32 @@ ItemModel* ItemModel::create(Item& item)
         case Gear_Gate:
             itemModel = GearGate::create(item);
             break;
+        case Gear_Reversal:
+            itemModel = GearReversal::create(item);
+            break;
         case Barrier_:
             itemModel = Barrier::create(item);
             break;
         case Decoration_Bridge:
             itemModel = Decoration::create(item);
             break;
+        case Decoration_Flower:
+            itemModel = Decoration::create(item);
+            break;
+        case Decoration_FlowerInv:
+            itemModel = Decoration::create(item);
+            break;
         case Decoration_Pendant:
             itemModel = Decoration::create(item);
+            break;
+        case Sprouts_Dextro:
+            itemModel = Sprouts::create(item);
+            break;
+        case Sprouts_Levo:
+            itemModel = Sprouts::create(item);
+            break;
+        case Sprouts_Slope:
+            itemModel = Sprouts::create(item);
             break;
         default:
             break;
@@ -107,15 +121,22 @@ bool ItemModel::init(Item &item)
         setPosition(item.x*DefiniteSize.width, item.y*DefiniteSize.height);
         setAnimatedOn(item.isAnimated);
         setTriggerTime(item.triggerTime);
+        setElapsedTime(item.elapsedTime);
+        setBindedTriggerID(item.bindedTriggerID);
+        setTriggerSwitchState(false);
+        setAutoSmoothingState(item.isAutoSmoothing);
         setCascadeOpacityEnabled(true);
-        setStatus(ItemStatus::NormalStatus);
+        animationGroupCount = item.animationInfos.size();
         
-        if (isAnimated) {
-            animationGroupCount = item.animationInfos.size();
-            createAnimates(item.animationInfos,item.animationControlInstructions);
+        if (isAnimated && animationGroupCount>0) {
+            if (isAutoSmoothing) {
+                createCardinalSplineAnimates(item.animationInfos.at(0));
+            }else{
+                createAnimates(item.animationInfos,item.animationControlInstructions);
+            }
         }
         isAniPerformed = false;
-              result = true;
+        result = true;
     }else{
         result = false;
     }
@@ -140,15 +161,15 @@ void ItemModel::createAnimates(std::vector<std::vector<AnimationInfo>>& animatio
             ActionInterval* move = nullptr;
             Sequence* singleAnimation = nullptr;
             CCASSERT(info.waitTime>=0.0&&info.rotationSpeed>=0.0&&info.moveSpeed>=0.0, "animation information is invalid,game cannot be run!");
-            //
+            //延迟
             delay = DelayTime::create(info.waitTime);
             singleAnimation  = Sequence::create(delay, NULL);
-            //
+            //旋转
             if (info.rotation != 0.0&& info.rotationSpeed != 0.0) {
                 rotate = RotateBy::create(info.rotation/info.rotationSpeed, info.rotation);
                 singleAnimation = Sequence::create(singleAnimation,rotate, NULL);
             }
-            //
+            //移动
             Vec2 destPosition = getPosition() + info.position;
             if (destPosition - prePosition != Vec2(0,0) && info.moveSpeed != 0.0) {
                 t = destPosition.getDistance(prePosition)/info.moveSpeed;
@@ -190,7 +211,16 @@ void ItemModel::createCardinalSplineAnimates(std::vector<AnimationInfo> &animati
         
         prePosition = getPosition() + info.position;
     }
-    _animatesCardinalSpline = CardinalSplineBy::create(duration, pathPoint, kDefaultCardinalSplineTension);
+    
+    std::vector<float> dutyRatio(pathPoint->count(),0.0);
+    float accumulativeRatio = 0.0;
+    for (int i = 1; i<pathPoint->count(); i++) {
+        float ratio = pathPoint->getControlPointAtIndex(i).distance(pathPoint->getControlPointAtIndex(i-1))/animationInfos.at(i-1).moveSpeed/duration;
+        accumulativeRatio += ratio;
+        dutyRatio[i] = accumulativeRatio;
+    }
+    
+    _animatesCardinalSpline = CustomCardinalSplineBy::create(duration, pathPoint, dutyRatio, kDefaultCardinalSplineTension);
     CC_SAFE_RETAIN(_animatesCardinalSpline);
 }
 
@@ -199,27 +229,34 @@ void ItemModel::createCustomCurveAnimates(std::vector<AnimationInfo> &animationI
     
 }
 
+void ItemModel::runMoveAction(float dt)
+{
+    if (isAutoSmoothing) {
+        if (_animatesCardinalSpline) {
+            runAction(_animatesCardinalSpline);
+        }
+    }else{
+        if (_animatesParallel) {
+            runAction(_animatesParallel);
+        }
+        for (Action* action : _allCyclicAnimations) {
+            runAction(action);
+        }
+    }
+    
+}
+
 void ItemModel::update(float dt)
 {
-    float beginningPointY = VisibleSize.height-getBoundingBox().size.height/2;
-    Vec2 pointInGl = getParent()->convertToWorldSpace(getPosition());
-    if (pointInGl.y<beginningPointY) {
-        if (isAnimated){
-            
-            if (_animatesParallel) {
-                runAction(_animatesParallel);
+    if (!isAniPerformed) {
+        float beginningPointY = VisibleSize.height-getBoundingBox().size.height/2;
+        Vec2 pointInGl = getParent()->convertToWorldSpace(getPosition());
+        if (pointInGl.y<beginningPointY) {
+            if (isAnimated && animationGroupCount>0){
+                scheduleOnce(schedule_selector(ItemModel::runMoveAction), triggerTime);
+                isAniPerformed = true;
             }
-            for (Action* action : _allCyclicAnimations) {
-                runAction(action);
-            }
-            
-            isAniPerformed = true;
         }
-        
-        if (_type!=Decoration_Bridge && _type!=Decoration_Pendant) {
-            unscheduleUpdate();
-        }
-    
     }
     
 }

@@ -14,7 +14,7 @@ static const char* _sPathBackground_level_2_3 = "";
 static const char* _sPathBackground_level_2_4 = "";
 static const char* _sPathBackground_level_2_5 = "";
 
-static const char* _sPathBackground_level_3_1 = "";
+static const char* _sPathBackground_level_3_1 = "background_3_1.jpg";
 static const char* _sPathBackground_level_3_2 = "";
 static const char* _sPathBackground_level_3_3 = "";
 static const char* _sPathBackground_level_3_4 = "";
@@ -40,7 +40,7 @@ static const char* _sPathMapDirt_level_2_3 = "dirt512_3.png";
 static const char* _sPathMapDirt_level_2_4 = "dirt512_3.png";
 static const char* _sPathMapDirt_level_2_5 = "dirt512_3.png";
 
-static const char* _sPathMapDirt_level_3_1 = "dirt512_3.png";
+static const char* _sPathMapDirt_level_3_1 = "dirt_3_1.jpg";
 static const char* _sPathMapDirt_level_3_2 = "dirt512_3.png";
 static const char* _sPathMapDirt_level_3_3 = "dirt512_3.png";
 static const char* _sPathMapDirt_level_3_4 = "dirt512_3.png";
@@ -65,7 +65,7 @@ static const char* _sPathMapBorder_level_2_3 = "border_2.png";
 static const char* _sPathMapBorder_level_2_4 = "border_2.png";
 static const char* _sPathMapBorder_level_2_5 = "border_2.png";
 
-static const char* _sPathMapBorder_level_3_1 = "border_2.png";
+static const char* _sPathMapBorder_level_3_1 = "border_3_1.png";
 static const char* _sPathMapBorder_level_3_2 = "border_2.png";
 static const char* _sPathMapBorder_level_3_3 = "border_2.png";
 static const char* _sPathMapBorder_level_3_4 = "border_2.png";
@@ -85,13 +85,13 @@ static const char* _sPathUIBorder_level_1_3 = "layer_border_3.png";
 static const char* _sPathUIBorder_level_1_4 = "layer_border_3.png";
 static const char* _sPathUIBorder_level_1_5 = "layer_border_3.png";
 
-static const char* _sPathUIBorder_level_2_1 = "layer_border_3.png";
+static const char* _sPathUIBorder_level_2_1 = "layer_border_2.png";
 static const char* _sPathUIBorder_level_2_2 = "layer_border_3.png";
 static const char* _sPathUIBorder_level_2_3 = "layer_border_3.png";
 static const char* _sPathUIBorder_level_2_4 = "layer_border_3.png";
 static const char* _sPathUIBorder_level_2_5 = "layer_border_3.png";
 
-static const char* _sPathUIBorder_level_3_1 = "layer_border_3.png";
+static const char* _sPathUIBorder_level_3_1 = "layer_border_3_1.png";
 static const char* _sPathUIBorder_level_3_2 = "layer_border_3.png";
 static const char* _sPathUIBorder_level_3_3 = "layer_border_3.png";
 static const char* _sPathUIBorder_level_3_4 = "layer_border_3.png";
@@ -105,11 +105,11 @@ static const char* _sPathUIBorder_level_4_5 = "layer_border_3.png";
 
 
 static const char* _sPathPlantBody_level_1_1 = "test_plant_1024.png";
-static const char* _sPathPlantBody_level_2_1 = "plant1_4_01_64.png";
-static const char* _sPathPlantBody_level_2_2 = "test_plant_1024.png";
-static const char* _sPathPlantBody_level_3_1 = "test_plant_1024.png";
-static const char* _sPathPlantBody_level_3_2 = "test_plant_1024.png";
-static const char* _sPathPlantBody_level_4_1 = "test_plant_1024.png";
+static const char* _sPathPlantBody_level_2_1 = "plant_2_1.png";
+static const char* _sPathPlantBody_level_2_2 = "plant_3_1.png";
+static const char* _sPathPlantBody_level_3_1 = "plant_3_2.png";
+static const char* _sPathPlantBody_level_3_2 = "plant_4_1.png";
+static const char* _sPathPlantBody_level_4_1 = "plant_4_2.png";
 static const char* _sPathPlantBody_level_4_2 = "test_plant_1024.png";
 
 static const char* _sPathPlantLeaf_level_1_1 = "plant1_leaf_1.png";

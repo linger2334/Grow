@@ -11,8 +11,14 @@ public:
     }
     void  update(float dt);
     void reGrowPlantByIndex(int index);
-    void addLightByFlame(Vec2 pt,int count,int plantIndex = 0);
-    void updatePlantGrowSpeed();
+    
+    ////Light
+    void addLightByFlame(Vec2 pt,int count,int plantIndex = 0,float waitTime = 0.3);
+    void removeOneLightNormal(int plantIndex = 0);
+    void removeSubLight(int plantIndex = 0);
+    void removeSubLight(Vec2 pt,int plantIndex = 0);
+    ///
+    void updatePlantGrowSpeed(float dt);
     void checkRemoveLightNormal();
     bool checkChangeSubMap();
     
@@ -26,12 +32,12 @@ public:
         return 300;
     }
     
+    void setPlantWaiting(int plantIndex,bool isWait);
+    
     void waitAddLight();
     void waitAddLightComplete();
     
-    void removeOneLightNormal(int plantIndex = 0);
-    void removeSubLight(int plantIndex = 0);
-    void removeSubLight(Vec2 pt,int plantIndex = 0);
+
     void checkNeedMoveDown();
     void updatePlantSpeed();
     
@@ -48,6 +54,7 @@ public:
     bool   _isShowPause;
     std::map<int,int> _plantsStepHeight;
     ScreenEnergy*     _layerAddLights;
+    int               _plantIndex;
 };
 
 #endif /* defined(__Grow_Beta_01__GameRunningContorler__) */

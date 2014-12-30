@@ -52,4 +52,28 @@ namespace UIHelper
         if(!node)return;
         node->setPosition(getViewPosition(_type));
     }
+    
+    Vec2 getWorldPosition(Node* node)
+    {
+        Vec2 pt = node->getPosition();
+        auto parent = node->getParent();
+        if (parent) {
+            pt = parent->convertToWorldSpace(pt);
+        }
+        return pt;
+    }
+    
+    Vec2 getNodePositionByWorld(Node* parent ,Vec2 point)
+    {
+       return parent->convertToNodeSpace(point);
+    }
+    Vec2 getPositionToSameParentByWorld(Node* node,Vec2 point)
+    {
+        Vec2 pt = point;
+        auto parent = node->getParent();
+        if (parent) {
+            pt = parent->convertToNodeSpace(pt);
+        }
+        return pt;
+    }
 };

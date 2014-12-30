@@ -19,7 +19,6 @@ public:
     GameLayerRollImage*             _borderLeftLayer;
     GameLayerRollImage*             _borderRightLayer;
     b2Body* bodys[2];
-    b2Body* _testBody;
 };
 
 #endif /* defined(__Grow_Beta_01__GameLayerUIBorder__) */

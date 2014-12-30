@@ -10,6 +10,9 @@ public:
     ContorlPointV2(Vec2 point,float radius,float angle,float height,int zPosition =0):_point(point),_height(height),
     _angle(angle),_radius(radius),_zPosition(zPosition){}
     
+    ContorlPointV2(Vec2 point,float rotateRadius):_point(point),_rotateRadius(rotateRadius){}
+    ContorlPointV2(Vec2 point,float rotateRadius,float angle):_point(point),_rotateRadius(rotateRadius){}
+    
     Vec2  getContorlPosition(){return _point;}
     Vec2  getNextContorPosition( float angle);
     
@@ -42,11 +45,11 @@ public:
     ContorlPointV2 moveNextByRotateRight(float len);
     
     Vec2   _point;
-    float  _angle;
-    float  _radius;
-    float  _height;
-    int    _zPosition;
-    float  _rotateRadius;
+    float  _angle = 0.0f;
+    float  _radius = 0.0f;
+    float  _height = 0.0f;
+    int    _zPosition = 0;
+    float  _rotateRadius = 0.0f;
 };
 
 #define MakeVec3(T,Z) Vec3(T.x,T.y,Z)

@@ -14,6 +14,7 @@ class LevelEditor;
 
 enum
 {
+    SceneNoSelect = -1,
     ScenePageView = 0 ,
     SceneLogo,
     SceneLoding,
@@ -81,7 +82,11 @@ public:
         CC_SAFE_RELEASE_NULL(_fileHandler);
     }
     
+    void  clearGameLevelInfo();
     void  clearRunningInfo();
+    
+    void  saveActions();
+    void  reStartActions();
     
     LevelEditor* _levelEditor;
     float editor_width;
@@ -92,6 +97,7 @@ public:
     LevelFileHandler* _fileHandler;
     Scene* _gameScne;
     int    _gameLevel;
+      Vector<Node*>   _pauseNodes;
 };
 
 

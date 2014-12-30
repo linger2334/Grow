@@ -134,6 +134,9 @@
         itemtype = item.type;
         isAnimated = item.isAnimated;
         triggerTime = item.triggerTime;
+        elapsedTime = item.elapsedTime;
+        bindedTriggerID = item.bindedTriggerID;
+        isAutoSmoothing = item.isAutoSmoothing;
         _animationControlInstructions = item.animationControlInstructions;
         _animationInfos = item.animationInfos;
         animationGroupCount = item.animationInfos.size();
@@ -208,37 +211,13 @@
                 break;
             case Cicada:
             {
-                imageFilename = IMAGE_CICADA;
-                
                 if(item.features){
                     features = new Features_Cicada(*((Features_Cicada*)item.features));
                 }else{
                     features = new Features_Cicada();
                 }
-            }
-                break;
-            case Dragon_Anti:
-            {
-                imageFilename = IMAGE_DRAGON_ANTI;
-                self.layer.anchorPoint = CGPointMake(145.0/382, 217.0/413);
                 
-                if(item.features){
-                    features = new Features_Dragon(*((Features_Dragon*)item.features));
-                }else{
-                    features = new Features_Dragon();
-                }
-            }
-                break;
-            case Dragon_Clockwise:
-            {
-                imageFilename = IMAGE_DRAGON_CLOCKWISE;
-                self.layer.anchorPoint = CGPointMake(237.0/382, 217.0/413);
-                
-                if(item.features){
-                    features = new Features_Dragon(*((Features_Dragon*)item.features));
-                }else{
-                    features = new Features_Dragon();
-                }
+                imageFilename = ((Features_Cicada*)features)->isReversalStatus? IMAGE_CICADA_BLUE : IMAGE_CICADA_RED;
             }
                 break;
             case DoubDragon_Anti:
@@ -299,15 +278,74 @@
                 GameManager::getInstance()->_levelEditor->_myViewController->_gates.push_back(self);
             }
                 break;
+            case Gear_Reversal:
+                imageFilename = IMAGE_GEARREVERSAL;
+                break;
             case Barrier_:
-                imageFilename = IMAGE_BARRIER;
+                imageFilename = IMAGE_BARRIER_RED;
                 break;
             case Decoration_Bridge:
                 imageFilename = IMAGE_DECORATION_BRIDGE;
                 break;
+            case Decoration_Flower:
+            {
+                imageFilename = IMAGE_DECORATION_FLOWER;
+                if (item.features) {
+                    Features_DecorationFlower* feat = (Features_DecorationFlower*)item.features;
+                    features = new Features_DecorationFlower(*feat);
+                }else{
+                    features = new Features_DecorationFlower();
+                }
+            }
+                break;
+            case Decoration_FlowerInv:
+            {
+                imageFilename = IMAGE_DECORATION_FLOWERINV;
+                if (item.features) {
+                    Features_DecorationFlower* feat = (Features_DecorationFlower*)item.features;
+                    features = new Features_DecorationFlower(*feat);
+                }else{
+                    features = new Features_DecorationFlower();
+                }
+            }
+                break;
             case Decoration_Pendant:
                 imageFilename = IMAGE_DECORATION_PENDANT;
                 break;
+            case Sprouts_Dextro:
+            {
+                imageFilename = IMAGE_SPROUTS_DEXTRO;
+                if (item.features) {
+                    Features_Sprouts* feat = (Features_Sprouts*)item.features;
+                    features = new Features_Sprouts(*feat);
+                }else{
+                    features = new Features_Sprouts();
+                }
+            }
+                break;
+            case Sprouts_Levo:
+            {
+                imageFilename = IMAGE_SPROUTS_LEVO;
+                if (item.features) {
+                    Features_Sprouts* feat = (Features_Sprouts*)item.features;
+                    features = new Features_Sprouts(*feat);
+                }else{
+                    features = new Features_Sprouts();
+                }
+            }
+                break;
+            case Sprouts_Slope:
+            {
+                imageFilename = IMAGE_SPROUTS_SLOPE;
+                if (item.features) {
+                    Features_Sprouts* feat = (Features_Sprouts*)item.features;
+                    features = new Features_Sprouts(*feat);
+                }else{
+                    features = new Features_Sprouts();
+                }
+            }
+                break;
+                
             default:
                 break;
         }
@@ -524,12 +562,6 @@
         case Cicada:
             name = "Cicada";
             break;
-        case Dragon_Anti:
-            name = "Dragon_Anti";
-            break;
-        case Dragon_Clockwise:
-            name = "Dragon_Clockwise";
-            break;
         case DoubDragon_Anti:
             name = "DoubDragon_Anti";
             break;
@@ -545,14 +577,32 @@
         case Gear_Gate:
             name = "Gear_Gate";
             break;
+        case Gear_Reversal:
+            name = "Gear_Reversal";
+            break;
         case Barrier_:
             name = "Barrier";
             break;
         case Decoration_Bridge:
             name = "Decoration_Bridge";
             break;
+        case Decoration_Flower:
+            name = "Decoration_Flower";
+            break;
+        case Decoration_FlowerInv:
+            name = "Decoration_FlowerInv";
+            break;
         case Decoration_Pendant:
             name = "Decoration_Pendant";
+            break;
+        case Sprouts_Dextro:
+            name = "Sprouts_Dextro";
+            break;
+        case Sprouts_Levo:
+            name = "Sprouts_Levo";
+            break;
+        case Sprouts_Slope:
+            name = "Sprouts_Slope";
             break;
         case Rock_Circle:
             name = "Rock_Circle";
@@ -605,6 +655,15 @@
     return name;
 }
 
+-(NSComparisonResult)compareWithID:(ItemView*)other
+{
+    ItemView* myself = (ItemView*)self;
+    NSNumber* myID = [NSNumber numberWithInt:myself.tag];
+    NSNumber* otherID = [NSNumber numberWithInt:other.tag];
+    
+    return [myID compare:otherID];
+}
+
 -(void)dealloc
 {    
     switch (itemtype) {
@@ -612,20 +671,6 @@
         {
             if (features) {
                 delete (Features_Cicada*)features;
-            }
-        }
-            break;
-        case Dragon_Anti:
-        {
-            if (features) {
-                delete (Features_Dragon*)features;
-            }
-        }
-            break;
-        case Dragon_Clockwise:
-        {
-            if (features) {
-                delete (Features_Dragon*)features;
             }
         }
             break;
@@ -660,6 +705,41 @@
         {
             if (features)
                 delete (Features_GearGate*)features;
+        }
+            break;
+        case Decoration_Flower:
+        {
+            if (features) {
+                delete (Features_DecorationFlower*)features;
+            }
+        }
+            break;
+        case Decoration_FlowerInv:
+        {
+            if (features) {
+                delete (Features_DecorationFlower*)features;
+            }
+        }
+            break;
+        case Sprouts_Dextro:
+        {
+            if (features) {
+                delete (Features_Sprouts*)features;
+            }
+        }
+            break;
+        case Sprouts_Levo:
+        {
+            if (features) {
+                delete (Features_Sprouts*)features;
+            }
+        }
+            break;
+        case Sprouts_Slope:
+        {
+            if (features) {
+                delete (Features_Sprouts*)features;
+            }
         }
             break;
             

@@ -21,30 +21,30 @@ bool GameLayerUI::initGameInfo()
     _pause_btn->setAnchorPoint(Vec2::ZERO);
     // "Arial"
     _lightCountShow_left = Sprite::create("light_show.png");
-    _lightCountShow_right = Sprite::create("light_show.png");
+   // _lightCountShow_right = Sprite::create("light_show.png");
     
     _lightCountShowNumber_left = Label::createWithSystemFont( "",  "Arial",20);
-    _lightCountShowNumber_right = Label::createWithSystemFont( "",  "Arial",20);
+   // _lightCountShowNumber_right = Label::createWithSystemFont( "",  "Arial",20);
     
     //    _lightCountShowNumber_left->setAnchorPoint(Vec2::ZERO);
     //    _lightCountShowNumber_left->setAnchorPoint(Vec2(1,0));
     
     Size wSize = GameRuntime::getInstance()->getVisibleSize();
     _lightCountShow_left->setAnchorPoint(Vec2(0.5,0.45));
-    _lightCountShow_right->setAnchorPoint(Vec2(0.5,0.45));
+   // _lightCountShow_right->setAnchorPoint(Vec2(0.5,0.45));
     addChild(_pause_btn,1001);
     addChild(_lightCountShowNumber_left,1002);
-    addChild(_lightCountShowNumber_right,1002);
+   // addChild(_lightCountShowNumber_right,1002);
     addChild(_lightCountShow_left,1001);
-    addChild(_lightCountShow_right,1001);
+  //  addChild(_lightCountShow_right,1001);
     _pause_btn->setPosition(Vec2(20,20));
     Size lSize = _lightCountShow_left->getContentSize();
     _lightCountShow_left->setPosition(Vec2(20+lSize.width*0.5,80+lSize.height*0.5));
-    _lightCountShow_right->setPosition(Vec2(wSize.width - 20-lSize.width*0.5,80+lSize.height*0.5));
+  //  _lightCountShow_right->setPosition(Vec2(wSize.width - 20-lSize.width*0.5,80+lSize.height*0.5));
     auto lrect = _lightCountShow_left->getBoundingBox();
     _lightCountShowNumber_left->setPosition(Vec2(lrect.origin.x+lrect.size.width*0.5,lrect.origin.y+lrect.size.height*0.5));
-     auto rrect = _lightCountShow_right->getBoundingBox();
-    _lightCountShowNumber_right->setPosition(Vec2(rrect.origin.x+rrect.size.width*0.5,rrect.origin.y+rrect.size.height*0.5));
+   //  auto rrect = _lightCountShow_right->getBoundingBox();
+   // _lightCountShowNumber_right->setPosition(Vec2(rrect.origin.x+rrect.size.width*0.5,rrect.origin.y+rrect.size.height*0.5));
     
     
     _lengthShow_left = Label::createWithSystemFont( "",  "Arial",35);
@@ -75,23 +75,27 @@ bool GameLayerUI::initGameInfo()
     _toFlower = Rect(w0 ,0,w,height);
     _toLevel = Rect(w0 + w,0,w,height);
     _toLogo  = Rect(w0 + w*2,0,w,height);
+    _pauseBtnRect = Rect(0,0,w,height);
     _isTouch = false;
     auto listener = EventListenerTouchOneByOne::create();
     listener->setSwallowTouches(true);
     listener->onTouchBegan = CC_CALLBACK_2(GameLayerUI::onTouchBegan, this);
     listener->onTouchEnded = CC_CALLBACK_2(GameLayerUI::onTouchEnded, this);
     listener->onTouchMoved = CC_CALLBACK_2(GameLayerUI::onTouchMoved, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this); //事件调度器
+ //   _eventDispatcher->addEventListenerWithFixedPriority(listener, -100);
+//    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this); //事件调度器
     //listener->setSwallowTouches(true);
     // schedule(schedule_selector(GameLayerUI::updateLength),1.0f/5.0f);
     _lengthShow_left->setOpacity(0);
     reStartGame();
-    
-    int count = LevelManager::getInstance()->_levelId == 3 ? 2 : 1;
-    if (count<2) {
-        _lightCountShowNumber_right->setVisible(false);
-        _lightCountShow_right->setVisible(false);
-    }
+    _level_id = LevelManager::getInstance()->_levelId;
+//    int count = GameLayerPlant::getRunningLayer()->getPlantCount();
+//    if (count<2) {
+//        _lightCountShowNumber_right->setVisible(false);
+//        _lightCountShow_right->setVisible(false);
+//    }
+//    
+    _isShowWaitLightUI = false;
     return true;
 }
 void  GameLayerUI::showLinght()
@@ -117,18 +121,23 @@ void  GameLayerUI::updateLightShow()
     float angle = passHeight*360;
     _lightCountShow_left->setRotation(angle);
     
-    
-    int count = LevelManager::getInstance()->_levelId == 3 ? 2 : 1;
-    if (count >1) {
-        int lightCount = GameLayerLight::getRunningLayer()->getLightCountByPlantIndex(1);
-        char buf[256]= {""};
-        sprintf(buf,"%d",lightCount);
-        _lightCountShowNumber_right->setString(buf);
-        
-        float passHeight = manager->getPlantRemoveLightStepHeight(1)/manager->getPlantRemoveLightUnitHeight(1);
-        float angle = passHeight*360;
-        _lightCountShow_right->setRotation(angle);
-    }
+//    int count = GameLayerPlant::getRunningLayer()->getPlantCount();
+//    if (count >1) {
+//        _lightCountShowNumber_right->setVisible(true);
+//        _lightCountShow_right->setVisible(true);
+//        int lightCount = GameLayerLight::getRunningLayer()->getLightCountByPlantIndex(1);
+//        char buf[256]= {""};
+//        sprintf(buf,"%d",lightCount);
+//        _lightCountShowNumber_right->setString(buf);
+//        
+//        float passHeight = manager->getPlantRemoveLightStepHeight(1)/manager->getPlantRemoveLightUnitHeight(1);
+//        float angle = passHeight*360;
+//        _lightCountShow_right->setRotation(angle);
+//    }
+//    else{
+//        _lightCountShowNumber_right->setVisible(false);
+//        _lightCountShow_right->setVisible(false);
+//    }
 
 }
 void GameLayerUI::update(float dt)
@@ -147,16 +156,17 @@ void GameLayerUI::onExit()
 }
 bool GameLayerUI::onTouchBegan(Touch* touch,Event* event)
 {
-    
     auto gamemanager = GameManager::getInstance();
     Vec2 pt = touch->getLocation();
-    if ((!gamemanager->isPause() && _pause_btn->getBoundingBox().containsPoint(pt))||
-        gamemanager->isPause())
-    {
-        return true;
+    bool ret =false;
+    if (!gamemanager->isPause()) {
+        if (_pauseBtnRect.containsPoint(pt)) {
+            ret = true;
+        }
     }
-
-    return false;
+    else ret= true;
+    
+    return ret;
 }
 
 void GameLayerUI::onTouchMoved(Touch* touch,Event* event)
@@ -168,28 +178,30 @@ void GameLayerUI::onTouchEnded(Touch* touch,Event* event)
 {
     auto gamemanager = GameManager::getInstance();
     Vec2 pt = touch->getLocation();
-    if (!gamemanager->isPause() && _pause_btn->getBoundingBox().containsPoint(pt)) {
-        //_pause_btn->setColor(Color3B::YELLOW);
-        pauseGame();
-        gamemanager->pauseGame();
-       
+    if (!gamemanager->isPause() ) {
+        if (_pauseBtnRect.containsPoint(pt)) {
+            gamemanager->pauseGame();
+        }
     }
-    else if( gamemanager->isPause()&&!_pauseRect.containsPoint(pt))
+    else if( gamemanager->isPause()&&!_pauseRect.containsPoint(pt)&&!_isShowWaitLightUI)
     {
         gamemanager->reStartGame();
-        reStartGame();
     }
     else if( gamemanager->isPause()&&_pauseRect.containsPoint(pt))
     {
+        auto sceneType = SceneNoSelect;
         if (_toLogo.containsPoint(pt)) {
-            GameManager::getInstance()->navigationTo(SceneLogo);
+            sceneType = SceneLogo;
         }
         else   if (_toFlower.containsPoint(pt)) {
-            GameManager::getInstance()->navigationTo(SceneFlower);
-            
+            sceneType = SceneFlower;
         }
         else   if (_toLevel.containsPoint(pt)) {
-            GameManager::getInstance()->navigationTo(ScenePageView);
+            sceneType = ScenePageView;
+        }
+        if (sceneType != SceneNoSelect) {
+            gamemanager->saveActions();
+            GameManager::getInstance()->navigationTo(sceneType);
         }
     }
 }
@@ -202,4 +214,10 @@ void  GameLayerUI::reStartGame()
 {
     _pause->setVisible(false);
     _layerColor->setVisible(false);
+}
+void GameLayerUI::showWaitLightUI()
+{
+    auto _layerAddLights = ScreenEnergy::create();
+    addChild(_layerAddLights,1111);
+    _isShowWaitLightUI = true;
 }

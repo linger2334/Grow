@@ -43,7 +43,10 @@ public:
     void CollideWithSerpent(ItemModel* item,ItemModel* plantHead);
     void CollideWithGearButton(ItemModel* item,ItemModel* plantHead);
     void CollideWithGearGate(ItemModel* item,ItemModel* plantHead);
+    void CollideWithGearReversal(ItemModel* item,ItemModel* plantHead);
     void CollideWithBarrier(ItemModel* item,ItemModel* plantHead);
+    void CollideWithDecorationFlower(ItemModel* item,ItemModel* plantHead);
+    void CollideWithTriggerNode(ItemModel* item,ItemModel* plantHead);
     
     void update(float dt);
 

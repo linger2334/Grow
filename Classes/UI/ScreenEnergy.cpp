@@ -7,6 +7,8 @@
 //
 
 #include "ScreenEnergy.h"
+#include "GameRunningManager.h"
+#include "GameManager.h"
 using namespace ui;
 
 bool ScreenEnergy::init()
@@ -135,7 +137,11 @@ bool ScreenEnergy::init()
         close->setPosition(Vec2(0.9*panelSize.width,0.95*panelSize.height));
         close->addTouchEventListener([&](Ref* sender,Widget::TouchEventType eventType){
             if (eventType == Widget::TouchEventType::ENDED) {
-                UserDefault::getInstance()->setIntegerForKey("accumulativeTime_Natural", accumulativeTime_Natural);
+                if (progress == 100) {
+                    UserDefault::getInstance()->setIntegerForKey("accumulativeTime_Natural", 0);
+                }else{
+                    UserDefault::getInstance()->setIntegerForKey("accumulativeTime_Natural", accumulativeTime_Natural);
+                }
                 UserDefault::getInstance()->flush();
                 FadeOut* disappear = FadeOut::create(1.5);
                 RemoveSelf* remove = RemoveSelf::create();
@@ -169,8 +175,10 @@ void ScreenEnergy::onEnter()
 void ScreenEnergy::onExit()
 {
     if(progress == 100){
-        
-        
+        GameRunningManager::getInstance()->waitAddLightComplete();
+    }else{
+        GameManager::getInstance()->reStartGame();
+        GameLayerUI::getRunningLayer()->noShowWaitLightUI();
     }
     
     Layer::onExit();

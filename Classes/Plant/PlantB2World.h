@@ -22,7 +22,7 @@ public:
         setType(98);
     }
     
-    PlantNode* getPlantNode(){}
+   // PlantNode* getPlantNode(){}
     int _plantIndex;
 };
 class PlantLineBorderBody : public ItemModel
@@ -33,7 +33,7 @@ public:
         setType(97);
     }
     
-    PlantNode* getPlantNode(){}
+   // PlantNode* getPlantNode(){}
     int _plantIndex;
 };
 #endif /* defined(__GrowDemo__PlantB2World__) */

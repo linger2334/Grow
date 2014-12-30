@@ -13,12 +13,12 @@
 #include "Macro.h"
 
 struct Features_Cicada{
-    float w;
-    float includedAngle;
-    float fanningDuration;
-    float interval;
-    float bellyTransparency;
-    Features_Cicada(float W=kDefaultCicadaW,float IncludedAngle=kDefaultCicadaIncludedAngle,float FanningDuration=kDefaultCicadaFanningDuration,float Interval=kDefaultCicadaInterval,float BellyTransparency=kDefaultCicadaBellyTransparency);
+    float fanningSpeed;
+    bool autoTurnHead;
+    bool autoFanning;
+    bool isReversalStatus;
+    
+    Features_Cicada(float _fanningSpeed=kDefaultCicadaFanningSpeed,bool _autoTurnHead=kDefaultCicadaAutoTurnHeadState,bool _autoFanning=kDefaultCicadaAutoFanningState, bool _isReversalStatus=kDefaultCicadaReversalStatus);
     Features_Cicada(const Features_Cicada& );
 };
 
@@ -62,6 +62,20 @@ struct Features_GearGate{
     Features_GearGate(const Features_GearGate& );
 };
 
+struct Features_DecorationFlower{
+    int flowerID;
+    
+    Features_DecorationFlower(int _flowerID=kDefaultDecorationFlowerID);
+    Features_DecorationFlower(const Features_DecorationFlower& );
+};
+
+struct Features_Sprouts{
+    float growSpeed;
+    
+    Features_Sprouts(float _growSpeed=kDefaultSproutsGrowSpeed);
+    Features_Sprouts(const Features_Sprouts& );
+};
+
 struct PolygonInfo{
     int tag;
     Vec2 position;
@@ -70,6 +84,17 @@ struct PolygonInfo{
     
     PolygonInfo(int _tag,Vec2 _position,bool _isConvex,std::vector<Vec2>& _vertexes);
     PolygonInfo(const PolygonInfo& );
+};
+
+struct TriggerInfo{
+    int tag;
+    Vec2 position;
+    bool isConvex;
+    std::vector<Vec2> vertexes;
+    std::vector<int> bindIDs;
+    
+    TriggerInfo(int _tag,Vec2 _position,bool _isConvex,std::vector<Vec2>& _vertexes,std::vector<int>& _bindIDs);
+    TriggerInfo(const TriggerInfo& );
 };
 
 struct AnimationInfo{
@@ -93,11 +118,14 @@ struct Item{
     int localZorder;
     bool isAnimated;
     float triggerTime;
+    float elapsedTime;
+    int bindedTriggerID;
+    bool isAutoSmoothing;
     std::map<std::string,bool> animationControlInstructions;
     std::vector<std::vector<AnimationInfo>> animationInfos;
     void* features;
     
-    Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _isAnimated,float _triggerTime,std::map<std::string,bool>& _animationControlInstrutcions,std::vector<std::vector<AnimationInfo>>& _animationInfos,void* _features = nullptr);
+    Item(Item_Type _type,int _id,float _x,float _y,float _angle,float _scale,int _localZorder,bool _isAnimated,float _triggerTime,float _elapsedTime,int _bindedTriggerID,bool _isAutoSmoothing,std::map<std::string,bool>& _animationControlInstrutcions,std::vector<std::vector<AnimationInfo>>& _animationInfos,void* _features = nullptr);
     
     Item(const Item& );
     ~Item();

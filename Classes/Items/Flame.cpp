@@ -116,8 +116,6 @@ void Flame::createBody()
     bodymassData.mass *= getScale();
     bodymassData.I *= getScale();
     _body->SetMassData(&bodymassData);
-    //
-    scheduleUpdate();
 }
 
 void Flame::updateFlameCollectedCount()

@@ -19,6 +19,10 @@ LevelFileHandler::LevelFileHandler()
 LevelFileHandler::~LevelFileHandler()
 {
     CC_SAFE_RELEASE(_polygonsDict);
+#ifdef GROW_LEVELEDITOR
+    CC_SAFE_RELEASE(_boundFlowerIDDict);
+#endif
+    
 }
 
 LevelFileHandler* LevelFileHandler::createWithFileName(const char* filename)
@@ -68,6 +72,9 @@ void LevelFileHandler::loadFile()
             int localZorder = 0;
             bool isAnimated = kDefaultAnimatedOnState;
             float triggerTime = kDefaultTriggerTime;
+            float elapsedTime = kDefaultElapsedTime;
+            int bindedTriggerID = kDefaultBindedTriggerID;
+            bool isAutoSmoothing = kDefaultAutoSmoothingState;
             std::map<std::string,bool> animationControlInstructions;
             std::vector<std::vector<AnimationInfo>> animationInfos;
             void* features = nullptr;
@@ -133,45 +140,20 @@ void LevelFileHandler::loadFile()
                 type = Cicada;
                 Features_Cicada feat;
                 
-                if(XMLElement* wElement = objElement->FirstChildElement("w")){
-                    wElement->QueryFloatText(&feat.w);
+                if (XMLElement* fanningSpeedElement = objElement->FirstChildElement("fanningSpeed")) {
+                    fanningSpeedElement->QueryFloatText(&feat.fanningSpeed);
                 }
-                if (XMLElement* includedAngeleElement = objElement->FirstChildElement("includedAngle")) {
-                    includedAngeleElement->QueryFloatText(&feat.includedAngle);
+                if (XMLElement* autoTurnHeadElement = objElement->FirstChildElement("autoTurnHead")) {
+                    autoTurnHeadElement->QueryBoolText(&feat.autoTurnHead);
                 }
-                if (XMLElement* fanningDurationElement = objElement->FirstChildElement("fanningDuration")) {
-                    fanningDurationElement->QueryFloatText(&feat.fanningDuration);
+                if (XMLElement* autoFanningElement = objElement->FirstChildElement("autoFanning")) {
+                    autoFanningElement->QueryBoolText(&feat.autoFanning);
                 }
-                if (XMLElement* intervalElement = objElement->FirstChildElement("interval")) {
-                    intervalElement->QueryFloatText(&feat.interval);
-                }
-                if(XMLElement* bellyTransparencyElement = objElement->FirstChildElement("bellyTransparency")){
-                    bellyTransparencyElement->QueryFloatText(&feat.bellyTransparency);
+                if (XMLElement* isReversalStatus = objElement->FirstChildElement("isReversalStatus")) {
+                    isReversalStatus->QueryBoolText(&feat.isReversalStatus);
                 }
                 features = &feat;
                 
-            }
-            else if(!strcmp(typestr, "Dragon_Anti")){
-                type = Dragon_Anti;
-                Features_Dragon feat;
-                if(XMLElement* wElement = objElement->FirstChildElement("w")){
-                    wElement->QueryFloatText(&feat.w);
-                }
-                if (XMLElement* backTransparencyElement = objElement->FirstChildElement("backTransparency")) {
-                    backTransparencyElement->QueryFloatText(&feat.backTransparency);
-                }
-                features = &feat;
-            }
-            else if (!strcmp(typestr, "Dragon_Clockwise")){
-                type = Dragon_Clockwise;
-                Features_Dragon feat;
-                if(XMLElement* wElement = objElement->FirstChildElement("w")){
-                    wElement->QueryFloatText(&feat.w);
-                }
-                if (XMLElement* backTransparencyElement = objElement->FirstChildElement("backTransparency")) {
-                    backTransparencyElement->QueryFloatText(&feat.backTransparency);
-                }
-                features = &feat;
             }
             else if (!strcmp(typestr, "DoubDragon_Anti")){
                 type = DoubDragon_Anti;
@@ -228,6 +210,8 @@ void LevelFileHandler::loadFile()
                     startRateElement->QueryFloatText(&feat.startRate);
                 }
                 features = &feat;
+            }else if (!strcmp(typestr, "Gear_Reversal")){
+                type = Gear_Reversal;
             }
             else if(!strcmp(typestr, "Barrier")){
                 type = Barrier_;
@@ -235,8 +219,48 @@ void LevelFileHandler::loadFile()
             else if(!strcmp(typestr, "Decoration_Bridge")){
                 type = Decoration_Bridge;
             }
+            else if (!strcmp(typestr, "Decoration_Flower")){
+                type = Decoration_Flower;
+                Features_DecorationFlower feat;
+                if (XMLElement* flowerIDElement = objElement->FirstChildElement("flowerID")) {
+                    flowerIDElement->QueryIntText(&feat.flowerID);
+                }
+                features = &feat;
+            }
+            else if (!strcmp(typestr, "Decoration_FlowerInv")){
+                type = Decoration_FlowerInv;
+                Features_DecorationFlower feat;
+                if (XMLElement* flowerIDElement = objElement->FirstChildElement("flowerID")) {
+                    flowerIDElement->QueryIntText(&feat.flowerID);
+                }
+                features = &feat;
+            }
             else if(!strcmp(typestr, "Decoration_Pendant")){
                 type = Decoration_Pendant;
+            }
+            else if (!strcmp(typestr, "Sprouts_Dextro")){
+                type = Sprouts_Dextro;
+                Features_Sprouts feat;
+                if (XMLElement* growSpeedElement = objElement->FirstChildElement("growSpeed")) {
+                    growSpeedElement->QueryFloatText(&feat.growSpeed);
+                }
+                features = &feat;
+            }
+            else if (!strcmp(typestr, "Sprouts_Levo")){
+                type = Sprouts_Levo;
+                Features_Sprouts feat;
+                if (XMLElement* growSpeedElement = objElement->FirstChildElement("growSpeed")) {
+                    growSpeedElement->QueryFloatText(&feat.growSpeed);
+                }
+                features = &feat;
+            }
+            else if (!strcmp(typestr, "Sprouts_Slope")){
+                type = Sprouts_Slope;
+                Features_Sprouts feat;
+                if (XMLElement* growSpeedElement = objElement->FirstChildElement("growSpeed")) {
+                    growSpeedElement->QueryFloatText(&feat.growSpeed);
+                }
+                features = &feat;
             }
             
             id = objElement->IntAttribute("id");
@@ -247,6 +271,9 @@ void LevelFileHandler::loadFile()
             localZorder = objElement->IntAttribute("localZorder");
             objElement->QueryBoolAttribute("isAnimated", &isAnimated);
             objElement->QueryFloatAttribute("triggerTime", &triggerTime);
+            objElement->QueryFloatAttribute("elapsedTime", &elapsedTime);
+            objElement->QueryIntAttribute("bindedTriggerID", &bindedTriggerID);
+            objElement->QueryBoolAttribute("isAutoSmoothing", &isAutoSmoothing);
             //
             bool animatedLoopState = kDefaultAnimatedLoopState;
             std::vector<AnimationInfo> animationGroupInfo;
@@ -284,7 +311,7 @@ void LevelFileHandler::loadFile()
 
             }
             
-            Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
+            Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,elapsedTime,bindedTriggerID,isAutoSmoothing, animationControlInstructions,animationInfos,features);
             _items.push_back(item);
             
             objElement = objElement->NextSiblingElement();
@@ -303,7 +330,7 @@ void LevelFileHandler::loadFile()
         log("file %s not exists!",documentPath.c_str());
 #endif
     }
-    //
+    //多边形文件
     std::string plistPath = FileUtils::getInstance()->getWritablePath() + _filename + "polygons.plist";
     if (FileUtils::getInstance()->isFileExist(plistPath)) {
         _polygonsDict = __Dictionary::createWithContentsOfFile(plistPath.c_str());
@@ -311,6 +338,23 @@ void LevelFileHandler::loadFile()
         _polygonsDict = __Dictionary::create();
     }
     CC_SAFE_RETAIN(_polygonsDict);
+
+#ifdef GROW_LEVELEDITOR
+    //花的ID是否已经被绑定的文件
+    std::string flowerIDPath = FileUtils::getInstance()->getWritablePath() + "boundFlowerID.plist";
+    if(FileUtils::getInstance()->isFileExist(flowerIDPath)){
+        _boundFlowerIDDict = __Dictionary::createWithContentsOfFile(flowerIDPath.c_str());
+    }else{
+        _boundFlowerIDDict = __Dictionary::create();
+        __Array* flowerIDArray = __Array::createWithCapacity(FLOWER_COUNT);
+        for (int i = 0; i<FLOWER_COUNT; i++) {
+            flowerIDArray->addObject(__String::createWithFormat("%d",0));
+        }
+        _boundFlowerIDDict->setObject(flowerIDArray, "flowerID");
+    }
+    CC_SAFE_RETAIN(_boundFlowerIDDict);
+#endif
+
 }
 
 void LevelFileHandler::removeItemWithID(int id)
@@ -410,86 +454,40 @@ int LevelFileHandler::saveFile()
                     Features_Cicada* features = (Features_Cicada*)item.features;
                     char buf[50];
                     
-                    if (features->w!=kDefaultCicadaW) {
-                        XMLElement* w = doc->NewElement("w");
-                        itemElement->LinkEndChild(w);
+                    if (features->fanningSpeed!=kDefaultCicadaFanningSpeed) {
+                        XMLElement* fanningSpeed = doc->NewElement("fanningSpeed");
+                        itemElement->LinkEndChild(fanningSpeed);
                         
-                        XMLText* wContent = doc->NewText(gcvt(features->w, 8, buf));
-                        w->LinkEndChild(wContent);
+                        sprintf(buf, "%f",features->fanningSpeed);
+                        XMLText* fanningSpeedContent = doc->NewText(buf);
+                        fanningSpeed->LinkEndChild(fanningSpeedContent);
                     }
                     
-                    if (features->includedAngle!=kDefaultCicadaIncludedAngle) {
-                        XMLElement* includedAngle = doc->NewElement("includedAngle");
-                        itemElement->LinkEndChild(includedAngle);
-                        XMLText* includedAngleContent = doc->NewText(gcvt(features->includedAngle, 7, buf));
-                        includedAngle->LinkEndChild(includedAngleContent);
+                    if (features->autoTurnHead!=kDefaultCicadaAutoTurnHeadState) {
+                        XMLElement* autoTurnHead = doc->NewElement("autoTurnHead");
+                        itemElement->LinkEndChild(autoTurnHead);
+                        
+                        sprintf(buf, features->autoTurnHead? "1" : "0");
+                        XMLText* autoTurnHeadContent = doc->NewText(buf);
+                        autoTurnHead->LinkEndChild(autoTurnHeadContent);
                     }
                     
-                    if (features->fanningDuration!=kDefaultCicadaFanningDuration) {
-                        XMLElement* fanningDuration = doc->NewElement("fanningDuration");
-                        itemElement->LinkEndChild(fanningDuration);
-                        XMLText* fanningDurationContent = doc->NewText(gcvt(((Features_Cicada*)item.features)->fanningDuration, 7, buf));
-                        fanningDuration->LinkEndChild(fanningDurationContent);
+                    if (features->autoFanning!=kDefaultCicadaAutoFanningState) {
+                        XMLElement* autoFanning = doc->NewElement("autoFanning");
+                        itemElement->LinkEndChild(autoFanning);
+                        
+                        sprintf(buf, features->autoFanning? "1" : "0");
+                        XMLText* autoFanningContent = doc->NewText(buf);
+                        autoFanning->LinkEndChild(autoFanningContent);
                     }
                     
-                    if (features->interval!=kDefaultCicadaInterval) {
-                        XMLElement* interval = doc->NewElement("interval");
-                        itemElement->LinkEndChild(interval);
-                        XMLText* intervalContent = doc->NewText(gcvt(((Features_Cicada*)item.features)->interval, 7, buf));
-                        interval->LinkEndChild(intervalContent);
-                    }
-                    
-                    if (features->bellyTransparency!=kDefaultCicadaBellyTransparency) {
-                        XMLElement* bellyTransparency = doc->NewElement("bellyTransparency");
-                        itemElement->LinkEndChild(bellyTransparency);
-                        XMLText* bellyTransparencyContent = doc->NewText(gcvt(((Features_Cicada*)item.features)->bellyTransparency, 6, buf));
-                        bellyTransparency->LinkEndChild(bellyTransparencyContent);
-                    }
-                }
-            }
-                break;
-            case Dragon_Anti:
-            {
-                itemElement->SetName("Dragon_Anti");
-                if(item.features){
-                    Features_Dragon* features = (Features_Dragon*)item.features;
-                    char buf[50];
-                    
-                    if (features->w!=kDefaultDragonW) {
-                        XMLElement* w = doc->NewElement("w");
-                        itemElement->LinkEndChild(w);
-                        XMLText* wContent = doc->NewText(gcvt(((Features_Dragon*)item.features)->w, 8, buf));
-                        w->LinkEndChild(wContent);
-                    }
-                    
-                    if (features->backTransparency!=kDefaultDragonBackTransparency) {
-                        XMLElement* backTransparency = doc->NewElement("backTransparency");
-                        itemElement->LinkEndChild(backTransparency);
-                        XMLText* backTransparencyContent = doc->NewText(gcvt(((Features_Dragon*)item.features)->backTransparency,6, buf));
-                        backTransparency->LinkEndChild(backTransparencyContent);
-                    }
-                }
-            }
-                break;
-            case Dragon_Clockwise:
-            {
-                itemElement->SetName("Dragon_Clockwise");
-                if(item.features){
-                    Features_Dragon* features = (Features_Dragon*)item.features;
-                    char buf[50];
-                    
-                    if (features->w!=kDefaultDragonW) {
-                        XMLElement* w = doc->NewElement("w");
-                        itemElement->LinkEndChild(w);
-                        XMLText* wContent = doc->NewText(gcvt(((Features_Dragon*)item.features)->w, 8, buf));
-                        w->LinkEndChild(wContent);
-                    }
-                    
-                    if (features->backTransparency!=kDefaultDragonBackTransparency) {
-                        XMLElement* backTransparency = doc->NewElement("backTransparency");
-                        itemElement->LinkEndChild(backTransparency);
-                        XMLText* backTransparencyContent = doc->NewText(gcvt(((Features_Dragon*)item.features)->backTransparency,6, buf));
-                        backTransparency->LinkEndChild(backTransparencyContent);
+                    if (features->isReversalStatus!=kDefaultCicadaReversalStatus) {
+                        XMLElement* isReversalStatus = doc->NewElement("isReversalStatus");
+                        itemElement->LinkEndChild(isReversalStatus);
+                        
+                        sprintf(buf, features->isReversalStatus? "1" : "0");
+                        XMLText* isReversalStatusContent = doc->NewText(buf);
+                        isReversalStatus->LinkEndChild(isReversalStatusContent);
                     }
                 }
             }
@@ -623,15 +621,103 @@ int LevelFileHandler::saveFile()
                 }
             }
                 break;
+            case Gear_Reversal:
+                itemElement->SetName("Gear_Reversal");
+                break;
             case Barrier_:
                 itemElement->SetName("Barrier");
                 break;
             case Decoration_Bridge:
                 itemElement->SetName("Decoration_Bridge");
                 break;
+            case Decoration_Flower:
+            {
+                itemElement->SetName("Decoration_Flower");
+                Features_DecorationFlower* feat = (Features_DecorationFlower*)item.features;
+                char buf[30];
+                
+                if (feat->flowerID != kDefaultDecorationFlowerID) {
+                    XMLElement* flowerIDElement = doc->NewElement("flowerID");
+                    itemElement->LinkEndChild(flowerIDElement);
+                    
+                    sprintf(buf, "%d",feat->flowerID);
+                    XMLText* flowerIDContent = doc->NewText(buf);
+                    flowerIDElement->LinkEndChild(flowerIDContent);
+                }
+                
+            }
+                break;
+            case Decoration_FlowerInv:
+            {
+                itemElement->SetName("Decoration_FlowerInv");
+                Features_DecorationFlower* feat = (Features_DecorationFlower*)item.features;
+                char buf[30];
+                
+                if (feat->flowerID != kDefaultDecorationFlowerID) {
+                    XMLElement* flowerIDElement = doc->NewElement("flowerID");
+                    itemElement->LinkEndChild(flowerIDElement);
+                    
+                    sprintf(buf, "%d",feat->flowerID);
+                    XMLText* flowerIDContent = doc->NewText(buf);
+                    flowerIDElement->LinkEndChild(flowerIDContent);
+                }
+            }
+                break;
             case Decoration_Pendant:
                 itemElement->SetName("Decoration_Pendant");
                 break;
+            case Sprouts_Dextro:
+            {
+                itemElement->SetName("Sprouts_Dextro");
+                Features_Sprouts* feat = (Features_Sprouts*)item.features;
+                char buf[30];
+                
+                if (feat->growSpeed != kDefaultSproutsGrowSpeed) {
+                    XMLElement* growSpeedElement = doc->NewElement("growSpeed");
+                    itemElement->LinkEndChild(growSpeedElement);
+                    
+                    sprintf(buf, "%f",feat->growSpeed);
+                    XMLText* growSpeedContent = doc->NewText(buf);
+                    growSpeedElement->LinkEndChild(growSpeedContent);
+                }
+            }
+                
+                break;
+            case Sprouts_Levo:
+            {
+                itemElement->SetName("Sprouts_Levo");
+                Features_Sprouts* feat = (Features_Sprouts*)item.features;
+                char buf[30];
+                
+                if (feat->growSpeed != kDefaultSproutsGrowSpeed) {
+                    XMLElement* growSpeedElement = doc->NewElement("growSpeed");
+                    itemElement->LinkEndChild(growSpeedElement);
+                    
+                    sprintf(buf, "%f",feat->growSpeed);
+                    XMLText* growSpeedContent = doc->NewText(buf);
+                    growSpeedElement->LinkEndChild(growSpeedContent);
+                }
+            }
+                
+                break;
+            case Sprouts_Slope:
+            {
+                itemElement->SetName("Sprouts_Slope");
+                Features_Sprouts* feat = (Features_Sprouts*)item.features;
+                char buf[30];
+                
+                if (feat->growSpeed != kDefaultSproutsGrowSpeed) {
+                    XMLElement* growSpeedElement = doc->NewElement("growSpeed");
+                    itemElement->LinkEndChild(growSpeedElement);
+                    
+                    sprintf(buf, "%f",feat->growSpeed);
+                    XMLText* growSpeedContent = doc->NewText(buf);
+                    growSpeedElement->LinkEndChild(growSpeedContent);
+                }
+            }
+                
+                break;
+                
             default:
                 break;
         }
@@ -651,6 +737,15 @@ int LevelFileHandler::saveFile()
         }
         if (item.triggerTime != kDefaultTriggerTime) {
             itemElement->SetAttribute("triggerTime", item.triggerTime);
+        }
+        if (item.elapsedTime != kDefaultElapsedTime) {
+            itemElement->SetAttribute("elapsedTime", item.elapsedTime);
+        }
+        if (item.bindedTriggerID != kDefaultBindedTriggerID) {
+            itemElement->SetAttribute("bindedTriggerID", item.bindedTriggerID);
+        }
+        if (item.isAutoSmoothing != kDefaultAutoSmoothingState) {
+            itemElement->SetAttribute("isAutoSmoothing", item.isAutoSmoothing);
         }
 
         XMLElement* animations = doc->NewElement("animations");
@@ -690,11 +785,16 @@ int LevelFileHandler::saveFile()
     std::string plistPath = FileUtils::getInstance()->getWritablePath() + _filename + "polygons.plist";
     bool plistSuccess = _polygonsDict->writeToFile(plistPath.c_str());
     
-    if (result==XML_SUCCESS && plistSuccess) {
+#ifdef GROW_LEVELEDITOR
+    std::string flowerIDPath = FileUtils::getInstance()->getWritablePath() + "boundFlowerID.plist";
+    bool flowerIDSuccess = _boundFlowerIDDict->writeToFile(flowerIDPath.c_str());
+    
+    if (result==XML_SUCCESS && plistSuccess && flowerIDSuccess) {
         log("Save file Success!in:%s",savePath.c_str());
     }else{
         log("Can not save file:%s",savePath.c_str());
     }
+#endif
     //只有Document对象需要释放
     delete doc;
     return result;
@@ -704,6 +804,11 @@ void LevelFileHandler::reload()
 {
     this->_items.clear();
     this->_polygonsDict->removeAllObjects();
+    CC_SAFE_RELEASE_NULL(_polygonsDict);
+#ifdef GROW_LEVELEDITOR
+    this->_boundFlowerIDDict->removeAllObjects();
+    CC_SAFE_RELEASE_NULL(_boundFlowerIDDict);
+#endif
     this->loadFile();
 }
 

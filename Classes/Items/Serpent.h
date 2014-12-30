@@ -13,7 +13,7 @@
 #include "Macro.h"
 #include "ItemModel.h"
 
-class Serpent : public ItemModel
+class Serpent : public ItemModel,public ReversalProtocol
 {
 public:
     Serpent();
@@ -23,15 +23,18 @@ public:
     bool init(Item& item);
     
     void createBody();
-    
+    void runMoveAction(float dt);
+    void switchItemStatus();
     void update(float dt);
-    
 protected:
     Sprite* _hole;
     
     float absorptionRate;
     float holeTransparency;
-    
+    ///
+    float _waitRemoveTime = 0.5 ;
+    int   _lightCount = 0;
+    DrawNode*   _rangeNode;
 };
 
 

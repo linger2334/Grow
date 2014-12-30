@@ -7,8 +7,8 @@ namespace PathListHelper
     class PathList
     {
     public:
-        typedef  float (*PathGetLengthCall)(const _Type&,const _Type&);
-        typedef   _Type (*PathGetPointCall)(float, const _Type& ,const _Type&);
+        typedef   float (* PathGetLengthCall)(const _Type&,const _Type&);
+        typedef   _Type (* PathGetPointCall)(float, const _Type& ,const _Type&);
 
         enum
         {
@@ -24,6 +24,15 @@ namespace PathListHelper
              _preIterator = _list->begin();
              _preReverseIterator = _list->rbegin();
          }
+        }
+        PathList(_ListType* list,PathGetLengthCall lengthCall,PathGetPointCall pointCall):_list(list),PathGetLength(lengthCall),PathGetPoint(pointCall){
+            _preLength =0;
+            _preReverseLength =0;
+            if(_list)
+            {
+                _preIterator = _list->begin();
+                _preReverseIterator = _list->rbegin();
+            }
         }
 
         int  getTypePointByLength(float length , bool isBeginToEnd,_Type* out);

@@ -17,7 +17,7 @@
 -(void)viewDidLoad
 {
     [super viewDidLoad];
-    self.scrollview.contentSize = CGSizeMake(768, 1792);
+    self.scrollview.contentSize = CGSizeMake(768, 2048);
     self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
     self.backButton.frame = CGRectMake(280, 900, 212, 110);
     [self.view addSubview:self.backButton];

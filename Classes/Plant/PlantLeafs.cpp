@@ -52,8 +52,77 @@ int PlantLeafListBase::queryLeafsByHeightRange(float start,float end,std::list<P
     }
     return ret;
 }
+#define OUTMAP(T,D) *((T*)(&buf[index])) = D;\
+index += sizeof(D)
+void PlantLeafListBase::saveInfoToData(cocos2d::Data& outData)
+{
+    std::string out;
+    auto& leafs = _leafList;;
+    int leafsCount = leafs.size();
+    int count =  sizeof(_leafStepHeight)+sizeof(_leafStepRandHeight)+sizeof(_leafsStep)+sizeof(int)+(sizeof(LeafSaveInfo)*leafsCount);
+    
+    char * buf = new char[count];
+    int index = 0;
+    OUTMAP(int,_leafStepHeight);
+    OUTMAP(int,_leafStepRandHeight);
+    OUTMAP(int,_leafsStep);
+    int size = leafs.size();
+    OUTMAP(int,size);
+    LeafSaveInfo* bufData = (LeafSaveInfo*)(&buf[index]);
+    int i =0;
+    for (auto& ip :leafs) {
+        bufData[i].position = ip._leaf->getPosition();
+        bufData[i].rotateAngle = ip._leaf->getRotation();
+        bufData[i].isleft = ip._isLeft;
+        bufData[i].heightInPlant = ip._heightInPlant;
+        bufData[i].tag = ip._leaf->getTag();
+        i++;
+    }
+    
+    outData.copy((unsigned char*)buf,count);
+}
+void PlantLeafListBase::resetInfoBySaveData(const cocos2d::Data& in)
+{
+    const char* data = (const char*)in.getBytes();
+    int index = 0;
+    _leafStepHeight = *((int*)(&data[index]));
+    index += sizeof(_leafStepHeight);
+    
+    _leafStepRandHeight = *((int*)(&data[index]));
+    index += sizeof(_leafStepRandHeight);
+    
+    _leafsStep = *((int*)(&data[index]));
+    index += sizeof(_leafsStep);
+    
+    int size =   *((int*)(&data[index]));
+    index += sizeof(size);
+    LeafSaveInfo* buf = (LeafSaveInfo*)(&data[index]);
+    _leafList.clear();
+    for (int i = 0 ; i < size; i++) {
+        Sprite* sp = Sprite::create(_pathLeafs[buf[i].tag]);
+        sp->setTag(buf[i].tag);
+        _node->addChild(sp,-1);
+    
+        PlantLeafCountext context;
+        context._heightInPlant = buf[i].heightInPlant;
+        context._isLeft =   context._isLeft;
+        context._leaf = sp;
+        _leafList.push_back(context);
+        if(context._isLeft)
+        { sp->setAnchorPoint(Vec2(1,0.5));
+            sp->setFlippedX(true);
+        }
+        else
+        {
+            sp->setAnchorPoint(Vec2(0,0.5));
+        }
+        sp->setRotation(buf[i].rotateAngle);
+        sp->setPosition(buf[i].position);
+    }
+    updateLeafsScale();
+}
 
-void   PlantLeafsHelper_1::moveDownLeafs(float yLen)
+void   PlantLeafListBase::moveDownLeafs(float yLen)
 {
     auto ip = _leafList.begin();
     auto end = _leafList.end();
@@ -72,7 +141,7 @@ void   PlantLeafsHelper_1::moveDownLeafs(float yLen)
     }
 }
 
-void   PlantLeafsHelper_1::checkRemoveLeafs()
+void   PlantLeafListBase::checkRemoveLeafs()
 {
     auto ip = _leafList.begin();
     auto end = _leafList.end();
@@ -84,7 +153,7 @@ void   PlantLeafsHelper_1::checkRemoveLeafs()
         ip = _leafList.erase(ip);
     }
 }
-void PlantLeafsHelper_1::checkAddLeaf()
+void PlantLeafListBase::checkAddLeaf()
 {
     auto layerPlant = GameLayerPlant::getRunningLayer();
     PlantNode* plant = layerPlant->getPlantNodeByIndex(_plantId);
@@ -102,6 +171,7 @@ void PlantLeafsHelper_1::checkAddLeaf()
         assert(index<_pathLeafs.size());
 
         Sprite* sp = Sprite::create(_pathLeafs[index]);
+        sp->setTag(index);
         _node->addChild(sp,-1);
 
         auto cp = plant->getContorlPointByHeight(plantTopHeight-40);
@@ -132,3 +202,4 @@ void PlantLeafsHelper_1::checkAddLeaf()
          _leafsStep = (rand()%_leafStepRandHeight)+_leafStepHeight;
     }
 }
+

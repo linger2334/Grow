@@ -156,12 +156,12 @@ void GuideManager::unRegister(GuideComponentDelegate *instance)
     }
 }
 
-void GuideManager::start(int from/*0*/)
+void GuideManager::start(int from/* = 0*/)
 {
     goNextStep(from);
 }
 
-void GuideManager::goNextStep(int designedStep/*-1*/)
+void GuideManager::goNextStep(int designedStep/* = -1*/)
 {
     if (_paused) {
         resumeGuide();

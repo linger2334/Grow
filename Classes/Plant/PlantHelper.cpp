@@ -177,8 +177,8 @@ namespace PlantHelper
         PlantRayCastContext retContext;
         auto physicalWorld = GamePhysicalWorld::getInstance();
 
-        Vec2 pto = plant->getHeadPositionInWorld();
-       // Vec2 pto = plant->getHeadUnitPositionInWorld();
+       // Vec2 pto = plant->getHeadPositionInWorld();
+        Vec2 pto = plant->getHeadUnitPositionInWorld();
         Vec2 ptTop = pto + Vec2(0,testLength);
         
         for (int i = 1; i <= count; i++) {
@@ -237,26 +237,7 @@ namespace PlantHelper
         };
         return getPlantRayCastContext(plant,testLength,startAnalg,stepAngle,count,call);
     }
-    PlantGrowContext getGrowContextGrowNextUnitLength(PlantNode* plant)
-    {
-        return PlantGrowContext(true);
-    }
-    PlantGrowContext getGrowContextMap(PlantNode* plant)
-    {
-        return PlantGrowContext(true);
-    }
-    PlantGrowContext getGrowContextStone(PlantNode* plant)
-    {
-        return PlantGrowContext(true);
-    }
-    PlantGrowContext getGrowContextAngle(PlantNode* plant)
-    {
-        return PlantGrowContext(true);
-    }
-    PlantGrowContext getRayCastGrowContext(PlantNode* plant)
-    {
-        return PlantGrowContext(true);
-    }
+ 
     void getGroeDirList(PlantNode* plant, std::vector<FaceDirection>& dirList)
     {
      //   int listtype = 0;
@@ -286,9 +267,9 @@ namespace PlantHelper
         PlantGrowContext grow(true);
         Vec2 pto = plant->getHeadPositionInWorld();
 
-        Vec2 left = plant->getHeadNextPositionByTopCPInWorld(4, FaceLeft);
-        Vec2 right =  plant->getHeadNextPositionByTopCPInWorld(4, FaceRight);
-        Vec2 top = plant->getHeadNextPositionByTopCPInWorld(4, FaceTop);
+        Vec2 left = plant->getHeadNextPositionByTopCPInWorld(17, FaceLeft);
+        Vec2 right =  plant->getHeadNextPositionByTopCPInWorld(17, FaceRight);
+        Vec2 top = plant->getHeadNextPositionByTopCPInWorld(17, FaceTop);
     
         auto physicalWorld = GamePhysicalWorld::getInstance();
 
@@ -297,12 +278,11 @@ namespace PlantHelper
             return item->getType() == TypeBorderLine;
         };
         float leftLen = physicalWorld->rayCastTest(pto, left,callGrid);
-        if (leftLen >= 0)grow._left = false;
+        if (leftLen >= 0 || physicalWorld->isInMapDirtOrOutMap(left))grow._left = false;
         float rightLen = physicalWorld->rayCastTest(pto, right,callGrid);
-        if (rightLen >= 0)grow._right = false;
-        
+        if (rightLen >= 0 || physicalWorld->isInMapDirtOrOutMap(right))grow._right = false;
         float topLen = physicalWorld->rayCastTest(pto, top,callGrid);
-        if (topLen >= 0)grow._top  = false;
+        if (topLen >= 0 || physicalWorld->isInMapDirtOrOutMap(top)) grow._top  = false;
         return grow;
     }
     PlantGrowContext getGrowContextGrowNextUnitLengthTestStone(PlantNode* plant)
@@ -330,6 +310,25 @@ namespace PlantHelper
         auto physicalWorld = GamePhysicalWorld::getInstance();
         return physicalWorld->isInStone(cpo);
     }
+    
+    float  getMinMaxAngleByLength(float length,float minLen,float maxLen,float minAngle,float maxAngle)
+    {
+        float retAngle = minAngle;
+        if(length < minLen)
+        {
+            
+        }
+        if (length > minLen && length < maxLen) {
+            float t = (length - minLen) / (maxLen - minLen);
+            retAngle = minAngle + (maxAngle - minAngle) * t;
+        }
+        else if(length >= maxLen)
+        {
+            retAngle = maxAngle;
+        }
+        return retAngle;
+    }
+    ///////////////
     float PlantRadiusHelper::getRadiusByHeight(float height)
     {
         bool isFind = false;
@@ -337,7 +336,7 @@ namespace PlantHelper
             return _defaultRadius;
         }
         float retRadius = _defaultRadius;
-
+        
         int i = 0;
         for(; i < _contextList.size();i++)
         {
@@ -374,6 +373,6 @@ namespace PlantHelper
         tt._radius = radius;
         _contextList.push_back(tt);
     }
-
+    
     
 };

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.iPad.XIB" version="3.0" toolsVersion="6250" systemVersion="13F34" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.iPad.XIB" version="3.0" toolsVersion="6254" systemVersion="13F34" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PopupViewController">
@@ -62,7 +62,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="106" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Fy5-lL-Sq3">
-                            <rect key="frame" x="217" y="957" width="74" height="168"/>
+                            <rect key="frame" x="200" y="1390" width="74" height="168"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" image="Rock_Ellipse1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -72,7 +72,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="107" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="ola-Jw-8WW">
-                            <rect key="frame" x="340" y="943" width="178" height="195"/>
+                            <rect key="frame" x="330" y="1376" width="178" height="195"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" image="Rock_Mount1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -84,61 +84,31 @@
                         <button opaque="NO" tag="5" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Ovq-WZ-E2l">
                             <rect key="frame" x="59" y="200" width="91" height="130"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <state key="normal" title="Cicada" image="Cicada.png">
+                            <state key="normal" title="Cicada" image="Cicada_Red.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                             </state>
                             <connections>
                                 <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="Igr-O3-R7q"/>
                             </connections>
                         </button>
-                        <button opaque="NO" tag="6" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Ucw-vU-Ai5">
-                            <rect key="frame" x="217" y="200" width="128" height="128"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <state key="normal" title="Dragon_Anti" image="Dragon_Anti.png">
-                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                            </state>
-                            <connections>
-                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="0fU-CJ-s1k"/>
-                            </connections>
-                        </button>
-                        <button opaque="NO" tag="7" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="qfB-PS-y5I">
-                            <rect key="frame" x="394" y="200" width="128" height="128"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <state key="normal" title="Dragon_Clockwise" image="Dragon_Clockwise.png">
-                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                            </state>
-                            <connections>
-                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="rzs-rN-GRV"/>
-                            </connections>
-                        </button>
-                        <button opaque="NO" tag="16" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="AZE-LQ-L3G">
-                            <rect key="frame" x="571" y="548" width="128" height="128"/>
+                        <button opaque="NO" tag="20" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="AZE-LQ-L3G">
+                            <rect key="frame" x="40" y="1002" width="128" height="128"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" image="Polygon.png"/>
                             <connections>
                                 <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="yzs-fv-4Kr"/>
                             </connections>
                         </button>
-                        <button opaque="NO" tag="8" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="la9-PG-Z9L">
-                            <rect key="frame" x="571" y="200" width="128" height="128"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <state key="normal" title="DoubDragon_Anti" image="DoubDragon_Anti.png">
-                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                            </state>
-                            <connections>
-                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="ALi-M0-gIL"/>
-                            </connections>
-                        </button>
-                        <button opaque="NO" tag="10" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Yqv-SO-mVa">
-                            <rect key="frame" x="217" y="380" width="128" height="128"/>
+                        <button opaque="NO" tag="8" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Yqv-SO-mVa">
+                            <rect key="frame" x="569" y="179" width="132" height="150"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Serpent" image="Serpent.png"/>
                             <connections>
                                 <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="el6-89-qDk"/>
                             </connections>
                         </button>
-                        <button opaque="NO" tag="9" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="4be-Fv-hBS">
-                            <rect key="frame" x="40" y="380" width="128" height="128"/>
+                        <button opaque="NO" tag="7" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="4be-Fv-hBS">
+                            <rect key="frame" x="394" y="190" width="128" height="128"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="DoubDragon_Clockwise" image="DoubDragon_Clockwise.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -148,7 +118,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="101" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="G3m-E1-y3j">
-                            <rect key="frame" x="29" y="744" width="151" height="148"/>
+                            <rect key="frame" x="26" y="1162" width="151" height="148"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Rock_Circle" image="Rock_Circle1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -158,7 +128,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="103" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="ENo-kU-zgz">
-                            <rect key="frame" x="427" y="749" width="103" height="115"/>
+                            <rect key="frame" x="424" y="1179" width="103" height="115"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_Crinkle1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -168,7 +138,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="104" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="oDD-sL-d9n">
-                            <rect key="frame" x="585" y="736" width="100" height="140"/>
+                            <rect key="frame" x="612" y="1165" width="100" height="140"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_Cross1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -178,7 +148,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="105" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Ft8-NG-IrN">
-                            <rect key="frame" x="59" y="968" width="86" height="146"/>
+                            <rect key="frame" x="58" y="1412" width="86" height="146"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_Dagger1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -188,7 +158,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="110" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="tLw-vB-t2W">
-                            <rect key="frame" x="281" y="1166" width="122" height="149"/>
+                            <rect key="frame" x="279" y="1628" width="122" height="149"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_Ovoid1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -198,7 +168,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="114" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="6Yb-0o-COo">
-                            <rect key="frame" x="261" y="1375" width="102" height="203"/>
+                            <rect key="frame" x="222" y="1823" width="102" height="203"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_Rect1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -208,7 +178,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="115" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="ORU-6i-auI">
-                            <rect key="frame" x="417" y="1376" width="172" height="201"/>
+                            <rect key="frame" x="394" y="1815" width="172" height="201"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_Trape1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -217,8 +187,8 @@
                                 <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="nSV-Tc-LMJ"/>
                             </connections>
                         </button>
-                        <button opaque="NO" tag="11" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Bw6-9T-xcL">
-                            <rect key="frame" x="417" y="408" width="82" height="71"/>
+                        <button opaque="NO" tag="9" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Bw6-9T-xcL">
+                            <rect key="frame" x="63" y="398" width="82" height="71"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="GearButton.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -227,8 +197,8 @@
                                 <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="Ynw-Rn-WVv"/>
                             </connections>
                         </button>
-                        <button opaque="NO" tag="12" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="i42-cu-5Mz">
-                            <rect key="frame" x="549" y="409" width="173" height="70"/>
+                        <button opaque="NO" tag="10" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="i42-cu-5Mz">
+                            <rect key="frame" x="177" y="370" width="242" height="128"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="GearGate.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -237,18 +207,18 @@
                                 <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="7XB-hz-uM2"/>
                             </connections>
                         </button>
-                        <button opaque="NO" tag="13" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Kvs-K1-IXo">
-                            <rect key="frame" x="64" y="541" width="81" height="141"/>
+                        <button opaque="NO" tag="12" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Kvs-K1-IXo">
+                            <rect key="frame" x="595" y="352" width="81" height="141"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <state key="normal" title="Button" image="Barrier.png">
+                            <state key="normal" title="Button" image="Barrier_Red.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                             </state>
                             <connections>
                                 <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="aMN-ph-hC2"/>
                             </connections>
                         </button>
-                        <button opaque="NO" tag="14" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="QAJ-FD-Xtr">
-                            <rect key="frame" x="193" y="574" width="210" height="75"/>
+                        <button opaque="NO" tag="13" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="QAJ-FD-Xtr">
+                            <rect key="frame" x="31" y="601" width="210" height="75"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Decoration_Bridge.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -257,18 +227,8 @@
                                 <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="EbW-FL-dtb"/>
                             </connections>
                         </button>
-                        <button opaque="NO" tag="15" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="zxn-mb-ocA">
-                            <rect key="frame" x="471" y="588" width="14" height="48"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <state key="normal" title="Button" image="Decoration_Pendant.png">
-                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                            </state>
-                            <connections>
-                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="wgC-3j-wxe"/>
-                            </connections>
-                        </button>
                         <button opaque="NO" tag="108" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="qH1-UC-Run">
-                            <rect key="frame" x="571" y="943" width="178" height="195"/>
+                            <rect key="frame" x="559" y="1376" width="178" height="195"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_MountInv1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -278,7 +238,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="109" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="j7B-SV-bYA">
-                            <rect key="frame" x="29" y="1171" width="220" height="155"/>
+                            <rect key="frame" x="21" y="1628" width="220" height="155"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_Ordinary1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -288,7 +248,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="111" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="0Ln-KM-72D">
-                            <rect key="frame" x="458" y="1194" width="91" height="110"/>
+                            <rect key="frame" x="457" y="1647" width="91" height="110"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_Pebble1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -298,7 +258,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" tag="112" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="JlQ-N0-fFm">
-                            <rect key="frame" x="611" y="1167" width="74" height="146"/>
+                            <rect key="frame" x="625" y="1628" width="74" height="146"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_Pillar1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -307,18 +267,8 @@
                                 <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="S9p-fZ-ao1"/>
                             </connections>
                         </button>
-                        <button opaque="NO" tag="113" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="FqC-iy-gp9">
-                            <rect key="frame" x="44" y="1385" width="148" height="139"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <state key="normal" title="Button" image="Rock_Pocket1.png">
-                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                            </state>
-                            <connections>
-                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="EXk-mv-Wgb"/>
-                            </connections>
-                        </button>
                         <button opaque="NO" tag="102" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="GSE-yG-MTM">
-                            <rect key="frame" x="244" y="731" width="109" height="150"/>
+                            <rect key="frame" x="223" y="1160" width="109" height="150"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button" image="Rock_Cover1.png">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -327,11 +277,111 @@
                                 <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="mjG-Qp-iTm"/>
                             </connections>
                         </button>
+                        <button opaque="NO" tag="6" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="la9-PG-Z9L">
+                            <rect key="frame" x="217" y="190" width="128" height="128"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" title="DoubDragon_Anti" image="DoubDragon_Anti.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="ALi-M0-gIL"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" tag="15" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="MKG-4V-dT8">
+                            <rect key="frame" x="444" y="547" width="117" height="135"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" image="Decoration_FlowerInv.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="5ai-iN-r95"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" tag="16" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="zxn-mb-ocA">
+                            <rect key="frame" x="639" y="615" width="25" height="48"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" image="Decoration_Pendant.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="wgC-3j-wxe"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" tag="21" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="DWd-Nh-p4V">
+                            <rect key="frame" x="234" y="1002" width="128" height="128"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" title="Button" image="Trigger.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="1HL-ho-u9m"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" tag="17" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="1Aj-YU-Bmv">
+                            <rect key="frame" x="254" y="786" width="38" height="131"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" title="Button" image="Sprouts_Dextro.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="NeZ-Mg-LM0"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" tag="18" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="f7O-ho-esP">
+                            <rect key="frame" x="446" y="780" width="28" height="135"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" title="Button" image="Sprouts_Levo.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="Kk4-Qv-LZg"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" tag="19" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="HOm-0B-zr7">
+                            <rect key="frame" x="606" y="786" width="58" height="123"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" title="Button" image="Sprouts_Slope.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="FyF-3W-NkZ"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" tag="113" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="FqC-iy-gp9">
+                            <rect key="frame" x="27" y="1868" width="148" height="139"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" title="Button" image="Rock_Pocket1.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="EXk-mv-Wgb"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" tag="14" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="yfN-CY-jJL">
+                            <rect key="frame" x="284" y="547" width="117" height="135"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" image="Decoration_Flower.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="7dg-Ev-pOR"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" tag="11" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="7ml-5M-zBK">
+                            <rect key="frame" x="472" y="403" width="60" height="60"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" title="Button" image="GearReversal.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="createItemAtCenter:" destination="-2" eventType="touchUpInside" id="ZSx-qn-cjb"/>
+                            </connections>
+                        </button>
                     </subviews>
                 </scrollView>
             </subviews>
             <nil key="simulatedStatusBarMetrics"/>
-            <point key="canvasLocation" x="106" y="-155"/>
+            <point key="canvasLocation" x="-257" y="-3025"/>
         </view>
         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="iXB-Mm-hfG">
             <rect key="frame" x="0.0" y="0.0" width="212" height="110"/>
@@ -347,20 +397,21 @@
         </button>
     </objects>
     <resources>
-        <image name="Barrier.png" width="108" height="187"/>
-        <image name="Cicada.png" width="91" height="130"/>
+        <image name="Barrier_Red.png" width="108" height="187"/>
+        <image name="Cicada_Red.png" width="91" height="130"/>
         <image name="Decoration_Bridge.png" width="331" height="138"/>
+        <image name="Decoration_Flower.png" width="100" height="129"/>
+        <image name="Decoration_FlowerInv.png" width="100" height="129"/>
         <image name="Decoration_Pendant.png" width="14" height="48"/>
         <image name="DoubDragon_Anti.png" width="177" height="176"/>
         <image name="DoubDragon_Clockwise.png" width="177" height="176"/>
-        <image name="Dragon_Anti.png" width="191" height="207"/>
-        <image name="Dragon_Clockwise.png" width="191" height="207"/>
         <image name="Flame_Blue.png" width="87" height="110"/>
         <image name="Flame_Orange.png" width="87" height="110"/>
         <image name="Flame_Violet.png" width="87" height="110"/>
         <image name="Flame_White.png" width="87" height="110"/>
         <image name="GearButton.png" width="82" height="71"/>
-        <image name="GearGate.png" width="242" height="99"/>
+        <image name="GearGate.png" width="242" height="128"/>
+        <image name="GearReversal.png" width="60" height="60"/>
         <image name="Polygon.png" width="128" height="128"/>
         <image name="Rock_Circle1.png" width="303" height="296"/>
         <image name="Rock_Cover1.png" width="218" height="300"/>
@@ -377,7 +428,11 @@
         <image name="Rock_Pocket1.png" width="295" height="278"/>
         <image name="Rock_Rect1.png" width="154" height="305"/>
         <image name="Rock_Trape1.png" width="258" height="302"/>
-        <image name="Serpent.png" width="177" height="176"/>
+        <image name="Serpent.png" width="132" height="150"/>
+        <image name="Sprouts_Dextro.png" width="38" height="131"/>
+        <image name="Sprouts_Levo.png" width="28" height="135"/>
+        <image name="Sprouts_Slope.png" width="58" height="123"/>
+        <image name="Trigger.png" width="128" height="128"/>
         <image name="back_normal.png" width="456" height="256"/>
     </resources>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">

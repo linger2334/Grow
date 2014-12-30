@@ -65,7 +65,8 @@ bool DoubleDragon::init(Item &item)
         addChild(_belly,-1);
         
         if (_type == DoubDragon_Clockwise) {
-            setRotation3D(Vec3(0, 180, 0));
+            setFlippedX(true);
+            _belly->setFlippedX(true);
         }
         setScale(item.scale);
         setRotation(CC_RADIANS_TO_DEGREES(item.angle));
@@ -119,8 +120,6 @@ void DoubleDragon::createBody()
             }
         }
     }
-    //
-    scheduleUpdate();
 }
 
 

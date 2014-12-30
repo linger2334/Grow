@@ -157,6 +157,7 @@ public:
 };
 enum
 {
+    TypeUIBorderLine = 121,
     TypeBorderLine = 120,
 };
 

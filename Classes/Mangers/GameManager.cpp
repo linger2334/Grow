@@ -2,7 +2,6 @@
 #include "GameSceneMain.h"
 #include "GameRunningInfo.h"
 #include "LevelManager.h"
-#include "SceneChangeSubMap.h"
 #include "GameRunningManager.h"
 #include "GameSceneWin.h"
 #include "LayerItem.h"
@@ -10,6 +9,7 @@
 #include "ScreenSelectLevel.h"
 #include "ScreenStart.h"
 #include "AchievementUi.h"
+#include "GameSceneNavigation.h"
 void  GameManager::clearRunningInfo()
 {
     GameRunningInfo::getInstance()->removeAllGameLayer();
@@ -28,7 +28,7 @@ void  GameManager::navigationTo(int id)
             scene = ScreenStart::createScene();
             break;
         case SceneLoding:
-            scene = ScreenLoading::createScene(0);
+            scene = GameSceneNavigation::createScene();
             break;
         case SceneGameScene:
             scene = GameSceneMain::createScene();
@@ -47,10 +47,12 @@ void  GameManager::navigationTo(int id)
 void  GameManager::navigationToPasueGameScene()
 {
     navigationTo(_gameScne);
+    reStartActions();
 }
 void   GameManager::releaseGameScene()
 {
     if (_gameScne) {
+        // GameRunningManager::getInstance()->onGameSceneMainExit();
         _gameScne->release();
         _gameScne = nullptr;
     }
@@ -59,7 +61,8 @@ void  GameManager::navigationToGameScene()
 {
     if (!_gameScne) {
         _gameScne = GameSceneMain::createScene();
-//        _gameScne->retain();
+        _gameScne->retain();
+        _gameLevel = LevelManager::getInstance()->_levelId;
     }
     navigationTo(_gameScne);
 }
@@ -73,19 +76,35 @@ void  GameManager::navigationToGameScene(int level)
 void  GameManager::createNewGameScene()
 {
     releaseGameScene();
-     _gameLevel = 0;
+    _gameLevel = 0;
 }
 void  GameManager::navigationTo(Scene* scene)
 {
-    Director::getInstance()->replaceScene(TransitionFade::create(0.2, scene, Color3B(0,0,0)));
+    Director::getInstance()->replaceScene(TransitionFade::create(0.1, scene, Color3B(0,0,0)));
 }
 void GameManager::pauseGame()
 {
+    // _pauseNodes = Director::getInstance()->getActionManager()->pauseAllRunningActions();
+    GameLayerUI::getRunningLayer()->pauseGame();
     GameRunningInfo::getInstance()->pauseGame();
     CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }
 void GameManager::reStartGame()
 {
+    GameLayerUI::getRunningLayer()->reStartGame();
     GameRunningInfo::getInstance()->reStartGame();
     CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+}
+void GameManager::clearGameLevelInfo()
+{
+    releaseGameScene();
+    _gameLevel =  0;
+}
+void  GameManager::saveActions()
+{
+    _pauseNodes = Director::getInstance()->getActionManager()->pauseAllRunningActions();
+}
+void  GameManager::reStartActions()
+{
+    Director::getInstance()->getActionManager()->resumeTargets(_pauseNodes);
 }

@@ -13,6 +13,8 @@
 
 @synthesize isSelected;
 @synthesize pointType;
+@synthesize itemtype;
+@synthesize _bindIDs;
 
 -(id)init
 {
@@ -21,6 +23,8 @@
         self.alpha = 0.8;
         self.isSelected = NO;
         self.isConvex = YES;
+        self.itemtype = [NSString stringWithUTF8String:"-1"];
+        self._bindIDs = [NSMutableArray array];
         self.backgroundColor = [UIColor blueColor];
         self.defaultColor = self.backgroundColor;
         self.selectedColor = [UIColor greenColor];
@@ -38,6 +42,8 @@
     self = [super initWithFrame:frame];
     if (self) {
         self.isSelected = NO;
+        self.itemtype = [NSString stringWithUTF8String:"Polygon_"];
+        self._bindIDs = [NSMutableArray array];
         self.backgroundColor = [UIColor blueColor];
         self.defaultColor = self.backgroundColor;
         self.selectedColor = [UIColor greenColor];
@@ -57,6 +63,8 @@
     if(self){
         self.isSelected = NO;
         self.isConvex = YES;
+        self.itemtype = @"-1";
+        self._bindIDs = [NSMutableArray array];
         self.backgroundColor = [UIColor redColor];
         self.defaultColor = self.backgroundColor;
         self.selectedColor = [UIColor greenColor];
@@ -228,6 +236,7 @@
 
 -(void)dealloc
 {
+    self._bindIDs = nil;
     [super dealloc];
 }
 

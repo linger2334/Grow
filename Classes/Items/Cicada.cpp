@@ -12,8 +12,6 @@
 #include "LayerItem.h"
 #include "CustomAction.h"
 
-
-
 Cicada::Cicada()
 {
     
@@ -36,85 +34,47 @@ class Cicada* Cicada::create(Item& item)
     return nullptr;
 }
 
-#ifdef CICADA_OLD
-
 bool Cicada::init(Item& item)
 {
     bool result;
     if (ItemModel::init(item)) {
-        
-        setContentSize(cocos2d::Size(82.96,132.06));
-        float ciwidth = getBoundingBox().size.width;
-        float ciheight = getBoundingBox().size.height;
-        
-        _head = Sprite::create("Cicada_Head.png");
-        _head->setPosition(ciwidth/2,0.678*ciheight);
-        _belly = Sprite::create("Cicada_Belly.png");
-        _belly->setPosition(ciwidth/2,23/132.06*ciheight);
-        
-        _leftwing = Sprite::create("Cicada_Leftwing.png");
-        _rightwing = Sprite::create("Cicada_Rightwing.png");
-        _leftwing->setAnchorPoint(Vec2(0.5,1));
-        _leftwing->setPosition(21/82.96*ciwidth,0.833*ciheight);
-        _rightwing->setAnchorPoint(Vec2(0.5,1));
-        _rightwing->setPosition(61.96/82.96*ciwidth,0.833*ciheight);
-        
-        addChild(_head);
-        addChild(_belly);
-        addChild(_leftwing);
-        addChild(_rightwing);
-        
-        setRotation(CC_RADIANS_TO_DEGREES(item.angle));
-        setScale(item.scale);
-        
-        w = kDefaultCicadaW;
-        includedAngle = kDefaultCicadaIncludedAngle;
-        fanningDuration = kDefaultCicadaFanningDuration;
-        interval = kDefaultCicadaInterval;
-        bellyTransparency = kDefaultCicadaBellyTransparency;
-        if(item.features){
-            Features_Cicada* features = (Features_Cicada*)item.features;
-            w = features->w;
-            includedAngle = features->includedAngle;
-            fanningDuration = features->fanningDuration;
-            interval = features->interval;
-            bellyTransparency = features->bellyTransparency;
+        fanningSpeed = kDefaultCicadaFanningSpeed;
+        autoTurnHead = kDefaultCicadaAutoTurnHeadState;
+        autoFanning = kDefaultCicadaAutoFanningState;
+        bool isReversalStatus = kDefaultCicadaReversalStatus;
+        if (item.features) {
+            Features_Cicada* feat = (Features_Cicada*)item.features;
+            fanningSpeed = feat->fanningSpeed;
+            autoTurnHead = feat->autoTurnHead;
+            autoFanning = feat->autoFanning;
+            isReversalStatus = feat->isReversalStatus;
         }
         
-        ActionInterval* shine = FadeTo::create(kDefaultFlickeringHalfCycle ,bellyTransparency*255);
-        ActionInterval* shine_reverse = FadeTo::create(kDefaultFlickeringHalfCycle, 255);
-        _belly->runAction(RepeatForever::create(Sequence::createWithTwoActions(shine, shine_reverse)));
+        setTexture(isReversalStatus? "Cicada_Trunk_Blue.png" : "Cicada_Trunk_Red.png");
+        setCascadeOpacityEnabled(true);
         
-        result = true;
-    }else{
-        result = false;
-    }
-    
-    _collisionCallBack = std::bind(&Cicada::collisionWithPlant, this,std::placeholders::_1);
-    return result;
-}
-
-#else
-
-bool Cicada::init(Item& item)
-{
-    bool result;
-    if (ItemModel::init(item)) {
+        _belly = Sprite::create(isReversalStatus? "Cicada_Belly_Blue.png" : "Cicada_Belly_Red.png");
+        _belly->setPosition(getBoundingBox().size.width/2, getBoundingBox().size.height/2);
+        _belly->setCascadeOpacityEnabled(true);
+        addChild(_belly);
         
-        setTexture("Cicada_Trunk.png");
+        _wing = Sprite::create(isReversalStatus? "Cicada_WingStill_Blue.png" : "Cicada_WingStill_Red.png");
+        _wing->setPosition(Vec2(getBoundingBox().size.width/2,getBoundingBox().size.height/2));
+        _wing->setCascadeOpacityEnabled(true);
+        addChild(_wing);
         
-        _eye = Sprite::create("Cicada_Eye.png");
-        _eye->setPosition(getBoundingBox().size.width/2, getBoundingBox().size.height/2);
-        _eye->setCascadeOpacityEnabled(true);
-        addChild(_eye);
-        
+        setStatus(isReversalStatus? ItemStatus::ReversalStatus : ItemStatus::NormalStatus);
         setRotation(CC_RADIANS_TO_DEGREES(item.angle));
         setScale(item.scale);
         
         ActionInterval* shine = FadeTo::create(kDefaultFlickeringHalfCycle ,kDefaultCicadaBellyTransparency*255);
         ActionInterval* shine_reverse = FadeTo::create(kDefaultFlickeringHalfCycle, 255);
-        _eye->runAction(RepeatForever::create(Sequence::createWithTwoActions(shine, shine_reverse)));
-
+        _belly->runAction(RepeatForever::create(Sequence::createWithTwoActions(shine, shine_reverse)));
+        
+        prePosition = getPosition();
+        setCicadaState(Cicada_State::Motionless);
+        onStateChangeToMotionless();
+        
         result = true;
     }else{
         result = false;
@@ -122,8 +82,6 @@ bool Cicada::init(Item& item)
 
     return result;
 }
-
-#endif
 
 void Cicada::createBody()
 {
@@ -160,6 +118,147 @@ void Cicada::createBody()
     _body->SetMassData(&bodymassData);
     //
     scheduleUpdate();
+}
+
+void Cicada::wingStir()
+{
+    CallFunc* expand = CallFunc::create([&](){
+        std::string texturename = status==ItemStatus::NormalStatus? "Cicada_WingMotion_Red.png" : "Cicada_WingMotion_Blue.png";
+        _wing->setTexture(texturename);
+    });
+    CallFunc* combine = CallFunc::create([&](){
+        std::string texturename = status==ItemStatus::NormalStatus? "Cicada_WingStill_Red.png" : "Cicada_WingStill_Blue.png";
+        _wing->setTexture(texturename);
+    });
+    Sequence* fan1 = Sequence::create(expand,DelayTime::create(0.05),combine, NULL);
+    Sequence* fan2 = Sequence::create(fan1,DelayTime::create(0.1),fan1, NULL);
+    CallFunc* callback = CallFunc::create([&](){
+        this->wingStir();
+    });
+    
+    float waitTime1 = 1+CCRANDOM_0_1();
+    float waitTime2 = 2+CCRANDOM_0_1();
+    Sequence* fan = Sequence::create(DelayTime::create(waitTime1),fan1,DelayTime::create(waitTime2),fan2,callback, NULL);
+    fan->setTag(1);
+    runAction(fan);
+}
+
+void Cicada::wingFanning()
+{
+    DelayTime* remain = DelayTime::create(0.07/fanningSpeed);
+    CallFunc* expand = CallFunc::create([&](){
+        _wing->setTexture("Cicada_WingFanning_1.png");
+    });
+    DelayTime* stay = DelayTime::create(0.07/fanningSpeed);
+    CallFunc* combine = CallFunc::create([&](){
+        _wing->setTexture("Cicada_WingFanning_2.png");
+    });
+    
+    Sequence* fanning = Sequence::create(remain,expand,stay,combine, NULL);
+    RepeatForever* fanningForever = RepeatForever::create(fanning);
+    fanningForever->setTag(2);
+    runAction(fanningForever);
+}
+
+void Cicada::onStateChangeToMotionless()
+{
+    if (_actionManager->getActionByTag(2, this)) {
+        _actionManager->removeActionByTag(2, this);
+        std::string texturename = status==ItemStatus::NormalStatus? "Cicada_WingStill_Red.png" : "Cicada_WingStill_Blue.png";
+        _wing->setTexture(texturename);
+    }
+    wingStir();
+}
+
+void Cicada::onStateChangeToMoving()
+{
+    if (_actionManager->getActionByTag(1, this)) {
+        _actionManager->removeActionByTag(1, this);
+    }
+    wingFanning();
+}
+
+void Cicada::switchItemStatus()
+{
+    std::string trunkFileName;
+    std::string bellyFileName;
+    std::string wingFileName;
+    CallFunc* changeTexture;
+    if (getCicadaState() == Cicada_State::Motionless) {
+        if (status==ItemStatus::NormalStatus) {
+            status = ItemStatus::ReversalStatus;
+            trunkFileName = "Cicada_Trunk_Blue.png";
+            bellyFileName = "Cicada_Belly_Blue.png";
+            wingFileName = "Cicada_WingStill_Blue.png";
+            
+        }else{
+            status = ItemStatus::NormalStatus;
+            trunkFileName = "Cicada_Trunk_Red.png";
+            bellyFileName = "Cicada_Belly_Red.png";
+            wingFileName = "Cicada_WingStill_Red.png";
+        }
+        
+        changeTexture = CallFunc::create([=](){
+            this->setTexture(trunkFileName);
+            this->_belly->setTexture(bellyFileName);
+            this->_wing->setTexture(wingFileName);
+        });
+    }else{
+        if (status==ItemStatus::NormalStatus) {
+            status = ItemStatus::ReversalStatus;
+            trunkFileName = "Cicada_Trunk_Blue.png";
+            bellyFileName = "Cicada_Belly_Blue.png";
+        }else{
+            status = ItemStatus::NormalStatus;
+            trunkFileName = "Cicada_Trunk_Red.png";
+            bellyFileName = "Cicada_Belly_Red.png";
+        }
+        
+        changeTexture = CallFunc::create([=](){
+            this->setTexture(trunkFileName);
+            this->_belly->setTexture(bellyFileName);
+        });
+    }
+    
+    FadeOut* fadeaway = FadeOut::create(kDefaultSwitchStatusInterval);
+    FadeIn* fadeIn = FadeIn::create(kDefaultSwitchStatusInterval);
+    Sequence* turnColor = Sequence::create(fadeaway,changeTexture,fadeIn, NULL);
+    runAction(turnColor);
+}
+
+void Cicada::update(float dt)
+{
+    if (bindedTriggerID == kDefaultBindedTriggerID) {
+        ItemModel::update(dt);
+    }else{
+        if (isTriggerSwitchOn) {
+            ItemModel::update(dt);
+        }
+    }
+    Vec2 diff = getPosition() - prePosition;
+    if (diff == Vec2::ZERO) {
+        if (getCicadaState() != Cicada_State::Motionless) {
+            setCicadaState(Cicada_State::Motionless);
+            onStateChangeToMotionless();
+        }
+    }else{
+        if (getCicadaState() != Cicada_State::Moving) {
+            setCicadaState(Cicada_State::Moving);
+            if (autoFanning) {
+                onStateChangeToMoving();
+            }
+        }
+        if (autoTurnHead) {
+            float dy = getPositionY()-prePosition.y;
+            float dx = getPositionX()-prePosition.x;
+            float rotation = CC_RADIANS_TO_DEGREES(M_PI/2 - atan2f(dy, dx));
+            setRotation(rotation);
+            float distance = sqrtf(dy*dy + dx*dx);
+            log("%f",distance/dt);
+        }
+    }
+    prePosition = getPosition();
+    
 }
 
 

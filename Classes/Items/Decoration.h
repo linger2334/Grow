@@ -19,6 +19,9 @@ public:
     static Decoration* create(Item& item);
     bool init(Item& item);
 
+    void createBody();
+    CC_SYNTHESIZE_READONLY(int, flowerID, FlowerID)
+
 };
 
 

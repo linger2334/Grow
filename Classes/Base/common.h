@@ -20,4 +20,6 @@ using namespace CocosDenshion;
 #include "Setting.h"
 #include "Paths.h"
 #include "RandomHelper.h"
+
+#include "ConfigKeys.h"
 #endif

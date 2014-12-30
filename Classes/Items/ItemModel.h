@@ -17,9 +17,18 @@
 #include "GameRunningManager.h"
 
 enum class ItemStatus{
-    InvertStatus = -1,
+    ReversalStatus = -1,
     NormalStatus = 1
     
+};
+
+class ReversalProtocol
+{
+public:
+    virtual ~ReversalProtocol() {}
+    virtual void switchItemStatus()=0;
+    
+    CC_SYNTHESIZE(ItemStatus, status, Status)
 };
 
 class ItemModel :public TypeBase, public Sprite
@@ -32,7 +41,6 @@ public:
     virtual bool init(Item& item);
     
     inline void setAnimatedOn(bool isanimated) { isAnimated = isanimated;}
-    inline void setTriggerTime(float triggertime) { triggerTime = triggertime;}
     virtual void createAnimates(std::vector<std::vector<AnimationInfo>>& animationInfos,std::map<std::string,bool>& animtaionControlInstructions);
     virtual void createCardinalSplineAnimates(std::vector<AnimationInfo>& animationInfos);
     virtual void createCustomCurveAnimates(std::vector<AnimationInfo>& animationInfos);
@@ -40,11 +48,19 @@ public:
     inline b2Body* getBody() { return _body;}
     inline void setBody(b2Body* body) { _body = body;}
     inline bool isSpecialItem(){
-        return (_type==Flame_Blue || _type==Flame_Orange || _type==Flame_Violet || _type==Flame_White || _type==Gear_Button || _type==Decoration_Pendant);
+        return (_type==Flame_Blue || _type==Flame_Orange || _type==Flame_Violet || _type==Flame_White || _type==Gear_Button || _type==Gear_Reversal || _type==Decoration_Pendant);
+    }
+    inline bool canSwitchStatus(){
+        return (_type==Cicada || _type==Barrier_ || _type== Serpent_);
     }
     std::function<void(ItemModel*)> _collisionCallBack;
-    CC_SYNTHESIZE(ItemStatus, status, Status)
+    CC_SYNTHESIZE(float, triggerTime, TriggerTime)
+    CC_SYNTHESIZE(float, elapsedTime, ElapsedTime)
+    CC_SYNTHESIZE(int,bindedTriggerID,BindedTriggerID)
+    CC_SYNTHESIZE(bool, isTriggerSwitchOn, TriggerSwitchState)
+    CC_SYNTHESIZE(bool, isAutoSmoothing, AutoSmoothingState)
     
+    virtual void runMoveAction(float dt);
     virtual void update(float dt);
     /////add by wzf
     virtual Vec2 getRemovePositionInWorld()
@@ -60,7 +76,6 @@ protected:
     b2Body* _body;
     bool isAnimated;
     bool isAniPerformed;
-    float triggerTime;
     int animationGroupCount;
     Vector<Action*> _allCyclicAnimations;
     ActionInterval* _animatesParallel;

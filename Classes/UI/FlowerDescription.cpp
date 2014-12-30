@@ -10,6 +10,7 @@
 #include "AchievementUi.h"
 #include "ScreenSelectLevel.h"
 #include "ui/CocosGUI.h"
+#include "StatisticsData.h"
 using namespace ui;
 
 Scene* FlowerDescription::createScene(int index)
@@ -79,50 +80,73 @@ bool FlowerDescription::init(int index)
 
 void FlowerDescription::createDescriptionPage(int index)
 {
+    int destIndex = index;
     ValueVector flowersInfo = FileUtils::getInstance()->getValueVectorFromFile("flowersinfo.plist");
-    int seedlingIndex = UserDefault::getInstance()->getIntegerForKey("seedlingIndex");
-    
-    for (int i = 0;i<seedlingIndex;i++) {
-        Layout* layout = Layout::create();
-        layout->setContentSize(_pageView->getContentSize());
-        
-        ImageView* stone = ImageView::create("UI_FlowDescStone.png");
-        stone->setPosition(Vec2(layout->getContentSize().width/2,layout->getContentSize().height/3.1));
-        layout->addChild(stone);
-        
-        Button* button = Button::create("UI_FlowDescButton.png");
-        button->setPressedActionEnabled(false);
-        button->setScale9Enabled(true);
-        button->setPosition(Vec2(stone->getBoundingBox().size.width/2,stone->getBoundingBox().size.height*0.85));
-        stone->addChild(button);
-        
-        ValueMap flowerInfo = flowersInfo.at(i).asValueMap();
-        ImageView* flower = ImageView::create(flowerInfo.at("imagename").asString());
-        flower->setPosition(Vec2(stone->getBoundingBox().size.width/2,stone->getBoundingBox().size.height + flower->getBoundingBox().size.height/2.2));
-        stone->addChild(flower);
-        
-        Text* unlockdate = Text::create(flowerInfo.at("unlockdate").asString(), "Arial", 24);
-        unlockdate->setPosition(Vec2(stone->getPositionX(),stone->getPositionY() + 0.12*VisibleSize.height));
-        layout->addChild(unlockdate);
-        
-        Text* flowername = Text::create(flowerInfo.at("flowername").asString(), "Arial", 48);
-        flowername->setPosition(Vec2(stone->getPositionX(), stone->getPositionY() + 45.0/1024*VisibleSize.height));
-        layout->addChild(flowername);
-        
-        Text* description = Text::create(flowerInfo.at("description").asString(), "Helvetica-light", 24);
-        description->setPosition(Vec2(stone->getPositionX(),stone->getPositionY()-25.0/1024*VisibleSize.height));
-        layout->addChild(description);
-        
-        ImageView* arrow = ImageView::create("UI_FlowDescArrow.png");
-        arrow->setPosition(Vec2(stone->getPositionX(),stone->getPositionY()-240.0/1024*VisibleSize.height));
-        layout->addChild(arrow);
-        
-        Text* Id = Text::create(flowerInfo.at("id").asString(), "Arial", 24);
-        Id->setPosition(Vec2(stone->getPositionX(),stone->getPositionY()-240.0/1024*VisibleSize.height));
-        layout->addChild(Id);
-        
-        _pageView->addPage(layout);
+    __Array* flowerUnlockInfo;
+    if (StatisticsData::isHasRunningLayer()) {
+        flowerUnlockInfo = StatisticsData::getRunningLayer()->getFlowerUnlockInfo();
+    }else{
+        std::string path = FileUtils::getInstance()->getWritablePath() + "StatisticsData.plist";
+        if (FileUtils::getInstance()->isFileExist(path)) {
+            __Dictionary* dict = __Dictionary::createWithContentsOfFile(path.c_str());
+            flowerUnlockInfo = static_cast<__Array*>(dict->objectForKey("flowerUnlock"));
+        }else{
+            flowerUnlockInfo = __Array::createWithCapacity(FLOWER_COUNT);
+            for (int i = 0; i<FLOWER_COUNT; i++) {
+                flowerUnlockInfo->addObject(__Bool::create(false));
+            }
+        }
     }
     
-    _pageView->scrollToPage(index);
+    for (int i = 0;i<FLOWER_COUNT;i++) {
+        bool isUnlock = static_cast<__String*>(flowerUnlockInfo->getObjectAtIndex(i))->boolValue();
+        if (isUnlock) {
+            Layout* layout = Layout::create();
+            layout->setContentSize(_pageView->getContentSize());
+            
+            ImageView* stone = ImageView::create("UI_FlowDescStone.png");
+            stone->setPosition(Vec2(layout->getContentSize().width/2,layout->getContentSize().height/3.1));
+            layout->addChild(stone);
+            
+            Button* button = Button::create("UI_FlowDescButton.png");
+            button->setPressedActionEnabled(false);
+            button->setScale9Enabled(true);
+            button->setPosition(Vec2(stone->getBoundingBox().size.width/2,stone->getBoundingBox().size.height*0.85));
+            stone->addChild(button);
+            
+            ValueMap flowerInfo = flowersInfo.at(i).asValueMap();
+            ImageView* flower = ImageView::create(flowerInfo.at("imagename").asString());
+            flower->setPosition(Vec2(stone->getBoundingBox().size.width/2,stone->getBoundingBox().size.height + flower->getBoundingBox().size.height/2.2));
+            stone->addChild(flower);
+            
+            Text* unlockdate = Text::create(flowerInfo.at("unlockdate").asString(), "Arial", 24);
+            unlockdate->setPosition(Vec2(stone->getPositionX(),stone->getPositionY() + 0.12*VisibleSize.height));
+            layout->addChild(unlockdate);
+            
+            Text* flowername = Text::create(flowerInfo.at("flowername").asString(), "Arial", 48);
+            flowername->setPosition(Vec2(stone->getPositionX(), stone->getPositionY() + 45.0/1024*VisibleSize.height));
+            layout->addChild(flowername);
+            
+            Text* description = Text::create(flowerInfo.at("description").asString(), "Helvetica-light", 24);
+            description->setPosition(Vec2(stone->getPositionX(),stone->getPositionY()-25.0/1024*VisibleSize.height));
+            layout->addChild(description);
+            
+            ImageView* arrow = ImageView::create("UI_FlowDescArrow.png");
+            arrow->setPosition(Vec2(stone->getPositionX(),stone->getPositionY()-240.0/1024*VisibleSize.height));
+            layout->addChild(arrow);
+            
+            Text* Id = Text::create(flowerInfo.at("id").asString(), "Arial", 24);
+            Id->setPosition(Vec2(stone->getPositionX(),stone->getPositionY()-240.0/1024*VisibleSize.height));
+            layout->addChild(Id);
+            
+            _pageView->addPage(layout);
+        }else{
+            if (i<index) {
+                destIndex--;
+            }
+        }
+        
+    }
+    
+    _pageView->scrollToPage(destIndex);
 }

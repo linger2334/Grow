@@ -13,17 +13,24 @@
 #include "LayerItem.h"
 #include "Flame.h"
 #include "Cicada.h"
-#include "Dragon.h"
 #include "DoubleDragon.h"
 #include "Serpent.h"
 #include "GearButton.h"
 #include "GearGate.h"
+#include "GearReversal.h"
 #include "Barrier.h"
+#include "Decoration.h"
+#include "Sprouts.h"
+#include "TriggerNode.h"
 #include "StatisticsData.h"
 #include "GameLayerPlant.h"
 #include "GameLayerLight.h"
 
 Spawn* createRemoveAction();
+int    getPlantIndex(ItemModel* plantItem);
+void doBadCrash(ItemModel* plantHead);
+void changeParentToLayerItem(ItemModel* item);
+#define AddLightNumberGoodsBlue  3
 
 PhysicsHandler::PhysicsHandler():_world(nullptr)
 {
@@ -150,8 +157,6 @@ void PhysicsHandler::CollisionCallBack(ItemModel *item, ItemModel *plantHead)
         CollideWithFlame(item,plantHead);
     }else if (type==Cicada){
         CollideWithCicada(item, plantHead);
-    }else if (type==Dragon_Anti || type==Dragon_Clockwise){
-        CollideWithDragon(item, plantHead);
     }else if (type==DoubDragon_Anti || type== DoubDragon_Clockwise){
         CollideWithDoubDragon(item, plantHead);
     }else if (type==Serpent_){
@@ -160,10 +165,16 @@ void PhysicsHandler::CollisionCallBack(ItemModel *item, ItemModel *plantHead)
         CollideWithGearButton(item, plantHead);
     }else if (type==Gear_Gate){
         CollideWithGearGate(item, plantHead);
+    }else if (type==Gear_Reversal){
+        CollideWithGearReversal(item, plantHead);
     }else if (type==Barrier_){
         CollideWithBarrier(item, plantHead);
+    }else if (type==Decoration_Flower || type==Decoration_FlowerInv){
+        CollideWithDecorationFlower(item, plantHead);
+    }else if (type==Trigger){
+        CollideWithTriggerNode(item,plantHead);
     }else{
-        CCASSERT(0==1, "unknown type!");
+        CCASSERT(nullptr, "unknown type!");
     }
     
 }
@@ -178,7 +189,7 @@ void PhysicsHandler::CollideWithFlame(ItemModel *item, ItemModel *plantHead)
     flame->stopAllActions();
     /////other effect
     //auto fadeout = FadeTo::create(1, 0);
-    auto scaleTo = ScaleTo::create(0.5, 0);
+//    auto scaleTo = ScaleTo::create(0.5, 0);
     auto call = CallFuncN::create([=](Node* node)
                                   {
                                       int type =dynamic_cast<Flame*>(node)->getType();
@@ -188,24 +199,27 @@ void PhysicsHandler::CollideWithFlame(ItemModel *item, ItemModel *plantHead)
                                               count = 1;
                                               break;
                                           case Flame_Blue:
-                                              count = 5;
+                                              count = 3;
                                               break;
                                           case Flame_Orange:
-                                              count = 10;
+                                              count = 7;
                                               break;
                                           case Flame_Violet:
-                                              count = 7;
+                                              count = 5;
                                               break;
                                               
                                           default:
                                               break;
                                       }
+                                      changeParentToLayerItem(flame);
+                                      flame->setZOrder(99999);
                                       flame->updateFlameCollectedCount();
                                       int index = GameLayerPlant::getRunningLayer()->getPlantIndexByPlantHeadBodyType(plantHead->getType());
                                       GameLayerLight::getRunningLayer()->addLightsUseBezier(index, node, count);
+                                      
                                   });
-    Sequence* seq = Sequence::create(call,nullptr);
-    flame->runAction(seq);
+    //  Sequence* seq = Sequence::create(scaleTo,call,nullptr);
+    flame->runAction(call);
 }
 
 ///蝉
@@ -216,45 +230,20 @@ void PhysicsHandler::CollideWithCicada(ItemModel *item, ItemModel *plantHead)
     cicada->setBody(nullptr);
     
     cicada->stopAllActions();
-    ActionInterval* disappear = FadeTo::create(1, 0);
+    // ActionInterval* disappear = FadeTo::create(1, 0);
     ActionInstant* remove = RemoveSelf::create();
     //正常状态，吸光
     if (cicada->getStatus() == ItemStatus::NormalStatus) {
         StatisticsData::getRunningLayer()->failures++;
         /////other effect
-        int index = GameLayerPlant::getRunningLayer()->getPlantIndexByPlantHeadBodyType(plantHead->getType());
-        GameRunningManager::getInstance()->reGrowPlantByIndex(index);
-        GameRunningManager::getInstance()->removeSubLight(index);
+        doBadCrash(plantHead);
     }else{
         //反相状态，加光
-
-    }
-    
-    cicada->runAction(Sequence::create(disappear,remove, NULL));
-}
-
-////单龙
-void PhysicsHandler::CollideWithDragon(ItemModel *item, ItemModel *plantHead)
-{
-    Dragon* dragon = dynamic_cast<Dragon*>(item);
-    _world->DestroyBody(dragon->getBody());
-    dragon->setBody(nullptr);
-    
-    dragon->stopAllActions();
-    //other effect
-    ActionInterval* disappear = FadeOut::create(1);
-    ActionInstant* remove = RemoveSelf::create();
-    //正常状态，吸光
-    if(dragon->getStatus() == ItemStatus::NormalStatus){
-        StatisticsData::getRunningLayer()->failures++;
-        
-        dragon->runAction(Sequence::create(createRemoveAction(),remove,NULL));
-    }else{
-        //反相状态，加光
+        GameRunningManager::getInstance()->addLightByFlame(cicada->getParent()->convertToWorldSpace(cicada->getPosition()), 1);
         
     }
     
-    dragon->runAction(Sequence::create(disappear,remove,NULL));
+    cicada->runAction(Sequence::create(createRemoveAction(),remove, NULL));
 }
 
 ///双龙
@@ -269,8 +258,8 @@ void PhysicsHandler::CollideWithDoubDragon(ItemModel *item, ItemModel *plantHead
     ActionInstant* remove = RemoveSelf::create();
     //other effect
     int index = GameLayerPlant::getRunningLayer()->getPlantIndexByPlantHeadBodyType(plantHead->getType());
-    if (doubDragon->getCollisionSign()* (int)doubDragon->getStatus() == 1) {
-        GameRunningManager::getInstance()->addLightByFlame(doubDragon->getParent()->convertToWorldSpace(doubDragon->getPosition()), 5,index);
+    if (doubDragon->getCollisionSign() == 1) {
+        GameRunningManager::getInstance()->addLightByFlame(doubDragon->getParent()->convertToWorldSpace(doubDragon->getPosition()), 3,index);
     }else{
         StatisticsData::getRunningLayer()->failures++;
         
@@ -288,21 +277,21 @@ void PhysicsHandler::CollideWithSerpent(ItemModel *item, ItemModel *plantHead)
     _world->DestroyBody(serpent->getBody());
     serpent->setBody(nullptr);
     
-    ActionInterval* disappear = FadeOut::create(1);
-    ActionInstant* remove = RemoveSelf::create();
-    
-    int index = GameLayerPlant::getRunningLayer()->getPlantIndexByPlantHeadBodyType(plantHead->getType());
-    //正常状态
-    if (serpent->getStatus() == ItemStatus::NormalStatus) {
-        StatisticsData::getRunningLayer()->failures++;
-        ///other effect
-        GameRunningManager::getInstance()->addLightByFlame(serpent->getParent()->convertToWorldSpace(serpent->getPosition()), 10,index);
-        
-    }else{
-        //反相状态
-        
-    }
-    serpent->runAction(Sequence::create(createRemoveAction(),remove, NULL));
+//    ActionInterval* disappear = FadeOut::create(1);
+//    ActionInstant* remove = RemoveSelf::create();
+//    
+//    int index = GameLayerPlant::getRunningLayer()->getPlantIndexByPlantHeadBodyType(plantHead->getType());
+//    //正常状态
+//    if (serpent->getStatus() == ItemStatus::NormalStatus) {
+//        StatisticsData::getRunningLayer()->failures++;
+//        ///other effect
+//        GameRunningManager::getInstance()->addLightByFlame(serpent->getParent()->convertToWorldSpace(serpent->getPosition()), 10,index);
+//        
+//    }else{
+//        //反相状态
+//        
+//    }
+//    serpent->runAction(Sequence::create(createRemoveAction(),remove, NULL));
     
 }
 
@@ -337,22 +326,55 @@ void PhysicsHandler::CollideWithGearGate(ItemModel *item, ItemModel *plantHead)
     gearGate->setBody(nullptr);
     StatisticsData::getRunningLayer()->failures++;
     
-    FadeTo* disappear = FadeTo::create(1, 0);
-    TargetedAction* leftDisappear = TargetedAction::create(gearGate->_left, disappear);
-    TargetedAction* rightDisappear = TargetedAction::create(gearGate->_right, disappear->clone());
-    CallFuncN* remove = CallFuncN::create([&](Node* sender){
-        GearGate* gearGate = dynamic_cast<GearGate*>(sender);
-        gearGate->_left->removeFromParent();
-        gearGate->_left = nullptr;
-        gearGate->_right->removeFromParent();
-        gearGate->_right = nullptr;
-        gearGate->removeFromParent();
-    });
-    gearGate->runAction(Sequence::create(Spawn::create(leftDisappear,rightDisappear,NULL),remove, NULL));
     //other effect
-    int index = GameLayerPlant::getRunningLayer()->getPlantIndexByPlantHeadBodyType(plantHead->getType());
-    GameRunningManager::getInstance()->reGrowPlantByIndex(index);
-    GameRunningManager::getInstance()->removeSubLight(item->getRemovePositionInWorld(),index);
+    auto parent = gearGate->_leftEye->getParent();
+    Vec2 ptLeft = parent->convertToWorldSpace(gearGate->_leftEye->getPosition());
+    auto parent1 = gearGate->_rightEye->getParent();
+    Vec2 ptRight = parent1->convertToWorldSpace(gearGate->_rightEye->getPosition());
+    
+    int size = GameLayerLight::getRunningLayer()->getLightCountByPlantIndex(0);
+    if (size>0)
+    {
+        int subSize;
+        if (size != 1)subSize =  size/2;
+        else subSize = size;
+        float delayTime = 0;
+        if (subSize > 0) {
+            delayTime = 2;
+            for (int i = 0 ; i< subSize; i++) {
+                if(i%2 ==0)
+                {
+                    GameLayerLight::getRunningLayer()->removeOneLightUseBezier(0, ptLeft);
+                }
+                else{
+                    GameLayerLight::getRunningLayer()->removeOneLightUseBezier(0, ptRight);
+                }
+            }
+        }
+    }
+    
+    int index = getPlantIndex(plantHead);
+    GameRunningManager::getInstance()->setPlantWaiting(index, true);
+    gearGate->addWaitOpenGatePlant(index);
+    
+    auto callfunc = [](GearGate* node)
+    {
+        node->openGate();
+    };
+    
+    Sequence* seqa = Sequence::create(DelayTime::create(2),CallFunc::create(std::bind(callfunc,gearGate)), NULL);
+    gearGate->runAction(seqa);
+    
+}
+
+/////机关反相道具
+void PhysicsHandler::CollideWithGearReversal(ItemModel *item, ItemModel *plantHead)
+{
+    GearReversal* gearReversal = dynamic_cast<GearReversal*>(item);
+    _world->DestroyBody(gearReversal->getBody());
+    gearReversal->setBody(nullptr);
+    LayerItem::getRunningLayer()->invertStatusInCurrentScreen();
+    //
     
 }
 
@@ -363,32 +385,98 @@ void PhysicsHandler::CollideWithBarrier(ItemModel *item, ItemModel *plantHead)
     _world->DestroyBody(barrier->getBody());
     barrier->setBody(nullptr);
     
-    FadeTo* disappear = FadeTo::create(1,0);
-    ActionInstant* remove = RemoveSelf::create();
-    
-    int index = GameLayerPlant::getRunningLayer()->getPlantIndexByPlantHeadBodyType(plantHead->getType());
     //正常状态，吸光
     if(barrier->getStatus() == ItemStatus::NormalStatus){
         StatisticsData::getRunningLayer()->failures++;
-        
+        doBadCrash(plantHead);
         //other effect
-        GameRunningManager::getInstance()->reGrowPlantByIndex(index);
-        GameRunningManager::getInstance()->removeSubLight(item->getRemovePositionInWorld(),index);
+        
     }else{
         //反相状态，加光
+        GameRunningManager::getInstance()->addLightByFlame(barrier->getParent()->convertToWorldSpace(barrier->getPosition()), 3);
+    }
+    ActionInstant* remove = RemoveSelf::create();
+    barrier->runAction(Sequence::create(createRemoveAction(),remove, NULL));
+}
+
+////////花的解锁点
+void PhysicsHandler::CollideWithDecorationFlower(ItemModel *item, ItemModel *plantHead)
+{
+    Decoration* flower = dynamic_cast<Decoration*>(item);
+    _world->DestroyBody(flower->getBody());
+    flower->setBody(nullptr);
+    //
+    StatisticsData::getRunningLayer()->checkNewFlowerUnlock(flower->getFlowerID());
+    
+    Animation* bloomAnimation = Animation::create();
+    for (int i = 1; i<12; i++) {
+        bloomAnimation->addSpriteFrameWithFile(StringUtils::format("bloom_%d.png",i));
+    }
+    bloomAnimation->setDelayPerUnit(1.0/12);
+    Animate* bloom = Animate::create(bloomAnimation);
+    flower->runAction(bloom);
+    
+}
+
+/////动画触发器
+void PhysicsHandler::CollideWithTriggerNode(ItemModel *item, ItemModel *plantHead)
+{
+    TriggerNode* trigger = dynamic_cast<TriggerNode*>(item);
+    _world->DestroyBody(trigger->getBody());
+    trigger->setBody(nullptr);
+    //
+    for (int ID : trigger->getBindIDs()) {
+        ItemModel* item = dynamic_cast<ItemModel*>(LayerItem::getRunningLayer()->getChildByTag(ID));
+        if (item) {
+            switch (item->_type) {
+                case Cicada:
+                    item->setTriggerSwitchState(true);
+                    break;
+                case Sprouts_Dextro:
+                    ((Sprouts*)item)->runSproutingAnimate();
+                    break;
+                case Sprouts_Levo:
+                    ((Sprouts*)item)->runSproutingAnimate();
+                    break;
+                case Sprouts_Slope:
+                    ((Sprouts*)item)->runSproutingAnimate();
+                    break;
+                default:
+                    break;
+            }
+            
+            if (item->_type>=Rock_Circle && item->_type<=Rock_Trape) {
+                item->scheduleUpdate();
+            }
+            
+        }
         
     }
     
-    
-    barrier->runAction(Sequence::create(createRemoveAction(),remove, NULL));
 }
+
+
+
 
 bool PhysicsHandler::ReportFixture(b2Fixture *fixture)
 {
     b2Body* itemBody = fixture->GetBody();
     ItemModel* item = (ItemModel*)(itemBody->GetUserData());
-    if (item->getStatus() != ItemStatus::InvertStatus) {
-        item->setStatus(ItemStatus::InvertStatus);
+    if (item->canSwitchStatus()) {
+        switch (item->_type) {
+            case Cicada:
+                ((class::Cicada*)item)->switchItemStatus();
+                break;
+            case Serpent_:
+                ((Serpent*)item)->switchItemStatus();
+                break;
+            case Barrier_:
+                ((Barrier*)item)->switchItemStatus();
+                break;
+                
+            default:
+                break;
+        }
     }
     
     return true;
@@ -400,9 +488,21 @@ Spawn* createRemoveAction()
     FadeTo* fadeTo = FadeTo::create(1.5,0);
     return Spawn::create(sacleTo,fadeTo, NULL);
 }
-
-Action* createRemoveLightsAction()
+int   getPlantIndex(ItemModel* plantItem)
 {
-    
+    return GameLayerPlant::getRunningLayer()->getPlantIndexByPlantHeadBodyType(plantItem->getType());
+}
+void doBadCrash(ItemModel* plantHead)
+{
+    int index = getPlantIndex(plantHead);
+    GameRunningManager::getInstance()->reGrowPlantByIndex(index);
+    GameRunningManager::getInstance()->removeSubLight(index);
+}
+void changeParentToLayerItem(ItemModel* item)
+{
+    item->retain();
+    item->removeFromParent();
+    LayerItem::getRunningLayer()->addChild(item);
+    item->release();
 }
 

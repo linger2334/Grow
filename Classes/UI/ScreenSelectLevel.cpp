@@ -13,6 +13,7 @@
 #include "GameManager.h"
 #include "GameShaders.h"
 #include "LevelManager.h"
+#include "GameSceneNavigation.h"
 using namespace cocos2d::ui;
 
 void MyPageView::handleReleaseLogic(Touch *touch)
@@ -128,7 +129,7 @@ void ScreenSelectLevel::addPageView()
                     int id = manager->getPauseGameSceneLevel();
                     LevelManager::getInstance()->selectLevel(index+1);
                     manager->releaseGameScene();
-                    auto scene = ScreenLoading::createScene(index+1);
+                    auto scene = GameSceneNavigation::createScene();
                     manager->navigationTo(scene);
                     break;
                 }

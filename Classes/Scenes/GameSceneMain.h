@@ -24,6 +24,7 @@ public:
     Mat4 _modelViewMV;
     GameRunningInfo* _gameRunningInfo;
     CustomCommand _customCommand;
+        bool     _isFirstLoad = true;
 };
 
 

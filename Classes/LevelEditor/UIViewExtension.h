@@ -52,6 +52,9 @@
 @public Item_Type itemtype;
 @public bool isAnimated;
 @public float triggerTime;
+@public float elapsedTime;
+@public int bindedTriggerID;
+@public bool isAutoSmoothing;
 @public std::map<std::string,bool> _animationControlInstructions;
 @public std::vector<std::vector<AnimationInfo>> _animationInfos;
 @public std::vector<PolygonView*> _pathPoints;
@@ -79,6 +82,8 @@
 -(void)heightLightPathPoints;
 -(void)cancelHeightLightPathPoints;
 -(std::string)convertTypeToString;
+
+-(NSComparisonResult)compareWithID:(ItemView*)other;
 -(void)dealloc;
 
 @end

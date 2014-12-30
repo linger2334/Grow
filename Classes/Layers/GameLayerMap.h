@@ -14,6 +14,9 @@ public:
     virtual void moveDown(float yLen);
     virtual void update(float dt);
     virtual void updateConfigs();
+   // virtual void updateClearCell();
+    
+    
    
     void  moveDownMapGrid(int moveLen);
     void  moveDownMapGrid(float yLen);
@@ -23,12 +26,12 @@ public:
     virtual bool onTouchBegan(Touch*,Event*);
     virtual void onTouchMoved(Touch*,Event*);
     virtual void onTouchEnded(Touch*,Event*);
-//    virtual void onTouchCancelled(Touch*,Event*);
+//  virtual void onTouchCancelled(Touch*,Event*);
     
     void updateExcavatePolygon(int x,int y,int width , int height);
     /////////////////////
     bool  touchClearGrid(Vec2 touchPoint);
-    int  clearGridCellBorderByRange(GridCell cell, int radius);
+    int   clearGridCellBorderByRange(GridCell cell, int radius);
 
 //    bool  clearGridCell(int x,int y);
 //    void testClear(int x,int y,int len);
@@ -49,12 +52,18 @@ public:
     void _checkClear(int x,int y, int width,int height);
     
     void  onChangeCellCalls(const GridCell& cell);
-//    int clearGridCellBorderByRange(GridCell cell, int Radius);
+//  int clearGridCellBorderByRange(GridCell cell, int Radius);
     
+    void addToCheckClearCells(const GridCell& cell);
     void startListener();
     void stopListener();
     
     bool isCanTouchRangeCell(const GridCell& cell,int radius);
+    
+    void getOneClearRangeList(int x,int y,std::vector<GridCell>& outlist);
+    
+    virtual bool  saveToFile();
+    virtual bool  initBySaveConfig();
     
 public:
     GameLayerMapBorder*   _layerBorder;
@@ -62,12 +71,12 @@ public:
     cocos2d::Size                  _maskSize;
     Sprite*               _maskAlphaSprite;
     MapGrid               _mapGrid;
-    GameLayerMapDirt*   _layerdirt;
-    
-    std::set<GridCell>   _clearCells;
-    std::set<GridCell>   _updateBorderList;
-    Vec2                 _touchPrePoint;
-    bool                 _isFirstMoveTouch;
+    GameLayerMapDirt*     _layerdirt;
+    std::set<GridCell>    _checkClearCells;
+    std::set<GridCell>    _clearCells;
+    std::set<GridCell>    _updateBorderList;
+    Vec2                  _touchPrePoint;
+    bool                  _isFirstMoveTouch;
     EventListenerTouchOneByOne* _listener;
 };
 

@@ -43,12 +43,12 @@ protected:
 class CustomCardinalSplineBy : public CardinalSplineBy
 {
 public:
-//    static CustomCardinalSplineBy* create(float duration,cocos2d::PointArray* points,float tension);
-//    bool initWithDuration(float duration,cocos2d::PointArray* points,float tension);
-    
-    
-    
-    
+    static CustomCardinalSplineBy* create(float duration,cocos2d::PointArray* points,std::vector<float>& dutyRatio,float tension);
+    bool initWithDuration(float duration,cocos2d::PointArray* points,std::vector<float>& dutyRatio,float tension);
+    void update(float time);
+protected:
+    std::vector<float> _dutyRatio;
+    int pointCount;
 };
 
 

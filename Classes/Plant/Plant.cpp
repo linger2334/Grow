@@ -2,7 +2,7 @@
 #include "TypeBase.h"
 #include "GameHeaders.h"
 #include "PathListHelper.hpp"
-//#define OUT_GROW_DIR 1
+
 
 
 static float PathGetLength(const ContorlPointV2& p1,const ContorlPointV2& p2)
@@ -24,7 +24,13 @@ static ContorlPointV2 PathGetPoint(float lenght, const ContorlPointV2& start,con
         ret._point =  Vec2(tstart.x+xlen,tstart.y+ylen);
         return ret;
 }
-
+void PlantNode::resetStartContorlPoint(ContorlPointV2 cp)
+{
+    _cpList.clear();
+    _preContorlPoint = cp;
+    _cpList.push_back(cp);
+    _growLength = 0.0f;
+}
 void  PlantNode::initPlant(std::list<ContorlPointV2> cpList,float cpListUnitHeight ,float verticesUnitHeight  )
 {
     _cpList.clear();
@@ -41,7 +47,8 @@ bool PlantNode::init()
 {
     Node::init();
     auto glprogram  = GLProgram::createWithByteArrays(ccPositionTexture_vert, ccPositionTexture_frag);
-//    auto glprogram  = GLProgram::createWithFilenames("ccShader_PositionTexture.vert", "ccShader_PositionTexture.frag");
+   //     auto glprogram  = GLProgram::createWithByteArrays(ccPositionTextureColor_vert, ccPositionTextureColor_frag);
+//   auto glprogram  = GLProgram::createWithFilenames("ccShader_PositionTexture.vert", "ccShader_PositionTexture.frag");
     _glprogramstate = GLProgramState::getOrCreateWithGLProgram(glprogram);
     setGLProgramState(_glprogramstate);
     _ignoreAnchorPointForPosition = false;
@@ -57,6 +64,7 @@ bool PlantNode::init()
     _capacity = 0;
     _capacityAddSteplen = 10;
     _isDraw = true;
+    _growLength = 0.0;
     return true;
 }
 
@@ -88,11 +96,12 @@ void PlantNode::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 }
 void PlantNode::onDraw(const Mat4 &transform, uint32_t flags)
 {
-   
     getGLProgramState()->getGLProgram()->use();
     getGLProgramState()->getGLProgram()->setUniformsForBuiltins(transform);
+    //drawHeadRange(transform,flags);
     Director::getInstance()->setDepthTest(true);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_ONE, GL_ZERO);
     onDrawPlant(transform,flags);
     Director::getInstance()->setDepthTest(false);
 }
@@ -113,7 +122,7 @@ float  PlantNode::grow(FaceDirection dir,float height)
     {
         auto top = _cpList.back();
         _cpList.push_back(_preContorlPoint);
-        _preGrowDirection = dir;
+      //  _preGrowDirection = dir;
         _preContorlPoint._point = top._point;
         _preContorlPoint._height = top._height;
         _preContorlPoint._angle = top._angle;
@@ -175,7 +184,7 @@ float  PlantNode::reGrow(float height)
   //  auto end =_cpList.rend();
     if (ip == _cpList.rend()) return -1;
     float topHeight = ip->_height;
-    float tlen = 0;
+    //float tlen = 0;
     float angle = 0;
     while (ip!=_cpList.rend()) {
         angle = ip->_angle;
@@ -467,7 +476,7 @@ void PlantNode::updateVertices()
   // ensureCapacity(1);
     _verticesCount = 0;
     
-    ContorlPointV2* pre = &_cpList[0];
+ //   ContorlPointV2* pre = &_cpList[0];
     int  preIndex = 0;
     float topHeight = _cpList.back()._height;
     for (int i = 0 ; i<_cpList.size(); i++) {
@@ -535,5 +544,93 @@ float PlantNode::getLengthByCP(ContorlPointV2& cp,bool isTop )
     }
     len += pre->_point.distance(cp._point);
     return len;
+}
+void PlantNode::drawHeadRange(const Mat4 &transform, uint32_t flags)
+{
+    if (_cpList.size()==0) return;
+    V3F_C4F headVec[18];
+    
+    Vec2 cpl = getTopContorlPoint().getPositionLeftByLength(50);
+    Vec2 cpo = getHeadPosition();
+    for (int i=0 ; i<18; i++) {
+        headVec[i].vertices = V2TV3(MathHelper::getRotatePosition(cpo, cpl,i*10));
+        headVec[i].colors = Color4F(1,0,0,1);
+    }
+    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION | GL::VERTEX_ATTRIB_FLAG_COLOR);
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_C4F), headVec);
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof(V3F_C4F), ((float*)(headVec))+3);
+    glDrawArrays(GL_LINE_STRIP, 0,18);
+    
+//    V3F_C4F headVec1[6];
+//    float anglevec[3]={-40,0,40};
+//    Vec2 cpt = _headCur._cp.getTopPositionByLength(100);
+//    for (int i=0; i<3; i++) {
+//        headVec1[i*2].vertices = V2TV3(_headCur.getPosition());
+//        headVec1[i*2].colors = Color4F(1,0,0,1);
+//        headVec1[i*2+1].vertices = V2TV3(MathHelper::getRotatePosition(cpo, cpt,anglevec[i]));
+//        headVec1[i*2+1].colors = Color4F(0,1,0,1);
+//    }
+//    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_C4F), headVec1);
+//    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof(V3F_C4F), ((float*)(headVec1))+3);
+//    glDrawArrays(GL_LINES, 0,6);
+}
+void PlantNode::saveInfoToString(std::string& out)
+{
+    out.append((const char*)&_isDraw,sizeof(_isDraw));
+    out.append((const char*)&_capacity,sizeof(_capacity));
+    out.append((const char*)&_capacityAddSteplen,sizeof(_capacityAddSteplen));
+    out.append((const char*)&_textureLeft,sizeof(_textureLeft));
+    out.append((const char*)&_textureRight,sizeof(_textureRight));
+    ContorlPointV2  _preContorlPoint;
+    int size = _cpList.size();
+    out.append((const char*)&size,sizeof(size));
+    for (auto& ip : _cpList) {
+        out.append((const char*)&ip,sizeof(ContorlPointV2));
+    }
+}
+#define OUTMAP(T,D) *((T*)(&buf[index])) = D;\
+index += sizeof(D)
+void PlantNode::saveInfoToData(cocos2d::Data& outData)
+{
+    int count =  sizeof(_isDraw)+sizeof(_capacityAddSteplen)+sizeof(int)+(sizeof(ContorlPointV2)*(_cpList.size()));
+
+    unsigned char * buf = (unsigned char*)malloc(sizeof(unsigned char) * count);
+    int index = 0;
+    OUTMAP(bool,_isDraw);
+   // OUTMAP(int,_capacity);
+    OUTMAP(int,_capacityAddSteplen);
+
+    ContorlPointV2  _preContorlPoint;
+    int size = _cpList.size();
+    //out.append((const char*)&size,sizeof(size));
+    OUTMAP(int,size);
+    ContorlPointV2* bufData = (ContorlPointV2*)(&buf[index]);
+    for (int i = 0; i < _cpList.size(); i++)
+    {
+        bufData[i] = _cpList[i];
+    }
+    outData.fastSet((unsigned char*)buf,count);
+}
+void PlantNode::resetInfoBySaveData(const cocos2d::Data& in)
+{
+    const char* data = (const char*)in.getBytes();
+    int index = 0;
+    _isDraw = *((bool*)(&data[index]));
+    index += sizeof(_isDraw);
+    
+    _capacityAddSteplen = *((int*)(&data[index]));
+    index += sizeof(_capacityAddSteplen);
+   
+    _cpList.clear();
+    
+    int size =   *((int*)(&data[index]));
+    index += sizeof(size);
+    
+    _cpList.resize(size);
+    ContorlPointV2* buf = (ContorlPointV2*)(&data[index]);
+    for (int i = 0; i < size; i++) {
+        _cpList[i] = buf[i];
+    }
+    _isDirt = true;
 }
 

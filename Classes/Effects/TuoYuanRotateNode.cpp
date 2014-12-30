@@ -19,14 +19,28 @@ void TuoYuanRotateNode::initOvalConfig(Vec2 centerPosition,float OneCycle,float 
 }
 void TuoYuanRotateNode::update(float dt)
 {
-    if(!_isRotate)return;
-    _timeNow += dt;
-    if (_timeNow > _timeByOneCycle) {
-        _timeNow = 0;
+    if(_isRotate)
+    {
+        if(_config.moveInAnticlockwise)
+        {
+            _timeNow += dt;
+            if (_timeNow >= _timeByOneCycle) {
+                _timeNow = 0;
+            }
+        }
+        else{
+            _timeNow -= dt;
+            if (_timeNow <= 0.005) {
+                _timeNow = _timeByOneCycle;
+            }
+        }
     }
-    updateRotatePosition(_timeNow/_timeByOneCycle);
+   updatePosition();
 }
-
+void   TuoYuanRotateNode::updatePosition()
+{
+    this->setPosition(getNowTimeTargetPosition());
+}
 void TuoYuanRotateNode::updateRotatePosition(float dt)
 {
     this->setPosition(getNowTimeTargetPosition());

@@ -19,7 +19,7 @@ public:
     void onDrawPlant(const Mat4 &transform, uint32_t flags);
     
     void initPlant(std::list<ContorlPointV2> cpList,float cpListUnitHeight = -1,float verticesUnitHeight = -1 );
-    
+    void resetStartContorlPoint(ContorlPointV2 cp);
     void setTexture(Texture2D* texture);
     
     void editTopCP(const ContorlPointV2& cp)
@@ -37,7 +37,6 @@ public:
         _isDirt =true;
     }
     
-
     Tex2F getTex2FCPLeft(const ContorlPointV2& cp)
     {
         return Tex2F(_textureLeft,cp._height/_texture->getContentSize().height);
@@ -50,7 +49,7 @@ public:
     
     ContorlPointV2& getTopContorlPoint(){return *(_cpList.rbegin());}
     ContorlPointV2& getTopUintContorlPoint(){return _preContorlPoint;}
-    ContorlPointV2& getTopUintContorlPointInWorld()
+    ContorlPointV2 getTopUintContorlPointInWorld()
     {
         auto cp = getTopUintContorlPoint();
         cp._point = this->convertToWorldSpace(cp._point);
@@ -64,10 +63,10 @@ public:
     Vec2 getHeadNextPositionByTopCP(float len,FaceDirection dir);
     Vec2 getHeadNextPositionByTopCPInWorld(float len,FaceDirection dir){return this->convertToWorldSpace(getHeadNextPositionByTopCP(len,dir));}
     
-  //      Vec2 getHeadPosition(){return _preContorlPoint._point;}
+  //Vec2 getHeadPosition(){return _preContorlPoint._point;}
     Vec2 getHeadUnitPosition(){return _preContorlPoint._point;}
     Vec2 getHeadUnitPositionInWorld(){return this->convertToWorldSpace(getHeadUnitPosition());}
-   Vec2 getHeadPosition(){return _cpList.rbegin()->_point;}
+    Vec2 getHeadPosition(){return _cpList.rbegin()->_point;}
     Vec2 getHeadPositionInWorld(){return this->convertToWorldSpace(getHeadPosition());}
     
     
@@ -91,13 +90,13 @@ public:
     
     
     float getDefaultRadius(){return _preContorlPoint._radius;}
-    void setDefaultRadius(float value){_preContorlPoint._radius = value;}
+    void  setDefaultRadius(float value){_preContorlPoint._radius = value;}
     
     float getNextZPosition(){return _preContorlPoint._zPosition;}
-    void setNextZposition(float value){_preContorlPoint._zPosition = value;}
+    void  setNextZposition(float value){_preContorlPoint._zPosition = value;}
     
     float getRotateRadius(){return _preContorlPoint._rotateRadius;}
-    void setRotateRadius(float value){_preContorlPoint._rotateRadius = value;}
+    void  setRotateRadius(float value){_preContorlPoint._rotateRadius = value;}
     
     void subContorlPoint(int yheight);
     void subTextureHeight(int yheight);
@@ -105,7 +104,12 @@ public:
     void ensureCapacity(int count);
     void updateVertices();
     void addVertices(const ContorlPointV2& cp);
+    void drawHeadRange(const Mat4 &transform, uint32_t flags);
+    void saveInfoToString(std::string& out);
+    void resetInfoBySaveString(const std::string& in);
     
+    void saveInfoToData(cocos2d::Data& out);
+    void resetInfoBySaveData(const cocos2d::Data& in);
 public:
     CC_SYNTHESIZE(float , _growLength, GrowLength);
     CC_SYNTHESIZE(float , _verticesUnitHeight, VerticesUnitHeight);
@@ -119,7 +123,6 @@ public:
     bool            _isDraw;
     
     std::function<float(float length)> _updateCPRadiusCall;
-    
     
     Texture2D*      _texture;
     float           _textureLeft;

@@ -58,11 +58,10 @@ public:
             result = -0.016*VisibleSize.height;
         return result;
             }
-    
+    void adjustFlowerPos(MenuItemImage* flower,int index);
 protected:
     Layer* m_container;
     Myscrollview* _scrollview;
-    int seedlingIdx;
     ValueVector _flowersInfo;
     cocos2d::ui::Layout* _seedlingPage;
 };

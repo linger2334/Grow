@@ -30,6 +30,9 @@ public:
     float scrollViewContentOffSet;
     std::list<Item> _items;
     __Dictionary* _polygonsDict;
+#ifdef GROW_LEVELEDITOR
+    __Dictionary* _boundFlowerIDDict;
+#endif
     std::string _filename;
     
 protected:

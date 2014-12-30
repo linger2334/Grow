@@ -12,17 +12,21 @@
 
 @interface PropertyController(){
     UISwitch* animatedSwitch;
+    UISwitch* autoSmoothingSwitch;
     UITextField* triggerTextField;
+    UILabel* fanningSpeedSliderValueLabel;
+    UISwitch* autoTurnHeadSwitch;
+    UISwitch* autoFanningSwitch;
+    UISwitch* isReversalStatusSwitch;
     UILabel* wDoubleDragonShowLabel;
     UILabel* absorptionShowLabel;
     UILabel* sinkSpeedShowLabel;
     UITextField* gapTextField;
     UILabel* startRateShowLabel;
+    UILabel* growSpeedSliderValueLabel;
 }
 
 @end
-
-
 
 @implementation PropertyController
 
@@ -53,8 +57,15 @@
     [self addButtons];
     [self addHierarchyPickerView];
     [self addAnimatedSwitch];
+    [self addAutoSmoothingSwitch];
     [self addTriggerTimeTextField];
     switch (_itemView->itemtype) {
+        case Cicada:
+            [self addFanningSpeedSlider];
+            [self addAutoTurnHeadSwitch];
+            [self addAutoFanningSwitch];
+            [self addReversalStatusSwitch];
+            break;
         case DoubDragon_Anti:
             [self addWSlider];
             break;
@@ -72,6 +83,22 @@
             [self addGapTextField];
             [self addStartRateSlider];
             break;
+        case Decoration_Flower:
+            [self addFlowerIDCheckBoxes];
+            break;
+        case Decoration_FlowerInv:
+            [self addFlowerIDCheckBoxes];
+            break;
+        case Sprouts_Dextro:
+            [self addGrowSpeedSlider];
+            break;
+        case Sprouts_Levo:
+            [self addGrowSpeedSlider];
+            break;
+        case Sprouts_Slope:
+            [self addGrowSpeedSlider];
+            break;
+            
         default:
             break;
     }
@@ -187,7 +214,7 @@
 
 -(void)HideOnCancel
 {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [self dismissViewControllerAnimated:NO completion:nil];
 }
 
 -(void)HideOnOK
@@ -201,8 +228,9 @@
     }else if(preIndex>selectedIndex){
         [scrollview insertSubview:[scrollview.subviews objectAtIndex:preIndex] belowSubview:[scrollview.subviews objectAtIndex:selectedIndex]];
     }
-    //animate
+    //animate(on:表象,ison:内在)
     _itemView->isAnimated = animatedSwitch.on;
+    _itemView->isAutoSmoothing = autoSmoothingSwitch.isOn;
     float triggerTime = static_cast<float>(atof([triggerTextField.text UTF8String]));
     if (triggerTime<0) {
         UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"严重错误!" message:@"非法输入,请检查!" delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
@@ -213,6 +241,20 @@
     _itemView->triggerTime = triggerTime;
     //features
     switch (_itemView->itemtype) {
+        case Cicada:
+        {
+            Features_Cicada* cicadaFeat = (Features_Cicada*)_itemView->features;
+            float fanningSpeed = static_cast<float>(atof([fanningSpeedSliderValueLabel.text UTF8String]));
+            if (fanningSpeed != kDefaultCicadaFanningSpeed) {
+                cicadaFeat->fanningSpeed = fanningSpeed;
+            }
+            cicadaFeat->autoTurnHead = autoTurnHeadSwitch.isOn;
+            cicadaFeat->autoFanning = autoFanningSwitch.isOn;
+            cicadaFeat->isReversalStatus = isReversalStatusSwitch.isOn;
+            UIImage* image = [UIImage imageNamed:isReversalStatusSwitch.isOn? @IMAGE_CICADA_BLUE : @IMAGE_CICADA_RED];
+            [_itemView setImage:image];
+        }
+            break;
         case DoubDragon_Anti:
         {
             float w = static_cast<float>(atof([wDoubleDragonShowLabel.text UTF8String]));
@@ -300,26 +342,115 @@
             ((Features_GearGate*)_itemView->features)->startRate = startRate;
         }
             break;
+        case Decoration_Flower:
+        {
+            if (_selectedIDs.size() > 1) {
+                UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"非法选择!" message:@"不能绑定多朵花！" delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
+                [alert show];
+                [alert release];
+                return;
+            }else if (_selectedIDs.size() < 1){
+                Features_DecorationFlower* feat = (Features_DecorationFlower*)_itemView->features;
+                if (feat->flowerID != kDefaultDecorationFlowerID) {
+                    __Array* flowerIDArray = dynamic_cast<__Array*>(gameManager->_fileHandler->_boundFlowerIDDict->objectForKey("flowerID"));
+                    int count = static_cast<__String*>(flowerIDArray->getObjectAtIndex(feat->flowerID -1))->intValue();
+                    flowerIDArray->replaceObjectAtIndex(feat->flowerID -1, __String::createWithFormat("%d",count-1));
+                    feat->flowerID = kDefaultDecorationFlowerID;
+                }
+            }else{
+                Features_DecorationFlower* feat = (Features_DecorationFlower*)_itemView->features;
+                if (feat->flowerID != *_selectedIDs.begin()) {
+                     __Array* flowerIDArray = dynamic_cast<__Array*>(gameManager->_fileHandler->_boundFlowerIDDict->objectForKey("flowerID"));
+                    //之前绑定的花减1
+                    if (feat->flowerID != kDefaultDecorationFlowerID) {
+                        int count = static_cast<__String*>(flowerIDArray->getObjectAtIndex(feat->flowerID -1))->intValue();
+                        flowerIDArray->replaceObjectAtIndex(feat->flowerID -1, __String::createWithFormat("%d",count-1));
+                    }
+                    //新绑定的花加1
+                    int newIDCount = static_cast<__String*>(flowerIDArray->getObjectAtIndex(*_selectedIDs.begin() -1))->intValue();
+                    flowerIDArray->replaceObjectAtIndex(*_selectedIDs.begin() -1, __String::createWithFormat("%d",newIDCount +1));
+                    feat->flowerID = *_selectedIDs.begin();
+                }
+            }
+        }
+            break;
+        case Decoration_FlowerInv:
+        {
+            if (_selectedIDs.size() > 1) {
+                UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"非法选择!" message:@"不能绑定多朵花！" delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
+                [alert show];
+                [alert release];
+                return;
+            }else if (_selectedIDs.size() < 1){
+                Features_DecorationFlower* feat = (Features_DecorationFlower*)_itemView->features;
+                if (feat->flowerID != kDefaultDecorationFlowerID) {
+                    __Array* flowerIDArray = dynamic_cast<__Array*>(gameManager->_fileHandler->_boundFlowerIDDict->objectForKey("flowerID"));
+                    int count = static_cast<__String*>(flowerIDArray->getObjectAtIndex(feat->flowerID -1))->intValue();
+                    flowerIDArray->replaceObjectAtIndex(feat->flowerID -1, __String::createWithFormat("%d",count-1));
+                    feat->flowerID = kDefaultDecorationFlowerID;
+                }
+            }else{
+                Features_DecorationFlower* feat = (Features_DecorationFlower*)_itemView->features;
+                if (feat->flowerID != *_selectedIDs.begin()) {
+                    __Array* flowerIDArray = dynamic_cast<__Array*>(gameManager->_fileHandler->_boundFlowerIDDict->objectForKey("flowerID"));
+                    //之前绑定的花减1
+                    if (feat->flowerID != kDefaultDecorationFlowerID) {
+                        int count = static_cast<__String*>(flowerIDArray->getObjectAtIndex(feat->flowerID -1))->intValue();
+                        flowerIDArray->replaceObjectAtIndex(feat->flowerID -1, __String::createWithFormat("%d",count-1));
+                    }
+                    //新绑定的花加1
+                    int newIDCount = static_cast<__String*>(flowerIDArray->getObjectAtIndex(*_selectedIDs.begin() -1))->intValue();
+                    flowerIDArray->replaceObjectAtIndex(*_selectedIDs.begin() -1, __String::createWithFormat("%d",newIDCount +1));
+                    feat->flowerID = *_selectedIDs.begin();
+                }
+            }
+        }
+            break;
+        case Sprouts_Dextro:
+        {
+            float growSpeed = static_cast<float>(atof([growSpeedSliderValueLabel.text UTF8String]));
+            if (growSpeed != kDefaultSproutsGrowSpeed) {
+                ((Features_Sprouts*)_itemView->features)->growSpeed = growSpeed;
+            }
+        }
+            break;
+        case Sprouts_Levo:
+        {
+            float growSpeed = static_cast<float>(atof([growSpeedSliderValueLabel.text UTF8String]));
+            if (growSpeed != kDefaultSproutsGrowSpeed) {
+                ((Features_Sprouts*)_itemView->features)->growSpeed = growSpeed;
+            }
+        }
+            break;
+        case Sprouts_Slope:
+        {
+            float growSpeed = static_cast<float>(atof([growSpeedSliderValueLabel.text UTF8String]));
+            if (growSpeed != kDefaultSproutsGrowSpeed) {
+                ((Features_Sprouts*)_itemView->features)->growSpeed = growSpeed;
+            }
+        }
+            break;
+            
         default:
             break;
     }
     
     //
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [self dismissViewControllerAnimated:NO completion:nil];
     
 }
-
+//////
 -(void)addAnimatedSwitch
 {
     CGRect switchLabelFrame = CGRectMake(0.05*width, 0.2*height, 0.2*width, 0.1*height);
     UILabel* switchLabel = [[[UILabel alloc] initWithFrame:switchLabelFrame] autorelease];
-    switchLabel.text = @"Animated?:";
+    switchLabel.text = @"打开动画?:";
     switchLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
     switchLabel.textAlignment = NSTextAlignmentCenter;
     switchLabel.textColor = [UIColor blackColor];
     [self.view addSubview:switchLabel];
     
-    CGRect switchFrame = CGRectMake(0.35*width, 0.23*height, 0.25*width, 0.1*height);
+    CGRect switchFrame = CGRectMake(0.3*width, 0.23*height, 0.25*width, 0.1*height);
     animatedSwitch = [[[UISwitch alloc] initWithFrame:switchFrame] autorelease];
     animatedSwitch.on = _itemView->isAnimated;
     [animatedSwitch addTarget:self action:@selector(animatedSwitchChanged:) forControlEvents:UIControlEventValueChanged];
@@ -332,6 +463,31 @@
     BOOL isAnimated = animSwitch.isOn;
     [animSwitch setOn:isAnimated animated:YES];
 }
+
+/////////
+-(void)addAutoSmoothingSwitch
+{
+    CGRect labelFrame = CGRectMake(0.45*width, 0.2*height, 0.3*width, 0.1*height);
+    UILabel* label = [[[UILabel alloc] initWithFrame:labelFrame] autorelease];
+    label.text = @"自动平滑移动曲线?:";
+    label.textAlignment = NSTextAlignmentLeft;
+    label.textColor = [UIColor blackColor];
+    label.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:label];
+    
+    CGRect switchFrame = CGRectMake(0.75*width, 0.23*height, 0.25*width, 0.1*height);
+    autoSmoothingSwitch = [[[UISwitch alloc] initWithFrame:switchFrame] autorelease];
+    autoSmoothingSwitch.on = _itemView->isAutoSmoothing;
+    [autoSmoothingSwitch addTarget:self action:@selector(autoSmoothingSwitchChanged:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:autoSmoothingSwitch];
+}
+
+-(void)autoSmoothingSwitchChanged:(UISwitch*)sender
+{
+    bool isAutoSmoothing = sender.isOn;
+    [autoSmoothingSwitch setOn:isAutoSmoothing animated:YES];
+}
+
 //
 -(void)addTriggerTimeTextField
 {
@@ -389,6 +545,109 @@
 {
     [triggerTextField resignFirstResponder];
     return YES;
+}
+
+#pragma Cicada
+-(void)addFanningSpeedSlider
+{
+    CGRect sliderLabelFrame = CGRectMake(0.05*width, 0.4*height, 0.29*width, 0.1*height);
+    UILabel* sliderLabel = [[[UILabel alloc] initWithFrame:sliderLabelFrame] autorelease];
+    sliderLabel.text = @"扇动速度(相对值):";
+    sliderLabel.textAlignment = NSTextAlignmentLeft;
+    sliderLabel.textColor = [UIColor blackColor];
+    sliderLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:sliderLabel];
+    
+    CGRect sliderFrame = CGRectMake(0.5*width, 0.4*height, 0.4*width, 0.1*height);
+    UISlider* slider = [[[UISlider alloc] initWithFrame:sliderFrame] autorelease];
+    slider.minimumValue = 0.1;
+    slider.maximumValue = 5.0;
+    slider.value = ((Features_Cicada*)_itemView->features)->fanningSpeed;
+    [slider addTarget:self action:@selector(fanningSpeedSliderChanged:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:slider];
+    
+    CGRect sliderValueFrame = CGRectMake(0.35*width, 0.4*height, 0.15*width, 0.1*height);
+    fanningSpeedSliderValueLabel = [[[UILabel alloc] initWithFrame:sliderValueFrame] autorelease];
+    fanningSpeedSliderValueLabel.text = [NSString stringWithFormat:@"%f",slider.value];
+    fanningSpeedSliderValueLabel.textAlignment = NSTextAlignmentLeft;
+    fanningSpeedSliderValueLabel.textColor = [UIColor blackColor];
+    fanningSpeedSliderValueLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:fanningSpeedSliderValueLabel];
+}
+
+-(void)fanningSpeedSliderChanged:(UISlider*)slider
+{
+    fanningSpeedSliderValueLabel.text = [NSString stringWithFormat:@"%f",slider.value];
+}
+
+-(void)addAutoTurnHeadSwitch
+{
+    CGRect switchLabelFrame = CGRectMake(0.05*width, 0.5*height, 0.3*width, 0.1*height);
+    UILabel* switchLabel = [[[UILabel alloc] initWithFrame:switchLabelFrame] autorelease];
+    switchLabel.text = @"是否自动柺头?:";
+    switchLabel.textAlignment = NSTextAlignmentLeft;
+    switchLabel.textColor = [UIColor blackColor];
+    switchLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:switchLabel];
+    
+    CGRect switchFrame = CGRectMake(0.3*width, 0.53*height, 0.25*width, 0.1*height);
+    autoTurnHeadSwitch = [[[UISwitch alloc] initWithFrame:switchFrame] autorelease];
+    autoTurnHeadSwitch.on = ((Features_Cicada*)_itemView->features)->autoTurnHead;
+    [autoTurnHeadSwitch addTarget:self action:@selector(autoTurnSwitchChanged:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:autoTurnHeadSwitch];
+}
+
+-(void)autoTurnSwitchChanged:(UISwitch*)sender
+{
+    BOOL autoTurnHead = sender.isOn;
+    [sender setOn:autoTurnHead animated:YES];
+}
+
+-(void)addAutoFanningSwitch
+{
+    CGRect switchLabelFrame = CGRectMake(0.45*width, 0.5*height, 0.25*width, 0.1*height);
+    UILabel* switchLabel = [[[UILabel alloc] initWithFrame:switchLabelFrame] autorelease];
+    switchLabel.text = @"自动扇动翅膀?:";
+    switchLabel.textAlignment = NSTextAlignmentLeft;
+    switchLabel.textColor = [UIColor blackColor];
+    switchLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:switchLabel];
+    
+    CGRect switchFrame = CGRectMake(0.7*width, 0.53*height, 0.25*width, 0.1*height);
+    autoFanningSwitch = [[[UISwitch alloc] initWithFrame:switchFrame] autorelease];
+    autoFanningSwitch.on = ((Features_Cicada*)_itemView->features)->autoFanning;
+    [autoFanningSwitch addTarget:self action:@selector(autoFanningSwitchChanged:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:autoFanningSwitch];
+    
+}
+
+-(void)autoFanningSwitchChanged:(UISwitch*)sender
+{
+    BOOL autoFanning = sender.isOn;
+    [sender setOn:autoFanning animated:YES];
+}
+
+-(void)addReversalStatusSwitch
+{
+    CGRect switchLabelFrame = CGRectMake(0.05*width, 0.6*height, 0.2*width, 0.1*height);
+    UILabel* switchLabel = [[[UILabel alloc] initWithFrame:switchLabelFrame] autorelease];
+    switchLabel.text = @"是否反相?:";
+    switchLabel.textAlignment = NSTextAlignmentLeft;
+    switchLabel.textColor = [UIColor blackColor];
+    switchLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:switchLabel];
+    
+    CGRect switchFrame = CGRectMake(0.25*width, 0.63*height, 0.25*width, 0.1*height);
+    isReversalStatusSwitch = [[[UISwitch alloc] initWithFrame:switchFrame] autorelease];
+    isReversalStatusSwitch.on = ((Features_Cicada*)_itemView->features)->isReversalStatus;
+    [isReversalStatusSwitch addTarget:self action:@selector(reversalStatusSwitchChanged:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:isReversalStatusSwitch];
+}
+
+-(void)reversalStatusSwitchChanged:(UISwitch*)sender
+{
+    BOOL isReversalStatus = sender.isOn;
+    [sender setOn:isReversalStatus animated:YES];
 }
 
 #pragma DoubleDragon
@@ -612,6 +871,101 @@
 {
     UISlider* slider = (UISlider*)sender;
     startRateShowLabel.text = [NSString stringWithFormat:@"%d",static_cast<int>(slider.value)];
+}
+
+#pragma decorationflower
+-(void)addFlowerIDCheckBoxes
+{
+    UILabel* prompt = [[[UILabel alloc] initWithFrame:CGRectMake(0.05*width, 0.4*height, 0.8*width, 0.05*height)] autorelease];
+    prompt.text = @"请选择您想绑定的花的ID（绿色为未绑定，红色为已绑定）:";
+    prompt.textAlignment = NSTextAlignmentLeft;
+    prompt.textColor = [UIColor blackColor];
+    prompt.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:prompt];
+    
+    UIScrollView* flowerIDPanel = [[[UIScrollView alloc] initWithFrame:CGRectMake(0.05*width, 0.45*height, 0.95*width, 0.55*height)] autorelease];
+    flowerIDPanel.contentSize = CGSizeMake(flowerIDPanel.bounds.size.width, 2*flowerIDPanel.bounds.size.height);
+    flowerIDPanel.bounces = YES;
+    [flowerIDPanel setDirectionalLockEnabled:YES];
+    [self.view addSubview:flowerIDPanel];
+    
+    __Array* flowerIDArray = dynamic_cast<__Array*>(gameManager->_fileHandler->_boundFlowerIDDict->objectForKey("flowerID"));
+    int arraySize = flowerIDArray->count();
+    CGRect checkBoxFrame;
+    for(int i = 0;i<arraySize;i++){
+        checkBoxFrame = CGRectMake(-0.05*width, 0, 0.15*width, 0.05*height);
+        checkBoxFrame.origin.x += i%5*0.2*width;
+        checkBoxFrame.origin.y += i/5*0.1*height;
+        UIButton* checkBox = [[UIButton alloc] initWithFrame:checkBoxFrame];
+        checkBox.contentMode = UIViewContentModeLeft;
+        [checkBox setImage:[UIImage imageNamed:@"checkbox_off.png"] forState:UIControlStateNormal];
+        [checkBox setImage:[UIImage imageNamed:@"checkbox_on.png"] forState:UIControlStateSelected];
+        [checkBox setTag:i+1];
+        [checkBox addTarget:self action:@selector(flowerIDSelected:) forControlEvents:UIControlEventTouchUpInside];
+        
+        UILabel* flowerID = [[[UILabel alloc] initWithFrame:CGRectMake(0.05*width, 0, 0.1*width, 0.05*height)] autorelease];
+        flowerID.text = [NSString stringWithFormat:@"%d",i+1];
+        flowerID.textAlignment = NSTextAlignmentRight;
+       
+        int bindedCount = static_cast<__String*>(flowerIDArray->getObjectAtIndex(i))->intValue();
+        if (bindedCount > 0) {
+            flowerID.textColor = [UIColor redColor];
+            if (((Features_DecorationFlower*)_itemView->features)->flowerID == i+1) {
+                [checkBox setSelected:YES];
+                _selectedIDs.insert(i+1);
+            }
+        }else{
+            flowerID.textColor = [UIColor greenColor];
+        }
+        flowerID.font = [UIFont systemFontOfSize:kDefaultFontSize];
+        [checkBox addSubview:flowerID];
+        
+        [flowerIDPanel addSubview:checkBox];
+    }
+    
+}
+
+-(void)flowerIDSelected:(UIButton*)sender
+{
+    sender.selected = !sender.isSelected;
+    if (sender.selected) {
+        _selectedIDs.insert(sender.tag);
+    }else{
+        _selectedIDs.erase(sender.tag);
+    }
+}
+
+#pragma sprouts
+-(void)addGrowSpeedSlider
+{
+    CGRect sliderLabelFrame = CGRectMake(0.05*width, 0.4*height, 0.29*width, 0.1*height);
+    UILabel* sliderLabel = [[[UILabel alloc] initWithFrame:sliderLabelFrame] autorelease];
+    sliderLabel.text = @"生长速度(相对值):";
+    sliderLabel.textAlignment = NSTextAlignmentLeft;
+    sliderLabel.textColor = [UIColor blackColor];
+    sliderLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:sliderLabel];
+    
+    CGRect sliderFrame = CGRectMake(0.5*width, 0.4*height, 0.4*width, 0.1*height);
+    UISlider* slider = [[[UISlider alloc] initWithFrame:sliderFrame] autorelease];
+    slider.minimumValue = 0.1;
+    slider.maximumValue = 5.0;
+    slider.value = ((Features_Sprouts*)_itemView->features)->growSpeed;
+    [slider addTarget:self action:@selector(growSpeedSliderChanged:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:slider];
+    
+    CGRect sliderValueFrame = CGRectMake(0.35*width, 0.4*height, 0.15*width, 0.1*height);
+    growSpeedSliderValueLabel = [[[UILabel alloc] initWithFrame:sliderValueFrame] autorelease];
+    growSpeedSliderValueLabel.text = [NSString stringWithFormat:@"%f",slider.value];
+    growSpeedSliderValueLabel.textAlignment = NSTextAlignmentLeft;
+    growSpeedSliderValueLabel.textColor = [UIColor blackColor];
+    growSpeedSliderValueLabel.font = [UIFont systemFontOfSize:kDefaultFontSize];
+    [self.view addSubview:growSpeedSliderValueLabel];
+}
+
+-(void)growSpeedSliderChanged:(UISlider*)slider
+{
+    growSpeedSliderValueLabel.text = [NSString stringWithFormat:@"%f",slider.value];
 }
 
 @end

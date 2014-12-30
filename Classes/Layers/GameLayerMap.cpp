@@ -72,7 +72,7 @@ bool GameLayerMap::initGameInfo()
     _layerdirt = GameLayerMapDirt::create();
 
     _layerdirt->initGameInfo();
-  //  _layerdirt->retain();
+    //_layerdirt->retain();
 
     _layerBorder = GameLayerMapBorder::create();
     _layerBorder->_mapGrid = &_mapGrid;
@@ -139,6 +139,13 @@ void  GameLayerMap::onTouchMoved(Touch* touch,Event*)
     if(touchClearGrid(touch->getLocation()))
             _touchPrePoint = pt;
     _isFirstMoveTouch =false;
+    //
+//    ParticleSystemQuad* gravelEffect = ParticleSystemQuad::create();
+//    gravelEffect->setEmitterMode(ParticleSystem::Mode::GRAVITY);
+//    gravelEffect->setPositionType(cocos2d::ParticleSystem::PositionType::FREE);
+//    gravelEffect->setSourcePosition(pt);
+//    gravelEffect->setPosVar(Vec2(50, 50));
+//    gravelEffect->setTexture(Director::getInstance()->getTextureCache()->addImage("UI_GravelParticle.png"));
 }
 void  GameLayerMap::onTouchEnded(Touch* touch,Event*)
 {
@@ -285,15 +292,27 @@ void GameLayerMap::moveDownAlphaMask(float yLen)
 ///////
 void GameLayerMap::onClearCell()
 {
-    if(_clearCells.empty())return ;
-    
-    while (!_clearCells.empty()) {
-       auto ip = _clearCells.begin();
-        changeGridCell(ip->_x,ip->_y,0);
-        _clearCells.erase(ip);
-    };
+//    if(_clearCells.empty())return ;
+//    std::set<BorderCell> cell;
+//    auto ip = _clearCells.begin();
+//    while (ip != _clearCells.end()) {
+//        auto cell = *ip;
+//        if (_mapGrid.getValue(cell._x,cell._y)== 0) {
+//            ip = _clearCells.erase(ip);
+//            continue;
+//        }
+//        changeGridCell(ip->_x,ip->_y,0);
+//  
+//    };
 }
-
+void GameLayerMap::addToCheckClearCells(const GridCell& cell)
+{
+//    static GridCell _vgrid[]=
+//    {
+//        GridCell(-1,0),GridCell(1,0),GridCell(0,1),GridCell(0,-1),
+//        GridCell(-1,1),GridCell(-1,-1),GridCell(1,1),GridCell(1,-1)
+//    };
+}
 
 ////////
 
@@ -327,7 +346,7 @@ void GameLayerMap::changeGridCell(int x,int y ,unsigned char type)
 //    }
     GridCell cell(x,y);
     onChangeCellCalls(cell);
-    //GameRunningConfig::getInstance()->getChangeMapCellCall()(cell);
+   // GameRunningConfig::getInstance()->getChangeMapCellCall()(cell);
     _layerBorder->removeBorder(cell);
     _mapGrid.setValue(x, y, 0);
 }
@@ -337,7 +356,7 @@ void GameLayerMap::changeGridCell(int x,int y ,unsigned char type)
 void GameLayerMap::_checkClear(int x,int y, int width,int height)
 {
     static int _sclear_width =4;
-    //  std::list<GridCell> clearlist;
+      std::list<GridCell> clearlist;
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
             int tx,ty;
@@ -353,14 +372,18 @@ void GameLayerMap::_checkClear(int x,int y, int width,int height)
                _isNeedDelete(tx, ty, -1, 1, _sclear_width*2+1, 2)||
                _isNeedDelete(tx, ty, 1, 1, _sclear_width*2+1, 2))
             {
-                changeGridCell(tx,ty,GridType::None);
+              //  clearlist.push_back(GridCell(tx,ty));
+                changeGridCell(tx, ty,GridType::None);
             }
         }
     }
+//    for (auto& i : _clearCells) {
+//        changeGridCell(i._x,i._y,GridType::None);
+//    }
 }
  bool GameLayerMap::isNeedDeleteCell(int x,int y)
 {
-      static int _sclear_width =6;
+  static int _sclear_width =6;
   return  _isNeedDelete(x, y, 1, 0, _sclear_width*2+1, _sclear_width)||
           _isNeedDelete(x, y, 0, 1, _sclear_width*2+1, _sclear_width)||
           _isNeedDelete(x, y, -1, 1, _sclear_width*2+1, 4)||
@@ -420,6 +443,10 @@ bool GameLayerMap::isCanTouchRangeCell(const GridCell& cell,int radius)
     }
     return true;
 }
+void GameLayerMap::getOneClearRangeList(int x,int y,std::vector<GridCell>& outlist)
+{
+    
+}
 int  GameLayerMap::clearGridCellBorderByRange(GridCell cell, int radius)
 {
     if (!isCanTouchRangeCell(cell,radius)) {
@@ -461,10 +488,10 @@ int  GameLayerMap::clearGridCellBorderByRange(GridCell cell, int radius)
        // cellNeedDel(*ip);
         ip++;
     }
-#define CLEAR_RANG 6
+#define CLEAR_RANG 10
     if (isClear >0) {
         int xstep= cell._x- radius-CLEAR_RANG,ystep= cell._y- radius-CLEAR_RANG,wstep=radius*2+CLEAR_RANG*2,hstep= radius*2+CLEAR_RANG*2;
-        _checkClear(xstep,ystep,wstep,hstep);
+        _checkClear(xstep+2,ystep+2,wstep-4,hstep-4);
         _layerBorder->updateBorder(xstep,ystep,wstep,hstep);
     }
     //_clearCells.insert(clearList.begin(), clearList.end());
@@ -475,4 +502,42 @@ bool  GameLayerMap::PointIsInDirtOrOutMapGrid(Vec2 pt)
     GridCell cell = _mapGrid.getMapGridCellByPosition(pt);
     return _mapGrid.isOutMapGrid(cell._x, cell._y)||
     _mapGrid.getValue(cell._x, cell._y)==GridType::Dirt;
+}
+
+
+#define OUTMAP(T,D) *((T*)(&buf[index])) = D;\
+index += sizeof(D)
+bool  GameLayerMap::saveToFile()
+{
+    auto userInfo =  cocos2d::UserDefault::getInstance();
+    int mapInfoSize =_mapGrid._gridHeight*_mapGrid._gridWidth;
+    int count = sizeof(float) + sizeof(Vec2) + mapInfoSize;
+    unsigned char * buf = (unsigned char*)malloc(sizeof(unsigned char) * count);
+    int index = 0;
+    OUTMAP(float,_mapGrid._mapGridStarty);
+    OUTMAP(Vec2,_maskAlphaSprite->getPosition());
+    memcpy((unsigned char*)(&buf[index]),_mapGrid._gridData,mapInfoSize);
+    cocos2d::Data data;
+    data.fastSet(buf, count);
+    userInfo->setDataForKey(ConfigKeys::_sKeyMapData,data);
+    return true;
+}
+bool  GameLayerMap::initBySaveConfig()
+{
+    auto userInfo =  cocos2d::UserDefault::getInstance();
+    cocos2d::Data data;
+    data = userInfo->getDataForKey(ConfigKeys::_sKeyMapData);
+    const char* dataBuf = (const char*)data.getBytes();
+    int index = 0;
+    
+    _mapGrid._mapGridStarty = *((bool*)(&dataBuf[index]));
+    index += sizeof(_mapGrid._mapGridStarty);
+    
+    Vec2 maksPosition = *((Vec2*)(&dataBuf[index]));
+    index += sizeof(maksPosition);
+     unsigned char* mapdata = (unsigned char*)(&dataBuf[index]);
+    memcpy(_mapGrid._gridData, mapdata,_mapGrid._gridWidth * _mapGrid._gridHeight);
+    _layerBorder->clearBorders();
+    _layerBorder->updateBorder(0, 0, _mapGrid._gridWidth, _mapGrid._gridHeight);
+    return true;
 }

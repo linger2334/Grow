@@ -93,7 +93,7 @@ BorderDirection BorderCell::getNextBorderDirection(bool  clockwise)
     BorderDirection nextDir;
     auto ip =_sDirTable.find(_maskDir);
     if (ip == _sDirTable.end()) {
-        log("table size %d" ,_sDirTable.size());
+        log("table size %d" ,(int)_sDirTable.size());
         log("Error dirMaskType %d",_maskDir);
         assert(0);
     }
@@ -107,7 +107,7 @@ BorderDirection BorderCell::getPreBorderDirection(bool clockwise)
     BorderDirection nextDir;
     auto ip =_sDirTable.find(_maskDir);
     if (ip == _sDirTable.end()) {
-        log("table size %d" ,_sDirTable.size());
+        log("table size %d" ,(int)_sDirTable.size());
         log("Error dirMaskType %d",_maskDir);
         assert(0);
     }
@@ -122,7 +122,7 @@ GridCell  BorderCell::getNextMapCell(bool clockwise)
     BorderDirection nextDir;
     auto ip =_sDirTable.find(_maskDir);
     if (ip == _sDirTable.end()) {
-        log("table size %d" ,_sDirTable.size());
+        log("table size %d" ,(int)_sDirTable.size());
         log("Error dirMaskType %d",_maskDir);
         assert(0);
     }

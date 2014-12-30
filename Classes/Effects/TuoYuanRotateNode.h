@@ -1,21 +1,21 @@
 #ifndef __Grow_Beta_01__TuoYuanRotateNode__
 #define __Grow_Beta_01__TuoYuanRotateNode__
 #include <cocos2d.h>
+#include "RandomHelper.h"
 using namespace cocos2d;
 
 typedef struct OvalConfig {
-    //中心点坐标
-    Vec2 centerPosition;
     //椭圆a长半轴
     float a;
     //椭圆b短半轴
     float b;
+    //中心点坐标
+    Vec2 centerPosition;
     //是否逆时针运动
     bool moveInAnticlockwise;
-
 } lOvalConfig;
 
-
+#define PIX2 6.2831852f
 class TuoYuanRotateNode : public Node
 {
 public:
@@ -30,6 +30,7 @@ public:
     
     void   initOvalConfig(Vec2 centerPosition,float OneCycle,float a,float b,float isclock=true);
     void   updateRotatePosition(float dt);
+    void   updatePosition();
     void   resetOvalConfig(const OvalConfig&  config);
     
     float  getTime(){return _timeNow;}
@@ -52,17 +53,32 @@ public:
     {_config.moveInAnticlockwise = isclockwise;}
     
     bool   isClockwise(){return _config.moveInAnticlockwise;}
-    
-    Vec2   getNowTimeTargetPosition()
+    float randTime()
     {
-        return getTargetPositionByTime(_timeNow/_timeByOneCycle);
+        return RandomHelper::randFloat(0.0,_timeByOneCycle);
     }
-    Vec2   getNowTimeTargetPositionInWorld()
+    float randSubTime()
     {
-        Vec2 pt = getTargetPositionByTime(_timeNow/_timeByOneCycle);
+        float time = 0.0f;
+        if(_config.moveInAnticlockwise) time= RandomHelper::randFloat(0.5f * _timeByOneCycle,_timeByOneCycle);
+        else time= RandomHelper::randFloat(_timeByOneCycle,0.5f * _timeByOneCycle);
+        return time;
+    }
+    
+    Vec2  getNowTimeTargetPosition()
+    {
+        return getTargetPositionByTime(getNowPositionTime());
+    }
+    Vec2  getNowTimeTargetPositionInWorld()
+    {
+        Vec2 pt = getTargetPositionByTime(getNowPositionTime());
         auto p = this->getParent();
         if(p)pt = p->convertToWorldSpace(pt);
         return pt;
+    }
+    float getNowPositionTime()
+    {
+        return _timeNow/_timeByOneCycle;
     }
     inline Vec2 getTargetPositionByTime(float t)
     {
@@ -74,26 +90,15 @@ public:
     //x = a * cos(t)  t = [0, 2Pi]
     inline float getPositionXAtOval(float t ){//返回X坐标
         //参数方程
-        if(_config.moveInAnticlockwise == false){
-            return _config.a * cos(6.2831852 * (1 - t));
-        }else{
-            return _config.a * cos(6.2831852 * t);
-        }
-        
+        return _config.a * cos(6.2831852 * t);
     }
     
     //y = b * sin(t)  t = [0, 2Pi]
     inline float getPositionYAtOval(float t ){//返回Y坐标
-        //参数方程
-        if(_config.moveInAnticlockwise == false){
-            return _config.b * sin(6.2831852 * (1 - t));
-        }else{
             return _config.b * sin(6.2831852 * t);
-        }
     }
     
     bool       _isRotate;
-    
     //单位秒
     float      _timeNow;
     //单位秒

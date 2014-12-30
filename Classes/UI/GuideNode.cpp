@@ -9,6 +9,7 @@
 #include "GuideNode.h"
 #include "CocosGUI.h"
 #include "ScreenGuide.h"
+#include "GameManager.h"
 
 using namespace ui;
 
@@ -41,7 +42,7 @@ bool StrokeDirt::init()
         this->setStencil(stencil);
         this->setInverted(true);
         //针对模板
-        this->setAlphaThreshold(1);
+        this->setAlphaThreshold(0.9);
         
         Layout* graylayer = Layout::create();
         graylayer->setBackGroundColorType(cocos2d::ui::Layout::BackGroundColorType::SOLID);
@@ -65,7 +66,10 @@ bool StrokeDirt::init()
                 button->removeFromParent();
                 FadeOut* disappear = FadeOut::create(1.5);
                 RemoveSelf* remove = RemoveSelf::create();
-                this->runAction(Sequence::createWithTwoActions(disappear, remove));
+                CallFunc* resumeGame = CallFunc::create([](){
+                    GameManager::getInstance()->reStartGame();
+                });
+                this->runAction(Sequence::create(disappear,remove,resumeGame, NULL));
             }
         });
         quit->setCascadeOpacityEnabled(true);
@@ -82,6 +86,7 @@ bool StrokeDirt::init()
 void StrokeDirt::guideProcess(GuideInfo &guidePhase)
 {
     if (guidePhase.subSeq == 1) {
+        GameManager::getInstance()->pauseGame();
         ScreenGuide::getRunningLayer()->addChild(this);
         FadeIn* appear = FadeIn::create(1.5);
         CallFunc* goNext = CallFunc::create([&](){

@@ -96,7 +96,7 @@ bool Rock::init(Item& item)
         filename += StringUtils::format("%d.png",levelId);
         setTexture(filename);
         if (_type == Rock_MountInv) {
-            setRotation3D(Vec3(0, 180, 0));
+            setFlippedX(true);
         }
         setRotation(CC_RADIANS_TO_DEGREES(item.angle));
         setScale(item.scale);

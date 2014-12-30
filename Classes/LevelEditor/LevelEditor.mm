@@ -55,7 +55,6 @@ bool LevelEditor::init()
 void LevelEditor::playLevel()
 {
     auto manager = GameManager::getInstance();
-//    manager->releaseGameScene();
     manager->_fileHandler->_items.sort(OrderByHeight);
     manager->navigationToGameScene();
 }
@@ -183,7 +182,8 @@ void LevelEditor::drawLoadedLevel()
     _scrollView.bounds = CGRectMake(0, 0, _scrollView.currentZoomFactor*width, height);
     _scrollView.contentSize = CGSizeMake(_scrollView.currentZoomFactor*width, _scrollView.currentZoomFactor*PAGE_COUNTS*height);
     _scrollView.contentOffset = CGPointMake(0, _fileHandler->scrollViewContentOffSet);
-    _scrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"dirt_1.jpg"]];
+    int levelId = *(_fileHandler->_filename.c_str() + strlen("levels/level ")) - ('0' - 0);
+    _scrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:[NSString stringWithUTF8String:StringUtils::format("dirt_%d.jpg",levelId).c_str()]]];
     _scrollView.bounces = NO;
     _scrollView.scrollEnabled = YES;
     _scrollView.directionalLockEnabled = YES;
@@ -250,6 +250,8 @@ void LevelEditor::drawLoadedLevel()
     int tag;
     Vec2 position;
     bool isConvex;
+    NSString* type;
+    NSMutableArray* bindIDs;
     __Array* vertexes;
     
     CCDICT_FOREACH(polygonsDict, singlePolygon){
@@ -257,13 +259,31 @@ void LevelEditor::drawLoadedLevel()
         char buf[10];
         strlcpy(buf, mainKey+strlen("polygon"), sizeof(buf));
         tag = atoi(buf);
+        if (tag<1000) {
+            tag += 1000;
+        }
         
         __Dictionary* propertyDict = (__Dictionary*)singlePolygon->getObject();
         position = PointFromString(static_cast<__String*>(propertyDict->objectForKey("position"))->getCString());
         isConvex = (static_cast<__Bool*>(propertyDict->objectForKey("isConvex")))->getValue();
+        if(propertyDict->objectForKey("type")){
+            type = [NSString stringWithUTF8String:static_cast<__String*>(propertyDict->objectForKey("type"))->getCString()];
+        }else{
+            type = @"Polygon_";
+        }
+        if ([type isEqualToString:@"Trigger"]) {
+            __Array* IDs = static_cast<__Array*>(propertyDict->objectForKey("bindIDs"));
+            bindIDs = [NSMutableArray arrayWithCapacity:IDs->count()];
+            Ref* Id;
+            CCARRAY_FOREACH(IDs, Id){
+                [bindIDs addObject:[NSNumber numberWithInt:static_cast<__String*>(Id)->intValue()]];
+            }
+        }else{
+            bindIDs = [NSMutableArray array];
+        }
         vertexes = static_cast<__Array*>(propertyDict->objectForKey("vertexes"));
         
-        [_scrollView createNewPolygonOfTag:tag+1000 AtCCPercentPosition:position WithCCLocalVertxex:vertexes OfType:isConvex];
+        [_scrollView createNewPolygonOfTag:tag AtCCPercentPosition:position WithCCLocalVertxex:vertexes IsConvex:isConvex OfType:type andBindIDs:bindIDs];
     }
     
     polygonsDict->removeAllObjects();
@@ -632,8 +652,9 @@ void LevelEditor::drawLoadedLevel()
                 vertexes->addObject(__String::createWithFormat("{%f,%f}",CClocalpoint.x,CClocalpoint.y));
             }
             BOOL isConvex = centerview.isConvex;
-            
-            PolygonView* newPolygon = [_scrollView createNewPolygonOfTag:tag AtCCPercentPosition:percentPosition WithCCLocalVertxex:vertexes OfType:isConvex];
+            NSString* type = centerview.itemtype;
+            NSMutableArray* bindIDs = [NSMutableArray array];
+            PolygonView* newPolygon = [_scrollView createNewPolygonOfTag:tag AtCCPercentPosition:percentPosition WithCCLocalVertxex:vertexes IsConvex:isConvex OfType:type andBindIDs:bindIDs];
             
             centerview.isSelected = NO;
             centerview.backgroundColor = centerview.defaultColor;
@@ -673,6 +694,9 @@ void LevelEditor::drawLoadedLevel()
         int localZorder = itemViews.size();
         bool isAnimated = itemView->isAnimated;
         float triggerTime = itemView->triggerTime;
+        float elapsedTime = itemView->elapsedTime;
+        int bindedTriggerID = kDefaultBindedTriggerID;
+        bool isAutoSmoothing = itemView->isAutoSmoothing;
         std::map<std::string,bool> animationControlInstructions(itemView->_animationControlInstructions);
         std::vector<std::vector<AnimationInfo>> animationInfos;
         std::vector<AnimationInfo> eachAnimationGroupInfos;
@@ -695,9 +719,12 @@ void LevelEditor::drawLoadedLevel()
             Features_GearButton feat;
             feat.sinkSpeed = ((Features_GearButton*)itemView->features)->sinkSpeed;
             features = &feat;
+        }else if (type == Decoration_Flower || type == Decoration_FlowerInv){
+            Features_DecorationFlower feat;
+            features = &feat;
         }
         
-        Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
+        Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,elapsedTime,bindedTriggerID,isAutoSmoothing, animationControlInstructions,animationInfos,features);
         
         ItemView* newItem = [[ItemView alloc] init:item];
         [newItem createAllPathPoints];
@@ -742,12 +769,28 @@ void LevelEditor::drawLoadedLevel()
         {
             [_scrollView.centerViews removeObject:polygonview];
             _scrollView->polygontags.remove(polygonview.tag);
+            //删除绑定的触发器
+            if ([polygonview.itemtype isEqualToString:@"Trigger"]) {
+                for (NSNumber* number in polygonview._bindIDs) {
+                    for (ItemView* item : itemViews) {
+                        if ([number isEqualToNumber:[NSNumber numberWithInt:item.tag]]) {
+                            item->bindedTriggerID = kDefaultBindedTriggerID;
+                        }
+                    }
+                }
+            }
         }else if([polygonview.pointType isEqualToString:@"pathpoint"]){
-            std::vector<PolygonView*>::iterator it = polygonview->_pathParent->_pathPoints.erase(find(polygonview->_pathParent->_pathPoints.begin(), polygonview->_pathParent->_pathPoints.end(),polygonview));
-            for(;it!=polygonview->_pathParent->_pathPoints.end();it++){
-                PolygonView* pathpoint = *it;
-                pathpoint.tag -= 1;
-                pathpoint.pathNum.text = [NSString stringWithFormat:@"%d" ,pathpoint.tag + 1];
+            if (polygonview->_pathParent->_pathPoints.size()>1) {
+                std::vector<PolygonView*>::iterator it = polygonview->_pathParent->_pathPoints.erase(find(polygonview->_pathParent->_pathPoints.begin(), polygonview->_pathParent->_pathPoints.end(),polygonview));
+                for(;it!=polygonview->_pathParent->_pathPoints.end();it++){
+                    PolygonView* pathpoint = *it;
+                    pathpoint.tag -= 1;
+                    pathpoint.pathNum.text = [NSString stringWithFormat:@"%d" ,pathpoint.tag + 1];
+                }
+            }else{
+                polygonview->_pathParent->_pathPoints.clear();
+                polygonview->_pathParent->_animationControlInstructions.clear();
+                polygonview->_pathParent.animationGroupCount = 0;
             }
         }
         
@@ -759,6 +802,7 @@ void LevelEditor::drawLoadedLevel()
     for(std::set<ItemView*>::iterator it = _toDealWith.begin();it!=_toDealWith.end();it++)
     {
         ItemView* selectedItemview = *it;
+        Item_Type itemtype = selectedItemview->itemtype;
         //从编辑器中删
         itemViews.erase(find(itemViews.begin(),itemViews.end(),selectedItemview));
         ids.remove(selectedItemview.tag);
@@ -766,8 +810,8 @@ void LevelEditor::drawLoadedLevel()
         for (PolygonView* pathpoint : selectedItemview->_pathPoints) {
             [pathpoint removeFromSuperview];
         }
-        //取消按钮与门的绑定关系
-        if (selectedItemview->itemtype == Gear_Button) {
+        //取消特殊的绑定关系
+        if (itemtype == Gear_Button) {
             Features_GearButton* feat = (Features_GearButton*)selectedItemview->features;
             if (feat->bindID != kDefaultGearButtonBindID) {
                 for(ItemView* gate : _gates){
@@ -777,12 +821,26 @@ void LevelEditor::drawLoadedLevel()
                     }
                 }
             }
-        }
-        if (selectedItemview->itemtype == Gear_Gate) {
+        }else if (itemtype == Gear_Gate) {
             if (selectedItemview.bindButton) {
                 ((Features_GearButton*)selectedItemview.bindButton->features)->bindID = kDefaultGearButtonBindID;
             }
             _gates.erase(find(_gates.begin(),_gates.end(),selectedItemview));
+        }else if (itemtype == Decoration_Flower || itemtype == Decoration_FlowerInv){
+            Features_DecorationFlower* feat = (Features_DecorationFlower*)selectedItemview->features;
+            if (feat->flowerID != kDefaultDecorationFlowerID) {
+                __Array* flowerIDArray = static_cast<__Array*>(_fileHandler->_boundFlowerIDDict->objectForKey("flowerID"));
+                int count = static_cast<__String*>(flowerIDArray->getObjectAtIndex(feat->flowerID -1))->intValue();
+                flowerIDArray->replaceObjectAtIndex(feat->flowerID -1, __String::createWithFormat("%d",count-1));
+            }
+        }
+        //删除触发器所绑定的id
+        if (selectedItemview->bindedTriggerID != kDefaultBindedTriggerID) {
+            for (PolygonView* polygonview in _scrollView.centerViews) {
+                if ([polygonview.itemtype isEqualToString:@"Trigger"] && polygonview.tag==selectedItemview->bindedTriggerID) {
+                    [polygonview._bindIDs removeObject:[NSNumber numberWithInt:selectedItemview.tag]];
+                }
+            }
         }
         
         //从视图中移除
@@ -905,35 +963,39 @@ void LevelEditor::drawLoadedLevel()
     Item_Type type = static_cast<Item_Type>(btn.tag);
     if (type == Polygon_) {
         [_scrollView createNewPolygonAtCenter];
-        return [popupViewController backEditor:nil];
+    }else if (type == Trigger){
+        [_scrollView createNewTriggerAtCenter];
+    }else{
+        int id = [self firstUnusedId];
+        float x = 0.5 ;
+        float y = PAGE_COUNTS - (_scrollView.contentOffset.y + 0.5*height)/(_scrollView.currentZoomFactor*height);
+        float angle = kDefaultAngle;
+        float scale = kDefaultScale;
+        int localZorder = itemViews.size();
+        bool isAnimated = kDefaultAnimatedOnState;
+        float triggerTime = kDefaultTriggerTime;
+        float elapsedTime = kDefaultElapsedTime;
+        int bindedTriggerID = kDefaultBindedTriggerID;
+        bool isAutoSmoothing = kDefaultAutoSmoothingState;
+        std::map<std::string,bool> animationControlInstructions;
+        std::vector<std::vector<AnimationInfo>> animationInfos;
+        void* features = nullptr;
+        
+        Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,elapsedTime,bindedTriggerID,isAutoSmoothing, animationControlInstructions,animationInfos,features);
+        
+        ItemView* newItem = [[ItemView alloc] init:item];
+        [newItem itemAddGestureRecognizerWithTarget:self];
+        
+        //添加到数组
+        itemViews.push_back(newItem);
+        ids.push_back(newItem.tag);
+        
+        [_scrollView insertSubview:newItem atIndex:localZorder];
+        [newItem release];
     }
-    
-    int id = [self firstUnusedId];
-    float x = 0.5 ;
-    float y = PAGE_COUNTS - (_scrollView.contentOffset.y + 0.5*height)/(_scrollView.currentZoomFactor*height);
-    float angle = kDefaultAngle;
-    float scale = kDefaultScale;
-    int localZorder = itemViews.size();
-    bool isAnimated = kDefaultAnimatedOnState;
-    float triggerTime = kDefaultTriggerTime;
-    std::map<std::string,bool> animationControlInstructions;
-    std::vector<std::vector<AnimationInfo>> animationInfos;
-    void* features = nullptr;
-    
-    Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
-    
-    ItemView* newItem = [[ItemView alloc] init:item];
-    [newItem itemAddGestureRecognizerWithTarget:self];
-    
-    //添加到数组
-    itemViews.push_back(newItem);
-    ids.push_back(newItem.tag);
-    
-    [_scrollView insertSubview:newItem atIndex:localZorder];
-    [newItem release];
-    
+
     //返回
-    [popupViewController backEditor:newItem];
+    [popupViewController backEditor:nil];
 }
 
 -(void)saveItemInformationInMemory:(ItemView*)itemView
@@ -952,6 +1014,9 @@ void LevelEditor::drawLoadedLevel()
     int localZorder = [itemView getSubviewIndex];
     bool isAnimated = itemView->isAnimated;
     float triggerTime = itemView->triggerTime;
+    float elapsedTime = itemView->elapsedTime;
+    int bindedTriggerID = itemView->bindedTriggerID;
+    bool isAutoSmoothing = itemView->isAutoSmoothing;
     std::map<std::string,bool> animationControlInstructions(itemView->_animationControlInstructions);
     std::vector<std::vector<AnimationInfo>> animationInfos;
     std::vector<AnimationInfo> eachAnimationGroupInfos;
@@ -1010,22 +1075,6 @@ void LevelEditor::drawLoadedLevel()
             }
         }
             break;
-        case Dragon_Anti:
-        {
-            if(!features){
-                Features_Dragon feat;
-                features = &feat;
-            }
-        }
-            break;
-        case Dragon_Clockwise:
-        {
-            if(!features){
-                Features_Dragon feat;
-                features = &feat;
-            }
-        }
-            break;
         case DoubDragon_Anti:
         {
             if (!features) {
@@ -1066,11 +1115,52 @@ void LevelEditor::drawLoadedLevel()
             }
         }
             break;
+        case Decoration_Flower:
+        {
+            if (!features) {
+                Features_DecorationFlower feat;
+                features = &feat;
+            }
+        }
+            break;
+        case Decoration_FlowerInv:
+        {
+            if (!features) {
+                Features_DecorationFlower feat;
+                features = &feat;
+            }
+        }
+            break;
+        case Sprouts_Dextro:
+        {
+            if (!features) {
+                Features_Sprouts feat;
+                features = &feat;
+            }
+        }
+            break;
+        case Sprouts_Levo:
+        {
+            if (!features) {
+                Features_Sprouts feat;
+                features = &feat;
+            }
+        }
+            break;
+        case Sprouts_Slope:
+        {
+            if (!features) {
+                Features_Sprouts feat;
+                features = &feat;
+            }
+        }
+            break;
+            
         default:
             break;
     }
     
-    Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,animationControlInstructions,animationInfos,features);
+    Item item(type,id,x,y,angle,scale,localZorder,isAnimated,triggerTime,elapsedTime,bindedTriggerID,isAutoSmoothing, animationControlInstructions,animationInfos,features);
     _fileHandler->_items.push_back(item);
 }
 

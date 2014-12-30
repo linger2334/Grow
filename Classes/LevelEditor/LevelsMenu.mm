@@ -174,12 +174,11 @@ void LevelsMenu::selectLevel(cocos2d::Ref *sender, cocos2d::ui::ListView::EventT
     switch (eventtype) {
         case ui::ListView::EventType::ON_SELECTED_ITEM_END:
             
+            LevelManager::getInstance()->selectLevel(levelid);
             if(selectedIndex == 1){
                 Director::getInstance()->replaceScene(LevelEditor::createScene());
             }else{
-                LevelManager::getInstance()->selectLevel(levelid);
                 auto manager = GameManager::getInstance();
-//                manager->releaseGameScene();
                 manager->_levelFileName = fileName;
                 manager->navigationToGameScene();
             }

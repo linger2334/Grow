@@ -26,12 +26,20 @@ public:
     inline Sprite* getLeftHalf() { return _left;}
     inline Sprite* getRightHalf() { return _right;}
     void openGate();
+    ////add by wzf
+    void addWaitOpenGatePlant(int index)
+    {
+        _waitingPlants.push_back(index);
+    }
     
     Sprite* _left;
     Sprite* _right;
     Sprite* _leftEye;
     Sprite* _rightEye;
 protected:
+    ////add by wzf
+    std::vector<int> _waitingPlants;
+    
     int gap;
     float startRate;
 };
